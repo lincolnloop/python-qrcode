@@ -27,9 +27,9 @@ class QR8bitByte:
         return len(self.data)
 
     def write(self, buffer):
-        for i in range(len(self.data)):
+        for c in self.data:
             # not JIS ...
-            buffer.put(ord(self.data[i]), 8)
+            buffer.put(ord(c), 8)
 
     def __repr__(self):
         return self.data
