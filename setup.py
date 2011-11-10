@@ -4,9 +4,10 @@ from distutils.core import setup
 setup(
     name='qrcode',
     version='1.0',
-    url='http://github.com/lincolnloop/qrcode',
+    url='https://github.com/lincolnloop/python-qrcode',
     #download_url='',
     description='QR Code image generator',
+    license='BSD',
     long_description=open('README.rst').read(),
     author='Lincoln Loop',
     author_email='info@lincolnloop.com',
