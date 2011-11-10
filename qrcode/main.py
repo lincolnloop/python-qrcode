@@ -26,15 +26,6 @@ class QRCode:
         self.dataList.append(newData)
         self.dataCache = None
 
-    def isDark(self, row, col):
-        if (row < 0 or self.moduleCount <= row or col < 0 or
-                self.moduleCount <= col):
-            raise Exception("%s, %s - %s" % (row, col, self.moduleCount))
-        return self.modules[row][col]
-
-    def getModuleCount(self):
-        return self.moduleCount
-
     def make(self, fit=True):
         if fit:
             self.best_fit(start=self.typeNumber)
@@ -116,15 +107,15 @@ class QRCode:
         return pattern
 
     def makeImage(self):
-        offset = 4   # boxes as border
-        pixelsize = (self.getModuleCount() + offset + offset) * self.box_size
+        offset = 4   # Spec says border should be at least four boxes wide
+        pixelsize = (self.moduleCount + offset * 2) * self.box_size
 
         im = Image.new("1", (pixelsize, pixelsize), "white")
         d = ImageDraw.Draw(im)
 
-        for r in range(self.getModuleCount()):
-            for c in range(self.getModuleCount()):
-                if (self.isDark(r, c)):
+        for r in range(self.moduleCount):
+            for c in range(self.moduleCount):
+                if (self.modules[r][c]):
                     x = (c + offset) * self.box_size
                     y = (r + offset) * self.box_size
                     b = [(x, y),

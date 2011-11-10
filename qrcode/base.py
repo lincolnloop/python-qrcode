@@ -197,7 +197,7 @@ class QRUtil(object):
 
     @staticmethod
     def getLostPoint(qrCode):
-        moduleCount = qrCode.getModuleCount()
+        moduleCount = qrCode.moduleCount
 
         lostPoint = 0
 
@@ -208,7 +208,7 @@ class QRUtil(object):
             for col in range(moduleCount):
 
                 sameCount = 0
-                dark = qrCode.isDark(row, col)
+                dark = qrCode.modules[row][col]
 
                 for r in range(-1, 2):
 
@@ -222,7 +222,7 @@ class QRUtil(object):
                         if (r == 0 and c == 0):
                             continue
 
-                        if (dark == qrCode.isDark(row + r, col + c)):
+                        if (dark == qrCode.modules[row + r][col + c]):
                             sameCount += 1
                 if (sameCount > 5):
                     lostPoint += (3 + sameCount - 5)
@@ -232,13 +232,13 @@ class QRUtil(object):
         for row in range(moduleCount - 1):
             for col in range(moduleCount - 1):
                 count = 0
-                if (qrCode.isDark(row, col)):
+                if (qrCode.modules[row][col]):
                     count += 1
-                if (qrCode.isDark(row + 1, col)):
+                if (qrCode.modules[row + 1][col]):
                     count += 1
-                if (qrCode.isDark(row, col + 1)):
+                if (qrCode.modules[row][col + 1]):
                     count += 1
-                if (qrCode.isDark(row + 1, col + 1)):
+                if (qrCode.modules[row + 1][col + 1]):
                     count += 1
                 if (count == 0 or count == 4):
                     lostPoint += 3
@@ -247,24 +247,24 @@ class QRUtil(object):
 
         for row in range(moduleCount):
             for col in range(moduleCount - 6):
-                if (qrCode.isDark(row, col)
-                        and not qrCode.isDark(row, col + 1)
-                        and qrCode.isDark(row, col + 2)
-                        and qrCode.isDark(row, col + 3)
-                        and qrCode.isDark(row, col + 4)
-                        and not qrCode.isDark(row, col + 5)
-                        and qrCode.isDark(row, col + 6)):
+                if (qrCode.modules[row][col]
+                        and not qrCode.modules[row][col + 1]
+                        and qrCode.modules[row][col + 2]
+                        and qrCode.modules[row][col + 3]
+                        and qrCode.modules[row][col + 4]
+                        and not qrCode.modules[row][col + 5]
+                        and qrCode.modules[row][col + 6]):
                     lostPoint += 40
 
         for col in range(moduleCount):
             for row in range(moduleCount - 6):
-                if (qrCode.isDark(row, col)
-                        and not qrCode.isDark(row + 1, col)
-                        and qrCode.isDark(row + 2, col)
-                        and qrCode.isDark(row + 3, col)
-                        and qrCode.isDark(row + 4, col)
-                        and not qrCode.isDark(row + 5, col)
-                        and qrCode.isDark(row + 6, col)):
+                if (qrCode.modules[row][col]
+                        and not qrCode.modules[row + 1][col]
+                        and qrCode.modules[row + 2][col]
+                        and qrCode.modules[row + 3][col]
+                        and qrCode.modules[row + 4][col]
+                        and not qrCode.modules[row + 5][col]
+                        and qrCode.modules[row + 6][col]):
                     lostPoint += 40
 
         # LEVEL4
@@ -273,7 +273,7 @@ class QRUtil(object):
 
         for col in range(moduleCount):
             for row in range(moduleCount):
-                if (qrCode.isDark(row, col)):
+                if (qrCode.modules[row][col]):
                     darkCount += 1
 
         ratio = abs(100 * darkCount / moduleCount / moduleCount - 50) / 5
