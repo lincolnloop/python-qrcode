@@ -2,13 +2,19 @@ from PIL import Image, ImageDraw
 
 from qrcode.base import QR8bitByte, QRUtil, QRRSBlock, QRBitBuffer, \
     QRPolynomial
+from qrcode import constants
+
+
+class DataOverflowError(Exception):
+    pass
 
 
 class QRCode:
 
-    def __init__(self, typeNumber, errorCorrectLevel):
-        self.typeNumber = typeNumber
-        self.errorCorrectLevel = errorCorrectLevel
+    def __init__(self, qr_type=None,
+            error_correct_level=constants.ERROR_CORRECT_M):
+        self.typeNumber = qr_type
+        self.errorCorrectLevel = error_correct_level
         self.modules = None
         self.moduleCount = 0
         self.dataCache = None
@@ -28,11 +34,12 @@ class QRCode:
     def getModuleCount(self):
         return self.moduleCount
 
-    def make(self):
+    def make(self, fit=True):
+        if fit:
+            self.best_fit(start=self.typeNumber)
         self.makeImpl(False, self.getBestMaskPattern())
 
     def makeImpl(self, test, maskPattern):
-
         self.moduleCount = self.typeNumber * 4 + 17
         self.modules = [None for x in range(self.moduleCount)]
 
@@ -59,7 +66,6 @@ class QRCode:
         self.mapData(self.dataCache, maskPattern)
 
     def setupPositionProbePattern(self, row, col):
-
         for r in range(-1, 8):
 
             if (row + r <= -1 or self.moduleCount <= row + r):
@@ -77,8 +83,22 @@ class QRCode:
                 else:
                     self.modules[row + r][col + c] = False
 
-    def getBestMaskPattern(self):
+    def best_fit(self, start=None):
+        """
+        Set ``typeNumber`` the minimum size required to fit in the data.
+        """
+        size = start or 1
+        while True:
+            try:
+                self.dataCache = QRCode.createData(size,
+                    self.errorCorrectLevel, self.dataList)
+            except DataOverflowError:
+                size += 1
+            else:
+                self.typeNumber = size
+                return size
 
+    def getBestMaskPattern(self):
         minLostPoint = 0
         pattern = 0
 
@@ -112,7 +132,6 @@ class QRCode:
         return im
 
     def setupTimingPattern(self):
-
         for r in range(8, self.moduleCount - 8):
             if (self.modules[r][6] != None):
                 continue
@@ -124,7 +143,6 @@ class QRCode:
             self.modules[6][c] = (c % 2 == 0)
 
     def setupPositionAdjustPattern(self):
-
         pos = QRUtil.getPatternPosition(self.typeNumber)
 
         for i in range(len(pos)):
@@ -148,7 +166,6 @@ class QRCode:
                             self.modules[row + r][col + c] = False
 
     def setupTypeNumber(self, test):
-
         bits = QRUtil.getBCHTypeNumber(self.typeNumber)
 
         for i in range(18):
@@ -160,7 +177,6 @@ class QRCode:
             self.modules[i % 3 + self.moduleCount - 8 - 3][i // 3] = mod
 
     def setupTypeInfo(self, test, maskPattern):
-
         data = (self.errorCorrectLevel << 3) | maskPattern
         bits = QRUtil.getBCHTypeInfo(data)
 
@@ -192,7 +208,6 @@ class QRCode:
         self.modules[self.moduleCount - 8][8] = (not test)
 
     def mapData(self, data, maskPattern):
-
         inc = -1
         row = self.moduleCount - 1
         bitIndex = 7
@@ -232,6 +247,7 @@ class QRCode:
                     row -= inc
                     inc = -inc
                     break
+
     PAD0 = 0xEC
     PAD1 = 0x11
 
@@ -255,11 +271,9 @@ class QRCode:
             totalDataCount += rsBlocks[i].dataCount
 
         if (buffer.getLengthInBits() > totalDataCount * 8):
-            raise Exception("code length overflow. ("
-                + buffer.getLengthInBits()
-                + ">"
-                + totalDataCount * 8
-                + ")")
+            raise DataOverflowError("Code length overflow. Data size (%s) > "
+                "size available (%s)" % (buffer.getLengthInBits(),
+                    totalDataCount * 8))
 
         # end code
         if (buffer.getLengthInBits() + 4 <= totalDataCount * 8):
@@ -284,7 +298,6 @@ class QRCode:
 
     @staticmethod
     def createBytes(buffer, rsBlocks):
-
         offset = 0
 
         maxDcCount = 0

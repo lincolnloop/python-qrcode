@@ -3,7 +3,7 @@ from qrcode.constants import *
 
 
 def run_example():
-    qr = QRCode(20, ERROR_CORRECT_L)
+    qr = QRCode()
     qr.addData("http://www.lincolnloop.com")
     qr.make()
 
