@@ -12,13 +12,14 @@ class DataOverflowError(Exception):
 class QRCode:
 
     def __init__(self, qr_type=None,
-            error_correct_level=constants.ERROR_CORRECT_M):
+            error_correct_level=constants.ERROR_CORRECT_M, box_size=10):
         self.typeNumber = qr_type
         self.errorCorrectLevel = error_correct_level
         self.modules = None
         self.moduleCount = 0
         self.dataCache = None
         self.dataList = []
+        self.box_size = box_size
 
     def addData(self, data):
         newData = QR8bitByte(data)
@@ -115,9 +116,8 @@ class QRCode:
         return pattern
 
     def makeImage(self):
-        boxsize = 10   # pixels per box
         offset = 4   # boxes as border
-        pixelsize = (self.getModuleCount() + offset + offset) * boxsize
+        pixelsize = (self.getModuleCount() + offset + offset) * self.box_size
 
         im = Image.new("RGB", (pixelsize, pixelsize), "white")
         d = ImageDraw.Draw(im)
@@ -125,9 +125,10 @@ class QRCode:
         for r in range(self.getModuleCount()):
             for c in range(self.getModuleCount()):
                 if (self.isDark(r, c)):
-                    x = (c + offset) * boxsize
-                    y = (r + offset) * boxsize
-                    b = [(x, y), (x + boxsize, y + boxsize)]
+                    x = (c + offset) * self.box_size
+                    y = (r + offset) * self.box_size
+                    b = [(x, y),
+                        (x + self.box_size - 1, y + self.box_size - 1)]
                     d.rectangle(b, fill="black")
         return im
 
