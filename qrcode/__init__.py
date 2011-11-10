@@ -2,8 +2,8 @@ from qrcode.main import QRCode
 from qrcode.constants import *
 
 
-def run_example():
-    qr = QRCode()
+def run_example(*args, **kwargs):
+    qr = QRCode(*args, **kwargs)
     qr.addData("http://www.lincolnloop.com")
     qr.make()
 
