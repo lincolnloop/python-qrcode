@@ -14,11 +14,14 @@ setup(
     packages=[
         'qrcode',
     ],
+    package_data={'': ['LICENSE']},
     classifiers=[
         'Development Status :: 3 - Alpha',
         'License :: OSI Approved :: BSD License',
         'Operating System :: OS Independent',
+        'Intended Audience :: Developers',
         'Programming Language :: Python',
+        'Topic :: Multimedia :: Graphics',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
 )
