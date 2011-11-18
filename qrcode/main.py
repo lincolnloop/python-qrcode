@@ -21,6 +21,12 @@ class QRCode:
         self.dataList = []
         self.box_size = box_size
 
+    def strtoFile(self, the_string = "Hello World! It Works!", filename = "qrcode.png"):
+        self.addData(str(the_string))
+        self.make()
+        im = self.makeImage()
+        im.save(filename)
+
     def addData(self, data):
         newData = QR8bitByte(data)
         self.dataList.append(newData)
