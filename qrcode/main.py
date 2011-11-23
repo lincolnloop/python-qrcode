@@ -16,10 +16,13 @@ def make(data=None, **kwargs):
 class QRCode:
 
     def __init__(self, version=None,
-            error_correction=constants.ERROR_CORRECT_M, box_size=10):
+            error_correction=constants.ERROR_CORRECT_M, box_size=10, border=4):
         self.version = version and int(version)
         self.error_correction = int(error_correction)
         self.box_size = int(box_size)
+        # Spec says border should be at least four boxes wide, but allow for
+        # any (e.g. for producing printable QR codes).
+        self.border = int(border)
         self.clear()
 
     def clear(self):
@@ -164,7 +167,7 @@ class QRCode:
         """
         if self.data_cache is None:
             self.make()
-        offset = 4   # Spec says border should be at least four boxes wide
+        offset = self.border
         pixelsize = (self.modules_count + offset * 2) * self.box_size
 
         im = Image.new("1", (pixelsize, pixelsize), "white")
