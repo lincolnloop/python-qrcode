@@ -1,4 +1,8 @@
-from PIL import Image, ImageDraw
+# Try to import PIL in either of the two ways it can be installed.
+try:
+    from PIL import Image, ImageDraw
+except ImportError:
+    import Image, ImageDraw
 
 from qrcode.base import QR8bitByte, QRUtil, QRRSBlock, QRBitBuffer, \
     QRPolynomial
