@@ -4,75 +4,84 @@ try:
 except ImportError:
     import Image, ImageDraw
 
-from qrcode.base import QR8bitByte, QRUtil, QRRSBlock, QRBitBuffer, \
-    QRPolynomial
-from qrcode import constants
-
-
-class DataOverflowError(Exception):
-    pass
+from qrcode import constants, exceptions, util
 
 
 class QRCode:
 
-    def __init__(self, qr_type=None,
-            error_correct_level=constants.ERROR_CORRECT_M, box_size=10):
-        self.typeNumber = qr_type
-        self.errorCorrectLevel = error_correct_level
-        self.modules = None
-        self.moduleCount = 0
-        self.dataCache = None
-        self.dataList = []
-        self.box_size = box_size
+    def __init__(self, version=None,
+            error_correction=constants.ERROR_CORRECT_M, box_size=10):
+        self.version = version and int(version)
+        self.error_correction = int(error_correction)
+        self.box_size = int(box_size)
+        self.clear()
 
-    def addData(self, data):
-        newData = QR8bitByte(data)
-        self.dataList.append(newData)
-        self.dataCache = None
+    def clear(self):
+        """
+        Reset the internal data.
+        """
+        self.modules = None
+        self.modules_count = 0
+        self.data_cache = None
+        self.data_list = []
+
+    def add_data(self, data):
+        """
+        Add data to this QR Code.
+        """
+        newData = util.QR8bitByte(data)
+        self.data_list.append(newData)
+        self.data_cache = None
 
     def make(self, fit=True):
-        if fit:
-            self.best_fit(start=self.typeNumber)
-        self.makeImpl(False, self.getBestMaskPattern())
+        """
+        Compile the data into a QR Code array.
 
-    def makeImpl(self, test, maskPattern):
-        self.moduleCount = self.typeNumber * 4 + 17
-        self.modules = [None for x in range(self.moduleCount)]
+        :param fit: If ``True`` (or if a size has not been provided), find the
+            best fit for the data to avoid data overflow errors.
+        """
+        if fit or not self.version:
+            self.best_fit(start=self.version)
+        self.makeImpl(False, self.best_mask_pattern())
 
-        for row in range(self.moduleCount):
+    def makeImpl(self, test, mask_pattern):
+        self.modules_count = self.version * 4 + 17
+        self.modules = [None] * self.modules_count
 
-            self.modules[row] = [None for x in range(self.moduleCount)]
+        for row in range(self.modules_count):
 
-            for col in range(self.moduleCount):
+            self.modules[row] = [None] * self.modules_count
+
+            for col in range(self.modules_count):
                 self.modules[row][col] = None   # (col + row) % 3
 
-        self.setupPositionProbePattern(0, 0)
-        self.setupPositionProbePattern(self.moduleCount - 7, 0)
-        self.setupPositionProbePattern(0, self.moduleCount - 7)
-        self.setupPositionAdjustPattern()
-        self.setupTimingPattern()
-        self.setupTypeInfo(test, maskPattern)
+        self.setup_position_probe_pattern(0, 0)
+        self.setup_position_probe_pattern(self.modules_count - 7, 0)
+        self.setup_position_probe_pattern(0, self.modules_count - 7)
+        self.sutup_position_adjust_pattern()
+        self.setup_timing_pattern()
+        self.setup_type_info(test, mask_pattern)
 
-        if (self.typeNumber >= 7):
-            self.setupTypeNumber(test)
+        if self.version >= 7:
+            self.setup_type_number(test)
 
-        if (self.dataCache == None):
-            self.dataCache = QRCode.createData(self.typeNumber,
-                self.errorCorrectLevel, self.dataList)
-        self.mapData(self.dataCache, maskPattern)
+        if self.data_cache is None:
+            self.data_cache = util.create_data(self.version,
+                self.error_correction, self.data_list)
+        self.map_data(self.data_cache, mask_pattern)
 
-    def setupPositionProbePattern(self, row, col):
+    def setup_position_probe_pattern(self, row, col):
         for r in range(-1, 8):
 
-            if (row + r <= -1 or self.moduleCount <= row + r):
+            if row + r <= -1 or self.modules_count <= row + r:
                 continue
 
             for c in range(-1, 8):
 
-                if (col + c <= -1 or self.moduleCount <= col + c):
+                if col + c <= -1 or self.modules_count <= col + c:
                     continue
 
-                if ((0 <= r and r <= 6 and (c == 0 or c == 6))
+                if (0 <= r and r <= 6 and (c == 0 or c == 6)
                         or (0 <= c and c <= 6 and (r == 0 or r == 6))
                         or (2 <= r and r <= 4 and 2 <= c and c <= 4)):
                     self.modules[row + r][col + c] = True
@@ -81,45 +90,54 @@ class QRCode:
 
     def best_fit(self, start=None):
         """
-        Set ``typeNumber`` the minimum size required to fit in the data.
+        Find the minimum size required to fit in the data.
         """
         size = start or 1
         while True:
             try:
-                self.dataCache = QRCode.createData(size,
-                    self.errorCorrectLevel, self.dataList)
-            except DataOverflowError:
+                self.data_cache = util.create_data(size,
+                    self.error_correction, self.data_list)
+            except exceptions.DataOverflowError:
                 size += 1
             else:
-                self.typeNumber = size
+                self.version = size
                 return size
 
-    def getBestMaskPattern(self):
-        minLostPoint = 0
+    def best_mask_pattern(self):
+        """
+        Find the most efficient mask pattern.
+        """
+        min_lost_point = 0
         pattern = 0
 
         for i in range(8):
-
             self.makeImpl(True, i)
 
-            lostPoint = QRUtil.getLostPoint(self)
+            lost_point = util.lost_point(self.modules)
 
-            if (i == 0 or minLostPoint > lostPoint):
-                minLostPoint = lostPoint
+            if i == 0 or min_lost_point > lost_point:
+                min_lost_point = lost_point
                 pattern = i
 
         return pattern
 
-    def makeImage(self):
+    def make_image(self):
+        """
+        Make a PIL image from the QR Code data.
+
+        If the data has not been compiled yet, make it first.
+        """
+        if self.data_cache is None:
+            self.make()
         offset = 4   # Spec says border should be at least four boxes wide
-        pixelsize = (self.moduleCount + offset * 2) * self.box_size
+        pixelsize = (self.modules_count + offset * 2) * self.box_size
 
         im = Image.new("1", (pixelsize, pixelsize), "white")
         d = ImageDraw.Draw(im)
 
-        for r in range(self.moduleCount):
-            for c in range(self.moduleCount):
-                if (self.modules[r][c]):
+        for r in range(self.modules_count):
+            for c in range(self.modules_count):
+                if self.modules[r][c]:
                     x = (c + offset) * self.box_size
                     y = (r + offset) * self.box_size
                     b = [(x, y),
@@ -127,19 +145,19 @@ class QRCode:
                     d.rectangle(b, fill="black")
         return im
 
-    def setupTimingPattern(self):
-        for r in range(8, self.moduleCount - 8):
-            if (self.modules[r][6] != None):
+    def setup_timing_pattern(self):
+        for r in range(8, self.modules_count - 8):
+            if self.modules[r][6] != None:
                 continue
             self.modules[r][6] = (r % 2 == 0)
 
-        for c in range(8, self.moduleCount - 8):
-            if (self.modules[6][c] != None):
+        for c in range(8, self.modules_count - 8):
+            if self.modules[6][c] != None:
                 continue
             self.modules[6][c] = (c % 2 == 0)
 
-    def setupPositionAdjustPattern(self):
-        pos = QRUtil.getPatternPosition(self.typeNumber)
+    def sutup_position_adjust_pattern(self):
+        pos = util.pattern_position(self.version)
 
         for i in range(len(pos)):
 
@@ -148,7 +166,7 @@ class QRCode:
                 row = pos[i]
                 col = pos[j]
 
-                if (self.modules[row][col] != None):
+                if self.modules[row][col] != None:
                     continue
 
                 for r in range(-2, 3):
@@ -161,190 +179,85 @@ class QRCode:
                         else:
                             self.modules[row + r][col + c] = False
 
-    def setupTypeNumber(self, test):
-        bits = QRUtil.getBCHTypeNumber(self.typeNumber)
+    def setup_type_number(self, test):
+        bits = util.BCH_type_number(self.version)
 
         for i in range(18):
             mod = (not test and ((bits >> i) & 1) == 1)
-            self.modules[i // 3][i % 3 + self.moduleCount - 8 - 3] = mod
+            self.modules[i // 3][i % 3 + self.modules_count - 8 - 3] = mod
 
         for i in range(18):
             mod = (not test and ((bits >> i) & 1) == 1)
-            self.modules[i % 3 + self.moduleCount - 8 - 3][i // 3] = mod
+            self.modules[i % 3 + self.modules_count - 8 - 3][i // 3] = mod
 
-    def setupTypeInfo(self, test, maskPattern):
-        data = (self.errorCorrectLevel << 3) | maskPattern
-        bits = QRUtil.getBCHTypeInfo(data)
+    def setup_type_info(self, test, mask_pattern):
+        data = (self.error_correction << 3) | mask_pattern
+        bits = util.BCH_type_info(data)
 
         # vertical
         for i in range(15):
 
             mod = (not test and ((bits >> i) & 1) == 1)
 
-            if (i < 6):
+            if i < 6:
                 self.modules[i][8] = mod
-            elif (i < 8):
+            elif i < 8:
                 self.modules[i + 1][8] = mod
             else:
-                self.modules[self.moduleCount - 15 + i][8] = mod
+                self.modules[self.modules_count - 15 + i][8] = mod
 
         # horizontal
         for i in range(15):
 
             mod = (not test and ((bits >> i) & 1) == 1)
 
-            if (i < 8):
-                self.modules[8][self.moduleCount - i - 1] = mod
-            elif (i < 9):
+            if i < 8:
+                self.modules[8][self.modules_count - i - 1] = mod
+            elif i < 9:
                 self.modules[8][15 - i - 1 + 1] = mod
             else:
                 self.modules[8][15 - i - 1] = mod
 
         # fixed module
-        self.modules[self.moduleCount - 8][8] = (not test)
+        self.modules[self.modules_count - 8][8] = (not test)
 
-    def mapData(self, data, maskPattern):
+    def map_data(self, data, mask_pattern):
         inc = -1
-        row = self.moduleCount - 1
+        row = self.modules_count - 1
         bitIndex = 7
         byteIndex = 0
 
-        for col in range(self.moduleCount - 1, 0, -2):
+        mask_func = util.mask_func(mask_pattern)
 
-            if (col == 6):
+        for col in range(self.modules_count - 1, 0, -2):
+
+            if col == 6:
                 col -= 1
 
-            while (True):
+            while True:
 
                 for c in range(2):
 
-                    if (self.modules[row][col - c] == None):
+                    if self.modules[row][col - c] == None:
 
                         dark = False
 
-                        if (byteIndex < len(data)):
+                        if byteIndex < len(data):
                             dark = (((data[byteIndex] >> bitIndex) & 1) == 1)
 
-                        mask = QRUtil.getMask(maskPattern, row, col - c)
-
-                        if (mask):
+                        if mask_func(row, col - c):
                             dark = not dark
 
                         self.modules[row][col - c] = dark
                         bitIndex -= 1
 
-                        if (bitIndex == -1):
+                        if bitIndex == -1:
                             byteIndex += 1
                             bitIndex = 7
 
                 row += inc
 
-                if (row < 0 or self.moduleCount <= row):
+                if row < 0 or self.modules_count <= row:
                     row -= inc
                     inc = -inc
                     break
-
-    PAD0 = 0xEC
-    PAD1 = 0x11
-
-    @staticmethod
-    def createData(typeNumber, errorCorrectLevel, dataList):
-
-        rsBlocks = QRRSBlock.getRSBlocks(typeNumber, errorCorrectLevel)
-
-        buffer = QRBitBuffer()
-
-        for i in range(len(dataList)):
-            data = dataList[i]
-            buffer.put(data.mode, 4)
-            buffer.put(data.getLength(),
-                QRUtil.getLengthInBits(data.mode, typeNumber))
-            data.write(buffer)
-
-        # calc num max data.
-        totalDataCount = 0
-        for i in range(len(rsBlocks)):
-            totalDataCount += rsBlocks[i].dataCount
-
-        if (buffer.getLengthInBits() > totalDataCount * 8):
-            raise DataOverflowError("Code length overflow. Data size (%s) > "
-                "size available (%s)" % (buffer.getLengthInBits(),
-                    totalDataCount * 8))
-
-        # end code
-        if (buffer.getLengthInBits() + 4 <= totalDataCount * 8):
-            buffer.put(0, 4)
-
-        # padding
-        while (buffer.getLengthInBits() % 8 != 0):
-            buffer.putBit(False)
-
-        # padding
-        while True:
-
-            if (buffer.getLengthInBits() >= totalDataCount * 8):
-                break
-            buffer.put(QRCode.PAD0, 8)
-
-            if (buffer.getLengthInBits() >= totalDataCount * 8):
-                break
-            buffer.put(QRCode.PAD1, 8)
-
-        return QRCode.createBytes(buffer, rsBlocks)
-
-    @staticmethod
-    def createBytes(buffer, rsBlocks):
-        offset = 0
-
-        maxDcCount = 0
-        maxEcCount = 0
-
-        dcdata = [0 for x in range(len(rsBlocks))]
-        ecdata = [0 for x in range(len(rsBlocks))]
-
-        for r in range(len(rsBlocks)):
-
-            dcCount = rsBlocks[r].dataCount
-            ecCount = rsBlocks[r].totalCount - dcCount
-
-            maxDcCount = max(maxDcCount, dcCount)
-            maxEcCount = max(maxEcCount, ecCount)
-
-            dcdata[r] = [0 for x in range(dcCount)]
-
-            for i in range(len(dcdata[r])):
-                dcdata[r][i] = 0xff & buffer.buffer[i + offset]
-            offset += dcCount
-
-            rsPoly = QRUtil.getErrorCorrectPolynomial(ecCount)
-            rawPoly = QRPolynomial(dcdata[r], rsPoly.getLength() - 1)
-
-            modPoly = rawPoly.mod(rsPoly)
-            ecdata[r] = [0 for x in range(rsPoly.getLength() - 1)]
-            for i in range(len(ecdata[r])):
-                modIndex = i + modPoly.getLength() - len(ecdata[r])
-                if (modIndex >= 0):
-                    ecdata[r][i] = modPoly.get(modIndex)
-                else:
-                    ecdata[r][i] = 0
-
-        totalCodeCount = 0
-        for i in range(len(rsBlocks)):
-            totalCodeCount += rsBlocks[i].totalCount
-
-        data = [None for x in range(totalCodeCount)]
-        index = 0
-
-        for i in range(maxDcCount):
-            for r in range(len(rsBlocks)):
-                if (i < len(dcdata[r])):
-                    data[index] = dcdata[r][i]
-                    index += 1
-
-        for i in range(maxEcCount):
-            for r in range(len(rsBlocks)):
-                if (i < len(ecdata[r])):
-                    data[index] = ecdata[r][i]
-                    index += 1
-
-        return data
