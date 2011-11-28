@@ -17,6 +17,14 @@ alphanumeric, or Kanji symbols)
 Usage
 =====
 
+Use the ``make`` shortcut function::
+
+    import qrcode
+    img = qrcode.make('Some data here')
+
+Advanced Usage
+--------------
+
 For more control, use the ``QRCode`` class. For example::
 
     import qrcode

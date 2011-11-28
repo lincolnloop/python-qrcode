@@ -7,6 +7,12 @@ except ImportError:
 from qrcode import constants, exceptions, util
 
 
+def make(data=None, **kwargs):
+    qr = QRCode(**kwargs)
+    qr.add_data(data)
+    return qr.make_image()
+
+
 class QRCode:
 
     def __init__(self, version=None,
