@@ -1,0 +1,27 @@
+#!/usr/bin/env python
+# qr - Convert stdin to a QR Code.
+#
+# When stdout is a tty the QR Code is printed to the terminal and when stdout
+# is a pipe to a file a PNG image is written.
+#
+# Koen Bollen, 2012
+#
+
+import sys
+import qrcode
+
+def main():
+    qr = qrcode.QRCode()
+    qr.add_data( sys.stdin.read() )
+
+    if sys.stdout.isatty():
+        qr.print_tty()
+        return
+
+    img = qr.make_image()
+    img.save( sys.stdout, "PNG" )
+
+if __name__ == "__main__":
+    main()
+
+# vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 textwidth=79:

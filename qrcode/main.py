@@ -127,6 +127,35 @@ class QRCode:
 
         return pattern
 
+    def print_tty(self, out=None ):
+        """
+        Output the QR Code to a TTY. (usefull for debugging?)
+
+        If the data has not been compiled yet, make it first.
+        """
+        if out is None:
+            import sys
+            out = sys.stdout
+
+        if not out.isatty():
+            raise OSError( "not a tty" )
+
+        if self.data_cache is None:
+            self.make()
+
+        modcount = self.modules_count
+        out.write( "\x1b[1;47m" + (" "*(modcount*2+4)) + "\x1b[0m\n" )
+        for r in range(modcount):
+            out.write( "\x1b[1;47m  \x1b[0m" )
+            for c in range(modcount):
+                if self.modules[r][c]:
+                    out.write( "  " )
+                else:
+                    out.write( "\x1b[1;47m  \x1b[0m" )
+            out.write( "\x1b[1;47m  \x1b[0m\n" )
+        out.write( "\x1b[1;47m" + (" "*(modcount*2+4)) + "\x1b[0m\n" )
+        out.flush()
+
     def make_image(self):
         """
         Make a PIL image from the QR Code data.
@@ -267,3 +296,4 @@ class QRCode:
                     row -= inc
                     inc = -inc
                     break
+# vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 textwidth=79:
