@@ -32,6 +32,7 @@ For more control, use the ``QRCode`` class. For example::
         version=1,
         error_correction=constants.ERROR_CORRECT_L,
         box_size=10,
+        border=4,
     )
     qr.add_data('Some data')
     qr.make(fit=True)
@@ -58,3 +59,6 @@ package:
 
 The ``box_size`` parameter controls how many pixels each "box" of the QR code
 is.
+
+The ``border`` parameter controls how many boxes thick the border should be
+(the default is 4, which is the minimum according to the specs).
