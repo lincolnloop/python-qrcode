@@ -9,9 +9,12 @@ import sys
 import qrcode
 
 
-def main():
+def main(*args):
     qr = qrcode.QRCode()
-    qr.add_data(sys.stdin.read())
+    if args:
+        qr.add_data(args[0])
+    else:
+        qr.add_data(sys.stdin.read())
 
     if sys.stdout.isatty():
         qr.print_tty()
@@ -22,4 +25,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(*sys.argv[1:])
