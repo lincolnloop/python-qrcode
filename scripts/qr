@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-# qr - Convert stdin (or the first argument) to a QR Code.
-#
-# When stdout is a tty the QR Code is printed to the terminal and when stdout
-# is a pipe to a file a PNG image is written.
-#
+"""
+qr - Convert stdin (or the first argument) to a QR Code.
 
+When stdout is a tty the QR Code is printed to the terminal and when stdout is
+a pipe to a file a PNG image is written.
+"""
 import sys
 import qrcode
 
@@ -12,6 +12,9 @@ import qrcode
 def main(*args):
     qr = qrcode.QRCode()
     if args:
+        if args[0] == '--help':
+            print __doc__.strip()
+            return
         qr.add_data(args[0])
     else:
         qr.add_data(sys.stdin.read())
