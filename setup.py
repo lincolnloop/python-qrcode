@@ -15,7 +15,7 @@ setup(
     packages=[
         'qrcode',
     ],
-    scripts = [
+    scripts=[
         'scripts/qr',
     ],
     package_data={'': ['LICENSE']},
@@ -29,5 +29,3 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
 )
-
-# vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 textwidth=79:
