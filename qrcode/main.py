@@ -38,8 +38,9 @@ class QRCode:
         """
         Add data to this QR Code.
         """
-        newData = util.QR8bitByte(data)
-        self.data_list.append(newData)
+        if not isinstance(data, util.QRData):
+            data = util.QRData(data)
+        self.data_list.append(data)
         self.data_cache = None
 
     def make(self, fit=True):

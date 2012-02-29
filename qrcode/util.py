@@ -1,3 +1,4 @@
+import re
 import math
 
 from qrcode import base, exceptions
@@ -27,6 +28,11 @@ MODE_SIZE_LARGE = {
     MODE_8BIT_BYTE: 16,
     MODE_KANJI: 12,
 }
+
+ALPHA_NUM = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:'
+
+# The number of bits for numeric delimited data lengths.
+NUMBER_LENGTH = {3: 10, 2: 7, 1: 4}
 
 PATTERN_POSITION_TABLE = [
     [],
@@ -236,19 +242,59 @@ def lost_point(modules):
     return lost_point
 
 
-class QR8bitByte:
+class QRData:
+    """
+    Data held in a QR compatible format.
 
-    def __init__(self, data):
-        self.mode = MODE_8BIT_BYTE
+    Doesn't currently handle KANJI.
+    """
+
+    def __init__(self, data, mode=None):
+        """
+        If ``mode`` isn't provided, the most compact QR data type possible is
+        chosen.
+        """
+        data = str(data)
+
+        if data.isdigit():
+            auto_mode = MODE_NUMBER
+        elif re.match('^[%s]*$' % re.escape(ALPHA_NUM), data):
+            auto_mode = MODE_ALPHA_NUM
+        else:
+            auto_mode = MODE_8BIT_BYTE
+
+        if mode is None:
+            self.mode = auto_mode
+        else:
+            if mode not in (MODE_NUMBER, MODE_ALPHA_NUM, MODE_8BIT_BYTE):
+                raise TypeError("Invalid mode (%s)" % mode)
+            if mode < auto_mode:
+                raise ValueError("Provided data can not be represented in "
+                    "mode %s" % mode)
+            self.mode = mode
+
         self.data = data
 
     def __len__(self):
         return len(self.data)
 
     def write(self, buffer):
-        for c in self.data:
-            # not JIS ...
-            buffer.put(ord(c), 8)
+        if self.mode == MODE_NUMBER:
+            for i in xrange(0, len(self.data), 3):
+                chars = self.data[i:i + 3]
+                bit_length = NUMBER_LENGTH[len(chars)]
+                buffer.put(int(chars), bit_length)
+        elif self.mode == MODE_ALPHA_NUM:
+            for i in xrange(0, len(self.data), 2):
+                chars = self.data[i:i + 2]
+                if len(chars) > 1:
+                    buffer.put(ALPHA_NUM.find(chars[0]) * 45 +
+                        ALPHA_NUM.find(chars[1]), 11)
+                else:
+                    buffer.put(ALPHA_NUM.find(chars), 6)
+        else:
+            for c in self.data:
+                buffer.put(ord(c), 8)
 
     def __repr__(self):
         return self.data

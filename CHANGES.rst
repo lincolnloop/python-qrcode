@@ -3,6 +3,13 @@ Change log
 ==========
 
 
+Version 2.3
+===========
+
+* When adding data, auto-select the more efficient encoding methods for numbers
+  and alphanumeric data (KANJI still not supported).
+
+
 Version 2.2
 ===========
 
