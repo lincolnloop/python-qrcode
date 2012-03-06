@@ -3,6 +3,12 @@ Change log
 ==========
 
 
+Version 2.3.1
+=============
+
+* Encode unicode to utf-8 bytestrings when adding data to a QRCode.
+
+
 Version 2.3
 ===========
 

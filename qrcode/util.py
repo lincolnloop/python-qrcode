@@ -254,7 +254,14 @@ class QRData:
         If ``mode`` isn't provided, the most compact QR data type possible is
         chosen.
         """
-        data = str(data)
+        # Convert data to a (utf-8 encoded) byte-string.
+        if not isinstance(data, basestring):
+            try:
+                data = str(data)
+            except UnicodeEncodeError:
+                data = unicode(data)
+        if isinstance(data, unicode):
+            data = data.encode('utf-8')
 
         if data.isdigit():
             auto_mode = MODE_NUMBER
