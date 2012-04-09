@@ -3,28 +3,46 @@
 qr - Convert stdin (or the first argument) to a QR Code.
 
 When stdout is a tty the QR Code is printed to the terminal and when stdout is
-a pipe to a file a PNG image is written.
+a pipe to a file an image is written. The default image format is PNG.
 """
 import sys
+import optparse
 import qrcode
 
 
 def main(*args):
     qr = qrcode.QRCode()
     if args:
-        if args[0] == '--help':
-            print __doc__.strip()
-            return
+        parser = optparse.OptionParser(usage=__doc__.strip())
+        parser.add_option("--svg", action="store_true",
+                          default=False,
+                          help="Create a standalone SVG image")
+        parser.add_option("--svg-fragment", action="store_true",
+                          default=False,
+                          help="Create an embeddable SVG fragment")
+        opts, args = parser.parse_args(list(args))
+
+        if opts.svg and opts.svg_fragment:
+            parser.error("Cant' do both embedded and standalone SVG")
+
+    if args:
         qr.add_data(args[0])
     else:
         qr.add_data(sys.stdin.read())
 
-    if sys.stdout.isatty():
+    if opts.svg:
+        image_factory = qrcode.image.SvgImage
+    elif opts.svg_fragment:
+        image_factory = qrcode.image.SvgFragmentImage
+    else:
+        image_factory = None
+
+    if image_factory is None and sys.stdout.isatty():
         qr.print_tty()
         return
 
-    img = qr.make_image()
-    img.save(sys.stdout, "PNG")
+    img = qr.make_image(image_factory=image_factory)
+    img.save(sys.stdout)
 
 
 if __name__ == "__main__":
