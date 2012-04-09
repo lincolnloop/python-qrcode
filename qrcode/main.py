@@ -12,7 +12,7 @@ class QRCode:
     def __init__(self, version=None,
                  error_correction=constants.ERROR_CORRECT_M,
                  box_size=10, border=4,
-                 image_factory=image.PngImage):
+                 image_factory=image.PilImage):
         self.version = version and int(version)
         self.error_correction = int(error_correction)
         self.box_size = int(box_size)
