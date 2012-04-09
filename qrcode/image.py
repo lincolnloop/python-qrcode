@@ -23,13 +23,13 @@ class BaseImage(object):
         raise NotImplementedError("BaseImage.save")
 
 
-class PngImage(BaseImage):
+class PilImage(BaseImage):
     """PIL image builder, default format is PNG."""
 
     def __init__(self, border, width, box_size):
         if Image is None and ImageDraw is None:
             raise NotImplementedError("PIL not available")
-        super(PngImage, self).__init__(border, width, box_size)
+        super(PilImage, self).__init__(border, width, box_size)
         self.kind = "PNG"
 
         pixelsize = (self.width + self.border * 2) * self.box_size
