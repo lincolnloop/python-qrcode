@@ -9,11 +9,13 @@ import sys
 import optparse
 import qrcode
 
-
 def main(*args):
     qr = qrcode.QRCode()
     if args:
         parser = optparse.OptionParser(usage=__doc__.strip())
+        parser.add_option("--pil", action="store_true",
+                          default=False,
+                          help="Create a PIL (PNG) image")
         parser.add_option("--svg", action="store_true",
                           default=False,
                           help="Create a standalone SVG image")
@@ -22,18 +24,25 @@ def main(*args):
                           help="Create an embeddable SVG fragment")
         opts, args = parser.parse_args(list(args))
 
-        if opts.svg and opts.svg_fragment:
-            parser.error("Cant' do both embedded and standalone SVG")
+        formats = reduce(lambda a, b: int(a) + int(b),
+                         (opts.pil, opts.svg, opts.svg_fragment))
+        if formats > 1:
+            parser.error("Can't create more than one image format at a time")
 
     if args:
         qr.add_data(args[0])
     else:
         qr.add_data(sys.stdin.read())
 
-    if opts.svg:
-        image_factory = qrcode.image.SvgImage
+    if opts.pil:
+        from qrcode.image.pil import PilImage
+        image_factory = PilImage
+    elif opts.svg:
+        from qrcode.image.svg import SvgImage
+        image_factory = SvgImage
     elif opts.svg_fragment:
-        image_factory = qrcode.image.SvgFragmentImage
+        from qrcode.image.svg import SvgFragmentImage
+        image_factory = SvgFragmentImage
     else:
         image_factory = None
 

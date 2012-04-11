@@ -1,5 +1,5 @@
-from qrcode import constants, exceptions, image, util
-
+from qrcode import constants, exceptions, util
+from qrcode.image.base import BaseImage
 
 def make(data=None, **kwargs):
     qr = QRCode(**kwargs)
@@ -12,7 +12,7 @@ class QRCode:
     def __init__(self, version=None,
                  error_correction=constants.ERROR_CORRECT_M,
                  box_size=10, border=4,
-                 image_factory=image.PilImage):
+                 image_factory=None):
         self.version = version and int(version)
         self.error_correction = int(error_correction)
         self.box_size = int(box_size)
@@ -20,7 +20,8 @@ class QRCode:
         # any (e.g. for producing printable QR codes).
         self.border = int(border)
         self.image_factory = image_factory
-        assert issubclass(image_factory, image.BaseImage)
+        if image_factory is not None:
+            assert issubclass(image_factory, BaseImage)
         self.clear()
 
     def clear(self):
@@ -168,9 +169,13 @@ class QRCode:
             self.make()
 
         if image_factory is not None:
-            assert issubclass(image_factory, image.BaseImage)
+            assert issubclass(image_factory, BaseImage)
         else:
             image_factory = self.image_factory
+            if image_factory is None:
+                # Use PIL by default
+                from qrcode.image.pil import PilImage
+                image_factory = PilImage
 
         im = image_factory(self.border, self.modules_count, self.box_size)
         for r in range(self.modules_count):
