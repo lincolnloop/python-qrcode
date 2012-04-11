@@ -1,6 +1,6 @@
 from qrcode.main import QRCode, make
 from qrcode.constants import *
-
+from qrcode import image
 
 def run_example(data="http://www.lincolnloop.com", *args, **kwargs):
     """

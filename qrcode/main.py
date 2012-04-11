@@ -1,11 +1,5 @@
-# Try to import PIL in either of the two ways it can be installed.
-try:
-    from PIL import Image, ImageDraw
-except ImportError:
-    import Image, ImageDraw
-
 from qrcode import constants, exceptions, util
-
+from qrcode.image.base import BaseImage
 
 def make(data=None, **kwargs):
     qr = QRCode(**kwargs)
@@ -16,13 +10,18 @@ def make(data=None, **kwargs):
 class QRCode:
 
     def __init__(self, version=None,
-            error_correction=constants.ERROR_CORRECT_M, box_size=10, border=4):
+                 error_correction=constants.ERROR_CORRECT_M,
+                 box_size=10, border=4,
+                 image_factory=None):
         self.version = version and int(version)
         self.error_correction = int(error_correction)
         self.box_size = int(box_size)
         # Spec says border should be at least four boxes wide, but allow for
         # any (e.g. for producing printable QR codes).
         self.border = int(border)
+        self.image_factory = image_factory
+        if image_factory is not None:
+            assert issubclass(image_factory, BaseImage)
         self.clear()
 
     def clear(self):
@@ -160,28 +159,29 @@ class QRCode:
         out.write("\x1b[1;47m" + (" " * (modcount * 2 + 4)) + "\x1b[0m\n")
         out.flush()
 
-    def make_image(self):
+    def make_image(self, image_factory=None):
         """
-        Make a PIL image from the QR Code data.
+        Make an image from the QR Code data.
 
         If the data has not been compiled yet, make it first.
         """
         if self.data_cache is None:
             self.make()
-        offset = self.border
-        pixelsize = (self.modules_count + offset * 2) * self.box_size
 
-        im = Image.new("1", (pixelsize, pixelsize), "white")
-        d = ImageDraw.Draw(im)
+        if image_factory is not None:
+            assert issubclass(image_factory, BaseImage)
+        else:
+            image_factory = self.image_factory
+            if image_factory is None:
+                # Use PIL by default
+                from qrcode.image.pil import PilImage
+                image_factory = PilImage
 
+        im = image_factory(self.border, self.modules_count, self.box_size)
         for r in range(self.modules_count):
             for c in range(self.modules_count):
                 if self.modules[r][c]:
-                    x = (c + offset) * self.box_size
-                    y = (r + offset) * self.box_size
-                    b = [(x, y),
-                        (x + self.box_size - 1, y + self.box_size - 1)]
-                    d.rectangle(b, fill="black")
+                    im.drawrect(r, c)
         return im
 
     def setup_timing_pattern(self):
