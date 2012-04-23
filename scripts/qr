@@ -9,42 +9,37 @@ import sys
 import optparse
 import qrcode
 
+default_factories = {
+    'pil': 'qrcode.image.pil.PilImage',
+    'svg': 'qrcode.image.svg.SvgImage',
+    'svg-fragment': 'qrcode.image.svg.SvgFragmentImage',
+}
+
+
 def main(*args):
     qr = qrcode.QRCode()
-    if args:
-        parser = optparse.OptionParser(usage=__doc__.strip())
-        parser.add_option("--pil", action="store_true",
-                          default=False,
-                          help="Create a PIL (PNG) image")
-        parser.add_option("--svg", action="store_true",
-                          default=False,
-                          help="Create a standalone SVG image")
-        parser.add_option("--svg-fragment", action="store_true",
-                          default=False,
-                          help="Create an embeddable SVG fragment")
-        opts, args = parser.parse_args(list(args))
 
-        formats = reduce(lambda a, b: int(a) + int(b),
-                         (opts.pil, opts.svg, opts.svg_fragment))
-        if formats > 1:
-            parser.error("Can't create more than one image format at a time")
+    parser = optparse.OptionParser(usage=__doc__.strip())
+    parser.add_option("--factory", action="store",
+        help="Full python path to the image factory class to create the image "
+        "with. You can use the following shortcuts to the built-in image "
+        "factory classes: %s." % ", ".join(sorted(default_factories.keys())))
+    opts, args = parser.parse_args(list(args))
+
+    if opts.factory:
+        module = default_factories.get(opts.factory, opts.factory)
+        if '.' not in module:
+            parser.error("The image factory is not a full python path")
+        module, name = module.rsplit('.', 1)
+        imp = __import__(module, {}, [], [name])
+        image_factory = getattr(imp, name)
+    else:
+        image_factory = None
 
     if args:
         qr.add_data(args[0])
     else:
         qr.add_data(sys.stdin.read())
-
-    if opts.pil:
-        from qrcode.image.pil import PilImage
-        image_factory = PilImage
-    elif opts.svg:
-        from qrcode.image.svg import SvgImage
-        image_factory = SvgImage
-    elif opts.svg_fragment:
-        from qrcode.image.svg import SvgFragmentImage
-        image_factory = SvgFragmentImage
-    else:
-        image_factory = None
 
     if image_factory is None and sys.stdout.isatty():
         qr.print_tty()
