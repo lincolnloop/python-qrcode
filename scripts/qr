@@ -3,28 +3,50 @@
 qr - Convert stdin (or the first argument) to a QR Code.
 
 When stdout is a tty the QR Code is printed to the terminal and when stdout is
-a pipe to a file a PNG image is written.
+a pipe to a file an image is written. The default image format is PNG.
 """
 import sys
+import optparse
 import qrcode
+
+default_factories = {
+    'pil': 'qrcode.image.pil.PilImage',
+    'svg': 'qrcode.image.svg.SvgImage',
+    'svg-fragment': 'qrcode.image.svg.SvgFragmentImage',
+}
 
 
 def main(*args):
     qr = qrcode.QRCode()
+
+    parser = optparse.OptionParser(usage=__doc__.strip())
+    parser.add_option("--factory", action="store",
+        help="Full python path to the image factory class to create the image "
+        "with. You can use the following shortcuts to the built-in image "
+        "factory classes: %s." % ", ".join(sorted(default_factories.keys())))
+    opts, args = parser.parse_args(list(args))
+
+    if opts.factory:
+        module = default_factories.get(opts.factory, opts.factory)
+        if '.' not in module:
+            parser.error("The image factory is not a full python path")
+        module, name = module.rsplit('.', 1)
+        imp = __import__(module, {}, [], [name])
+        image_factory = getattr(imp, name)
+    else:
+        image_factory = None
+
     if args:
-        if args[0] == '--help':
-            print __doc__.strip()
-            return
         qr.add_data(args[0])
     else:
         qr.add_data(sys.stdin.read())
 
-    if sys.stdout.isatty():
+    if image_factory is None and sys.stdout.isatty():
         qr.print_tty()
         return
 
-    img = qr.make_image()
-    img.save(sys.stdout, "PNG")
+    img = qr.make_image(image_factory=image_factory)
+    img.save(sys.stdout)
 
 
 if __name__ == "__main__":
