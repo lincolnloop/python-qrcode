@@ -14,6 +14,7 @@ setup(
     platforms=['any'],
     packages=[
         'qrcode',
+        'qrcode.images',
     ],
     scripts=[
         'scripts/qr',
