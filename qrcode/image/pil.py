@@ -28,6 +28,9 @@ class PilImage(qrcode.image.base.BaseImage):
                 y + self.box_size - 1)]
         self._idr.rectangle(box, fill="black")
 
+    def show(self):
+        self._img.show()
+
     def save(self, stream, kind=None):
         if kind is None:
             kind = self.kind
