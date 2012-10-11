@@ -3,10 +3,22 @@ Change log
 ==========
 
 
-Version 2.3.1
-=============
+Version 2.4
+===========
 
-* Encode unicode to utf-8 bytestrings when adding data to a QRCode.
+* Use a pluggable backend system for generating images, thanks to Branko Čibej!
+  Comes with PIL and SVG backends built in.
+
+Version 2.4.1
+-------------
+
+* Fix a packaging issue
+
+Version 2.4.2
+-------------
+
+* Added a ``show`` method to the PIL image wrapper so the ``run_example``
+  function actually works.
 
 
 Version 2.3
@@ -14,6 +26,11 @@ Version 2.3
 
 * When adding data, auto-select the more efficient encoding methods for numbers
   and alphanumeric data (KANJI still not supported).
+
+Version 2.3.1
+-------------
+
+* Encode unicode to utf-8 bytestrings when adding data to a QRCode.
 
 
 Version 2.2
