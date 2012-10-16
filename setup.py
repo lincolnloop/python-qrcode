@@ -19,6 +19,9 @@ setup(
     scripts=[
         'scripts/qr',
     ],
+    extras_require={
+        'PIL': ['PIL'],
+    },
     package_data={'': ['LICENSE']},
     classifiers=[
         'Development Status :: 3 - Alpha',
