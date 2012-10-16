@@ -20,7 +20,7 @@ setup(
         'scripts/qr',
     ],
     extras_require={
-        'PIL': ['PIL'],
+        'PIL': ['Pillow'],
     },
     package_data={'': ['LICENSE']},
     classifiers=[
