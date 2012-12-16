@@ -255,7 +255,7 @@ class QRData:
         chosen.
         """
         # Convert data to a (utf-8 encoded) byte-string.
-        if not isinstance(data, basestring):
+        if not isinstance(data, str):
             try:
                 data = str(data)
             except UnicodeEncodeError:
