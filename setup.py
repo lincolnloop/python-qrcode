@@ -19,7 +19,8 @@ setup(
     scripts=[
         'scripts/qr',
     ],
-    package_data={'': ['LICENSE']},
+	data_files=[ ('man/man1/', ['scripts/qr.1'] ) ],
+    package_data={'': ['LICENSE'] },
     classifiers=[
         'Development Status :: 3 - Alpha',
         'License :: OSI Approved :: BSD License',
