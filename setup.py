@@ -19,7 +19,7 @@ setup(
     scripts=[
         'scripts/qr',
     ],
-    data_files=[ ('man/man1/', ['doc/qr.1'] ) ],
+    data_files=[ ('share/man/man1/', ['doc/qr.1'] ) ],
     package_data={'': ['LICENSE'] },
     classifiers=[
         'Development Status :: 3 - Alpha',
