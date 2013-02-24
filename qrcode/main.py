@@ -159,7 +159,7 @@ class QRCode:
         out.write("\x1b[1;47m" + (" " * (modcount * 2 + 4)) + "\x1b[0m\n")
         out.flush()
 
-    def make_image(self, image_factory=None):
+    def make_image(self, image_factory=None, **kwargs):
         """
         Make an image from the QR Code data.
 
@@ -177,7 +177,8 @@ class QRCode:
                 from qrcode.image.pil import PilImage
                 image_factory = PilImage
 
-        im = image_factory(self.border, self.modules_count, self.box_size)
+        im = image_factory(self.border, self.modules_count, self.box_size,
+                **kwargs)
         for r in range(self.modules_count):
             for c in range(self.modules_count):
                 if self.modules[r][c]:
