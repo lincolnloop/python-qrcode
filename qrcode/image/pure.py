@@ -34,7 +34,12 @@ class PymagingImage(qrcode.image.base.BaseImage):
             line = Line(x, y + r, x + self.box_size - 1, y + r)
             self._img.draw(line, Black)
 
-    def save(self, stream, kind=None):
+    def save(self, path, kind=None):
         if kind is None:
             kind = self.kind
-        self._img.save_to_path(stream, kind)
+        self._img.save_to_path(path, kind)
+
+    def save_stream(self, stream, kind=None):
+        if kind is None:
+            kind = self.kind
+        self._img.save(stream, kind)
