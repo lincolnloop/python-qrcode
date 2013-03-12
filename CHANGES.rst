@@ -2,6 +2,14 @@
 Change log
 ==========
 
+Version 2.5
+===========
+
+* The PilImage wrapper is more transparent - you can use any methods or
+  attributes available to the underlying PIL Image instance.
+
+* Fixed the first column of the QR Code coming up empty! Thanks to BecoKo.
+
 
 Version 2.4
 ===========

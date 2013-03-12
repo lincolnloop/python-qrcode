@@ -3,7 +3,7 @@ from distutils.core import setup
 
 setup(
     name='qrcode',
-    version='2.4.2',
+    version='2.5',
     url='https://github.com/lincolnloop/python-qrcode',
     #download_url='',
     description='QR Code image generator',
@@ -19,8 +19,8 @@ setup(
     scripts=[
         'scripts/qr',
     ],
-    data_files=[ ('share/man/man1/', ['doc/qr.1'] ) ],
-    package_data={'': ['LICENSE'] },
+    data_files=[('share/man/man1/', ['doc/qr.1'])],
+    package_data={'': ['LICENSE']},
     classifiers=[
         'Development Status :: 3 - Alpha',
         'License :: OSI Approved :: BSD License',
