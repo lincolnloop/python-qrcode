@@ -1,6 +1,7 @@
 from qrcode import constants, exceptions, util
 from qrcode.image.base import BaseImage
 
+
 def make(data=None, **kwargs):
     qr = QRCode(**kwargs)
     qr.add_data(data)
@@ -75,8 +76,8 @@ class QRCode:
             self.setup_type_number(test)
 
         if self.data_cache is None:
-            self.data_cache = util.create_data(self.version,
-                self.error_correction, self.data_list)
+            self.data_cache = util.create_data(
+                self.version, self.error_correction, self.data_list)
         self.map_data(self.data_cache, mask_pattern)
 
     def setup_position_probe_pattern(self, row, col):
@@ -104,8 +105,8 @@ class QRCode:
         size = start or 1
         while True:
             try:
-                self.data_cache = util.create_data(size,
-                    self.error_correction, self.data_list)
+                self.data_cache = util.create_data(
+                    size, self.error_correction, self.data_list)
             except exceptions.DataOverflowError:
                 size += 1
             else:
@@ -186,12 +187,12 @@ class QRCode:
 
     def setup_timing_pattern(self):
         for r in range(8, self.modules_count - 8):
-            if self.modules[r][6] != None:
+            if self.modules[r][6] is not None:
                 continue
             self.modules[r][6] = (r % 2 == 0)
 
         for c in range(8, self.modules_count - 8):
-            if self.modules[6][c] != None:
+            if self.modules[6][c] is not None:
                 continue
             self.modules[6][c] = (c % 2 == 0)
 
@@ -205,7 +206,7 @@ class QRCode:
                 row = pos[i]
                 col = pos[j]
 
-                if self.modules[row][col] != None:
+                if self.modules[row][col] is not None:
                     continue
 
                 for r in range(-2, 3):
@@ -281,7 +282,7 @@ class QRCode:
                     # be 0, causing lookup of -1). However, this isn't possible
                     # because self.modules_count is always odd so the last
                     # range item will always be 1.
-                    if self.modules[row][col - c] == None:
+                    if self.modules[row][col - c] is None:
 
                         dark = False
 
