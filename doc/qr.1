@@ -1,0 +1,23 @@
+.\" Manpage for qr
+.\" Contact devel@lsexperts.de for any feedback.
+.TH man 1 "07 Feb 2013" "2.5" "qr man page"
+.SH NAME
+qr \- script to create QR codes at the command line
+.SH SYNOPSIS
+qr [data]
+.SH DESCRIPTION
+This script uses the python qrcode module. It can take data from stdin or from the commandline and generate a QR code.
+Normally it will output the QR code as ascii art to the terminal. If the output is piped to a file, it will output a PNG image.
+.SH COMMON OPTIONS
+.PP
+\fB\ data\fR
+.RS 4
+The data from which should a QR code be generated.
+.RE
+
+.SH INTERNET SOURCES
+https://github.com/lincolnloop/python-qrcode/
+
+.SH AUTHOR
+Chris Beaven
+
