@@ -12,6 +12,9 @@ setup(
     author='Lincoln Loop',
     author_email='info@lincolnloop.com',
     platforms=['any'],
+    install_requires=[
+        "pil",
+    ],
     packages=[
         'qrcode',
         'qrcode.image',
