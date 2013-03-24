@@ -413,14 +413,15 @@ def create_data(version, error_correction, data_list):
     total_data_count = 0
     for block in rs_blocks:
         total_data_count += block.data_count
-
+    
+    # end code
     if len(buffer) > total_data_count * 8:
         raise exceptions.DataOverflowError("Code length overflow. Data size "
             "(%s) > size available (%s)" % (len(buffer), total_data_count * 8))
-
-    # end code
-    if len(buffer) + 4 <= total_data_count * 8:
+    elif len(buffer) + 4 <= total_data_count * 8:
         buffer.put(0, 4)
+    else:
+        buffer.put(0, total_data_count * 8 - len(buffer))
 
     # padding
     while len(buffer) % 8:
