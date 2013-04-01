@@ -399,41 +399,36 @@ def create_bytes(buffer, rs_blocks):
 
 def create_data(version, error_correction, data_list):
 
-    rs_blocks = base.rs_blocks(version, error_correction)
-
     buffer = BitBuffer()
-
     for data in data_list:
         buffer.put(data.mode, 4)
-        buffer.put(len(data),
-            length_in_bits(data.mode, version))
+        buffer.put(len(data), length_in_bits(data.mode, version))
         data.write(buffer)
 
-    # calc num max data.
-    total_data_count = 0
+    # Calculate the maximum number of bits for the given version.
+    rs_blocks = base.rs_blocks(version, error_correction)
+    bit_limit = 0
     for block in rs_blocks:
-        total_data_count += block.data_count
+        bit_limit += block.data_count * 8
 
-    if len(buffer) > total_data_count * 8:
-        raise exceptions.DataOverflowError("Code length overflow. Data size "
-            "(%s) > size available (%s)" % (len(buffer), total_data_count * 8))
+    if len(buffer) > bit_limit:
+        raise exceptions.DataOverflowError(
+            "Code length overflow. Data size (%s) > size available (%s)" %
+            (len(buffer), bit_limit))
 
-    # end code
-    if len(buffer) + 4 <= total_data_count * 8:
-        buffer.put(0, 4)
-
-    # padding
-    while len(buffer) % 8:
+    # Terminate the bits (add up to four 0s).
+    for i in range(min(bit_limit - len(buffer), 4)):
         buffer.put_bit(False)
 
-    # padding
-    while True:
-        if len(buffer) >= total_data_count * 8:
-            break
-        buffer.put(PAD0, 8)
+    # Delimit the string into 8-bit words, padding with 0s if necessary.
+    delimit = len(buffer) % 8
+    if delimit:
+        for i in range(8 - delimit):
+            buffer.put_bit(False)
 
-        if len(buffer) >= total_data_count * 8:
-            break
-        buffer.put(PAD1, 8)
+    # Add special alternating padding bitstrings until buffer if full.
+    bytes_to_fill = (bit_limit - len(buffer)) // 8
+    for i in range(bytes_to_fill):
+        buffer.put(PAD0 if i % 2 else PAD1, 8)
 
     return create_bytes(buffer, rs_blocks)
