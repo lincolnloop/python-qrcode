@@ -269,19 +269,15 @@ class QRCode:
 
         mask_func = util.mask_func(mask_pattern)
 
-        for col in range(self.modules_count - 1, -1, -2):
+        for col in range(self.modules_count - 1, 0, -2):
 
-            if col == 6:
+            if col <= 6:
                 col -= 1
 
             while True:
 
                 for c in range(2):
 
-                    # Note that col - c looks like a dangerous range (col could
-                    # be 0, causing lookup of -1). However, this isn't possible
-                    # because self.modules_count is always odd so the last
-                    # range item will always be 1.
                     if self.modules[row][col - c] is None:
 
                         dark = False
