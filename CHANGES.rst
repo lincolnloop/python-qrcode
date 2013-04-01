@@ -2,6 +2,16 @@
 Change log
 ==========
 
+Version 2.6
+===========
+
+* Fix the first four columns incorrectly shifted by one. Thanks to Josep
+  Gómez-Suay for the report and fix.
+
+* Fix strings within 4 bits of the QR version limit being incorrectly
+  terminated. Thanks to zhjie231 for the report.
+
+
 Version 2.5
 ===========
 
@@ -9,6 +19,11 @@ Version 2.5
   attributes available to the underlying PIL Image instance.
 
 * Fixed the first column of the QR Code coming up empty! Thanks to BecoKo.
+
+Version 2.5.1
+-------------
+
+* Fix installation error on Windows.
 
 
 Version 2.4
