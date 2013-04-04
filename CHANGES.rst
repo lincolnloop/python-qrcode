@@ -2,6 +2,12 @@
 Change log
 ==========
 
+Version 2.7
+===========
+
+* Fix incorrect termination padding.
+
+
 Version 2.6
 ===========
 

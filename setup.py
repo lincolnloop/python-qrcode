@@ -3,7 +3,7 @@ from distutils.core import setup
 
 setup(
     name='qrcode',
-    version='2.6',
+    version='2.7',
     url='https://github.com/lincolnloop/python-qrcode',
     #download_url='',
     description='QR Code image generator',
