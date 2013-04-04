@@ -429,6 +429,6 @@ def create_data(version, error_correction, data_list):
     # Add special alternating padding bitstrings until buffer if full.
     bytes_to_fill = (bit_limit - len(buffer)) // 8
     for i in range(bytes_to_fill):
-        buffer.put(PAD0 if i % 2 else PAD1, 8)
+        buffer.put(PAD0 if i % 2 == 0 else PAD1, 8)
 
     return create_bytes(buffer, rs_blocks)
