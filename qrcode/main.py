@@ -302,27 +302,26 @@ class QRCode:
                     inc = -inc
                     break
 
-    def getMatrix(self,mode=True):
+    def get_matrix(self):
         """
         Return the QR Code as a multidimensonal array
         If mode is set return data with border, else return
         data as is.
         """
-        code = self.modules
-        width = len(code)
-
-        if(mode):
-            for x in range(0,width+self.border*2):
-                if(x<self.border):
-                    code.insert(0,[False]*(width+(self.border*2)))
-                elif(x >= width+self.border):
-                    code.append([False]*(width+(self.border*2)))
-                else:
-                    for n in range(0,self.border):
-                        code[x].insert(0,False)
-                        code[x].append(False)
-
         if self.data_cache is None:
             self.make()
+
+        code = self.modules
+        
+        width = len(code)
+        for x in range(0,width+self.border*2):
+            if(x<self.border):
+                code.insert(0,[False]*(width+(self.border*2)))
+            elif(x >= width+self.border):
+                code.append([False]*(width+(self.border*2)))
+            else:
+                for n in range(0,self.border):
+                    code[x].insert(0,False)
+                    code[x].append(False)
 
         return code
