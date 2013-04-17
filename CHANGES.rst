@@ -2,6 +2,13 @@
 Change log
 ==========
 
+Version HEAD
+============
+
+* Add QRCode.get_matrix, an easy way to get the matrix array of a QR code
+  including the border. Thanks Hugh Rawlinson.
+
+
 Version 2.7
 ===========
 

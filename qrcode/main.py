@@ -301,3 +301,24 @@ class QRCode:
                     row -= inc
                     inc = -inc
                     break
+
+    def get_matrix(self):
+        """
+        Return the QR Code as a multidimensonal array, including the border.
+
+        To return the array without a border, set ``self.border`` to 0 first.
+        """
+        if self.data_cache is None:
+            self.make()
+
+        if not self.border:
+            return self.modules
+
+        width = len(self.modules) + self.border*2
+        code = [[False]*width] * self.border
+        x_border = [False]*self.border
+        for module in self.modules:
+            code.append(x_border + module + x_border)
+        code += [[False]*width] * self.border
+
+        return code
