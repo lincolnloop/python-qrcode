@@ -304,9 +304,9 @@ class QRCode:
 
     def get_matrix(self):
         """
-        Return the QR Code as a multidimensonal array
-        If mode is set return data with border, else return
-        data as is.
+        Return the QR Code as a multidimensonal array, including the border.
+
+        To return the array without a border, set ``self.border = 0`` first.
         """
         if self.data_cache is None:
             self.make()
