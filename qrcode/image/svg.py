@@ -1,4 +1,9 @@
-import xml.etree.ElementTree as ET
+# On Python 2.6 must install lxml since the older xml.etree.ElementTree
+# version can not be used to create SVG images.
+try:
+    import lxml.etree as ET
+except ImportError:
+    import xml.etree.ElementTree as ET
 import qrcode.image.base
 
 
@@ -25,7 +30,7 @@ class SvgFragmentImage(qrcode.image.base.BaseImage):
             raise ValueError("Cannot set SVG image type to " + kind)
         self._write(stream)
 
-    def _svg(self, tag = ET.QName(_SVG_namespace, "svg")):
+    def _svg(self, tag=ET.QName(_SVG_namespace, "svg")):
         dimension = "%dmm" % (2 * self.border + self.width)
         return ET.Element(tag, version="1.1",
                           width=dimension, height=dimension)

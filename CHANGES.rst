@@ -8,6 +8,9 @@ Version HEAD
 * Add QRCode.get_matrix, an easy way to get the matrix array of a QR code
   including the border. Thanks Hugh Rawlinson.
 
+* Add in a workaround so that Python 2.6 users can use SVG generation (they
+  must install ``lxml``)
+
 
 Version 2.7
 ===========
