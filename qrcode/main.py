@@ -306,22 +306,19 @@ class QRCode:
         """
         Return the QR Code as a multidimensonal array, including the border.
 
-        To return the array without a border, set ``self.border = 0`` first.
+        To return the array without a border, set ``self.border`` to 0 first.
         """
         if self.data_cache is None:
             self.make()
 
-        code = self.modules
+        if not self.border:
+            return self.modules
 
-        width = len(code)
-        for x in range(0, width + self.border*2):
-            if(x < self.border):
-                code.insert(0, [False] * (width + self.border*2))
-            elif(x >= width+self.border):
-                code.append([False] * (width + self.border*2))
-            else:
-                for n in range(0, self.border):
-                    code[x].insert(0, False)
-                    code[x].append(False)
+        width = len(self.modules) + self.border*2
+        code = [[False]*width] * self.border
+        x_border = [False]*self.border
+        for module in self.modules:
+            code.append(x_border + module + x_border)
+        code += [[False]*width] * self.border
 
         return code
