@@ -312,16 +312,16 @@ class QRCode:
             self.make()
 
         code = self.modules
-        
+
         width = len(code)
-        for x in range(0,width+self.border*2):
-            if(x<self.border):
-                code.insert(0,[False]*(width+(self.border*2)))
+        for x in range(0, width + self.border*2):
+            if(x < self.border):
+                code.insert(0, [False] * (width + self.border*2))
             elif(x >= width+self.border):
-                code.append([False]*(width+(self.border*2)))
+                code.append([False] * (width + self.border*2))
             else:
-                for n in range(0,self.border):
-                    code[x].insert(0,False)
+                for n in range(0, self.border):
+                    code[x].insert(0, False)
                     code[x].append(False)
 
         return code
