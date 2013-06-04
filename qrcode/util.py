@@ -255,13 +255,7 @@ class QRData:
         chosen.
         """
         # Convert data to a (utf-8 encoded) byte-string.
-        if not isinstance(data, basestring):
-            try:
-                data = str(data)
-            except UnicodeEncodeError:
-                data = unicode(data)
-        if isinstance(data, unicode):
-            data = data.encode('utf-8')
+        data = str(data)
 
         if data.isdigit():
             auto_mode = MODE_NUMBER

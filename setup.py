@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from distutils.core import setup
+from setuptools import setup
 
 setup(
     name='qrcode',
@@ -29,5 +29,8 @@ setup(
         'Programming Language :: Python',
         'Topic :: Multimedia :: Graphics',
         'Topic :: Software Development :: Libraries :: Python Modules',
+    ],
+    install_requires=[
+        'pillow >= 2.0.0',
     ],
 )

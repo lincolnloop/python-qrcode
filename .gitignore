@@ -1,1 +1,16 @@
 *.pyc
+*.pyo
+.installed.cfg
+bin
+build
+develop-eggs
+dist
+downloads
+eggs
+*.egg-info
+parts
+src/*.egg-info
+lib
+lib64*.pyc
+
+venv
