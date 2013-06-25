@@ -19,6 +19,7 @@ setup(
     scripts=[
         'scripts/qr',
     ],
+    install_requires=['six'],
     data_files=[('share/man/man1', ['doc/qr.1'])],
     package_data={'': ['LICENSE']},
     classifiers=[

@@ -1,6 +1,8 @@
 import re
 import math
 
+import six
+
 from qrcode import base, exceptions
 
 # QR encoding modes.
@@ -29,7 +31,7 @@ MODE_SIZE_LARGE = {
     MODE_KANJI: 12,
 }
 
-ALPHA_NUM = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:'
+ALPHA_NUM = b'0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:'
 
 # The number of bits for numeric delimited data lengths.
 NUMBER_LENGTH = {3: 10, 2: 7, 1: 4}
@@ -255,17 +257,14 @@ class QRData:
         chosen.
         """
         # Convert data to a (utf-8 encoded) byte-string.
-        if not isinstance(data, basestring):
-            try:
-                data = str(data)
-            except UnicodeEncodeError:
-                data = unicode(data)
-        if isinstance(data, unicode):
+        if not isinstance(data, six.string_types):
+            data = six.text_type(data)
+        if isinstance(data, six.text_type):
             data = data.encode('utf-8')
 
         if data.isdigit():
             auto_mode = MODE_NUMBER
-        elif re.match('^[%s]*$' % re.escape(ALPHA_NUM), data):
+        elif re.match(b'^[' + re.escape(ALPHA_NUM) + b'{0}]*$', data):
             auto_mode = MODE_ALPHA_NUM
         else:
             auto_mode = MODE_8BIT_BYTE
@@ -287,12 +286,12 @@ class QRData:
 
     def write(self, buffer):
         if self.mode == MODE_NUMBER:
-            for i in xrange(0, len(self.data), 3):
+            for i in six.moves.xrange(0, len(self.data), 3):
                 chars = self.data[i:i + 3]
                 bit_length = NUMBER_LENGTH[len(chars)]
                 buffer.put(int(chars), bit_length)
         elif self.mode == MODE_ALPHA_NUM:
-            for i in xrange(0, len(self.data), 2):
+            for i in six.moves.xrange(0, len(self.data), 2):
                 chars = self.data[i:i + 2]
                 if len(chars) > 1:
                     buffer.put(ALPHA_NUM.find(chars[0]) * 45 +
@@ -300,8 +299,14 @@ class QRData:
                 else:
                     buffer.put(ALPHA_NUM.find(chars), 6)
         else:
-            for c in self.data:
-                buffer.put(ord(c), 8)
+            if six.PY3:
+                # Iterating a bytestring in Python 3 returns an integer,
+                # no need to ord().
+                data = self.data
+            else:
+                data = [ord(c) for c in self.data]
+            for c in data:
+                buffer.put(c, 8)
 
     def __repr__(self):
         return self.data
