@@ -2,14 +2,19 @@
 Change log
 ==========
 
-Version HEAD
-============
+Version 3.0
+===========
+
+* Python 3 support.
 
 * Add QRCode.get_matrix, an easy way to get the matrix array of a QR code
   including the border. Thanks Hugh Rawlinson.
 
 * Add in a workaround so that Python 2.6 users can use SVG generation (they
-  must install ``lxml``)
+  must install ``lxml``).
+
+* Some initial tests! And tox support (``pip install tox``) for testing across
+  Python platforms.
 
 
 Version 2.7
