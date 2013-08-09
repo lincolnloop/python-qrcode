@@ -1,5 +1,6 @@
 from qrcode import constants, exceptions, util
 from qrcode.image.base import BaseImage
+import re
 
 
 def make(data=None, **kwargs):
@@ -38,9 +39,21 @@ class QRCode:
         """
         Add data to this QR Code.
         """
-        if not isinstance(data, util.QRData):
-            data = util.QRData(data)
-        self.data_list.append(data)
+        if isinstance(data, util.QRData):
+            self.data_list.append(data)
+        else:
+            # If the added string contains long runs of characters that are
+            # best encoding with different modes (numbers/alphanumeric/bytes),
+            # then reduce the encoded size by breaking the string into
+            # chunks and encoding each separately.
+            # (The chunk size threshold 10 is probably suboptimal, but exact
+            # calculation depends on many parameters, including the length
+            # field overhead induced by chunking; and that the length field size
+            # depends on the final size version, which isn't yet known.)
+            for chunk in re.split('([0-9]{10,})', data):
+                for subchunk in re.split('([' + str(re.escape(util.ALPHA_NUM)) + ']{10,})', chunk):
+                    if subchunk != '':
+                        self.data_list.append(util.QRData(subchunk))
         self.data_cache = None
 
     def make(self, fit=True):
