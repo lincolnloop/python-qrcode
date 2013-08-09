@@ -264,7 +264,7 @@ class QRData:
 
         if data.isdigit():
             auto_mode = MODE_NUMBER
-        elif re.match(b'^[' + re.escape(ALPHA_NUM) + b'{0}]*$', data):
+        elif re.match(b'^[' + re.escape(ALPHA_NUM) + b']*\Z', data):
             auto_mode = MODE_ALPHA_NUM
         else:
             auto_mode = MODE_8BIT_BYTE
