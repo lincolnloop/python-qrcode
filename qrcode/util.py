@@ -32,6 +32,7 @@ MODE_SIZE_LARGE = {
 }
 
 ALPHA_NUM = b'0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:'
+RE_ALPHA_NUM = re.compile(b'^[' + ALPHA_NUM + b']*\Z')
 
 # The number of bits for numeric delimited data lengths.
 NUMBER_LENGTH = {3: 10, 2: 7, 1: 4}
@@ -264,7 +265,7 @@ class QRData:
 
         if data.isdigit():
             auto_mode = MODE_NUMBER
-        elif re.match(b'^[' + re.escape(ALPHA_NUM) + b']*\Z', data):
+        elif RE_ALPHA_NUM.match(data):
             auto_mode = MODE_ALPHA_NUM
         else:
             auto_mode = MODE_8BIT_BYTE

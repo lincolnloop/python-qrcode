@@ -54,6 +54,12 @@ class QRCodeTests(unittest.TestCase):
         self.assertEqual(qr.version, 1)
         self.assertEqual(qr.data_list[0].mode, MODE_8BIT_BYTE)
 
+    def test_mode_8bit_newline(self):
+        qr = qrcode.QRCode()
+        qr.add_data('ABCDEFGHIJ1234567890\n')
+        qr.make()
+        self.assertEqual(qr.data_list[0].mode, MODE_8BIT_BYTE)
+
     def test_render_svg(self):
         qr = qrcode.QRCode()
         qr.add_data(UNICODE_TEXT)
