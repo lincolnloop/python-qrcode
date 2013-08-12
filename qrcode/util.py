@@ -245,6 +245,62 @@ def lost_point(modules):
     return lost_point
 
 
+def optimal_data_chunks(data, minimum=4):
+    """
+    An iterator returning QRData chunks optimized to the data content.
+
+    :param minimum: The minimum number of bytes in a row to split as a chunk.
+    """
+    data = to_bytestring(data)
+    re_repeat = b'{' + six.text_type(minimum).encode('ascii') + b',}'
+    num_pattern = re.compile(b'\d' + re_repeat)
+    num_bits = _optimal_split(data, num_pattern)
+    alpha_pattern = re.compile(b'[' + ALPHA_NUM + b']' + re_repeat)
+    for is_num, chunk in num_bits:
+        if is_num:
+            yield QRData(chunk, mode=MODE_NUMBER, check_data=False)
+        else:
+            for is_alpha, sub_chunk in _optimal_split(chunk, alpha_pattern):
+                mode = MODE_ALPHA_NUM if is_alpha else MODE_8BIT_BYTE
+                yield QRData(sub_chunk, mode=mode, check_data=False)
+
+
+def _optimal_split(data, pattern):
+    while data:
+        match = re.search(pattern, data)
+        if not match:
+            break
+        start, end = match.start(), match.end()
+        if start:
+            yield False, data[:start]
+        yield True, data[start:end]
+        data = data[end:]
+    if data:
+        yield False, data
+
+
+def to_bytestring(data):
+    """
+    Convert data to a (utf-8 encoded) byte-string.
+    """
+    if not isinstance(data, six.string_types):
+        data = six.text_type(data)
+    if isinstance(data, six.text_type):
+        data = data.encode('utf-8')
+    return data
+
+
+def optimal_mode(data):
+    """
+    Calculate the optimal mode for this chunk of data.
+    """
+    if data.isdigit():
+        return MODE_NUMBER
+    if RE_ALPHA_NUM.match(data):
+        return MODE_ALPHA_NUM
+    return MODE_8BIT_BYTE
+
+
 class QRData:
     """
     Data held in a QR compatible format.
@@ -252,33 +308,24 @@ class QRData:
     Doesn't currently handle KANJI.
     """
 
-    def __init__(self, data, mode=None):
+    def __init__(self, data, mode=None, check_data=True):
         """
         If ``mode`` isn't provided, the most compact QR data type possible is
         chosen.
         """
-        # Convert data to a (utf-8 encoded) byte-string.
-        if not isinstance(data, six.string_types):
-            data = six.text_type(data)
-        if isinstance(data, six.text_type):
-            data = data.encode('utf-8')
-
-        if data.isdigit():
-            auto_mode = MODE_NUMBER
-        elif RE_ALPHA_NUM.match(data):
-            auto_mode = MODE_ALPHA_NUM
-        else:
-            auto_mode = MODE_8BIT_BYTE
+        if check_data:
+            data = to_bytestring(data)
 
         if mode is None:
-            self.mode = auto_mode
+            self.mode = optimal_mode(data)
         else:
+            self.mode = mode
             if mode not in (MODE_NUMBER, MODE_ALPHA_NUM, MODE_8BIT_BYTE):
                 raise TypeError("Invalid mode (%s)" % mode)
-            if mode < auto_mode:
-                raise ValueError("Provided data can not be represented in "
-                    "mode %s" % mode)
-            self.mode = mode
+            if check_data and mode < optimal_mode(data):
+                raise ValueError(
+                    "Provided data can not be represented in mode "
+                    "{0}".format(mode))
 
         self.data = data
 

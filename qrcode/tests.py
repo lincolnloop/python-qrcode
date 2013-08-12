@@ -35,28 +35,28 @@ class QRCodeTests(unittest.TestCase):
 
     def test_mode_number(self):
         qr = qrcode.QRCode()
-        qr.add_data('1234567890123456789012345678901234')
+        qr.add_data('1234567890123456789012345678901234', optimize=0)
         qr.make()
         self.assertEqual(qr.version, 1)
         self.assertEqual(qr.data_list[0].mode, MODE_NUMBER)
 
     def test_mode_alpha(self):
         qr = qrcode.QRCode()
-        qr.add_data('ABCDEFGHIJ1234567890')
+        qr.add_data('ABCDEFGHIJ1234567890', optimize=0)
         qr.make()
         self.assertEqual(qr.version, 1)
         self.assertEqual(qr.data_list[0].mode, MODE_ALPHA_NUM)
 
     def test_mode_8bit(self):
         qr = qrcode.QRCode()
-        qr.add_data(u'abcABC' + UNICODE_TEXT)
+        qr.add_data(u'abcABC' + UNICODE_TEXT, optimize=0)
         qr.make()
         self.assertEqual(qr.version, 1)
         self.assertEqual(qr.data_list[0].mode, MODE_8BIT_BYTE)
 
     def test_mode_8bit_newline(self):
         qr = qrcode.QRCode()
-        qr.add_data('ABCDEFGHIJ1234567890\n')
+        qr.add_data('ABCDEFGHIJ1234567890\n', optimize=0)
         qr.make()
         self.assertEqual(qr.data_list[0].mode, MODE_8BIT_BYTE)
 
@@ -64,3 +64,29 @@ class QRCodeTests(unittest.TestCase):
         qr = qrcode.QRCode()
         qr.add_data(UNICODE_TEXT)
         qr.make_image(image_factory=qrcode.image.svg.SvgImage)
+
+    def test_optimize(self):
+        qr = qrcode.QRCode()
+        text = 'A1abc12345def1HELLOa'
+        qr.add_data(text, optimize=4)
+        qr.make()
+        self.assertEqual(len(qr.data_list), 5)
+        self.assertEqual(qr.data_list[0].mode, MODE_8BIT_BYTE)
+        self.assertEqual(qr.data_list[1].mode, MODE_NUMBER)
+        self.assertEqual(qr.data_list[2].mode, MODE_8BIT_BYTE)
+        self.assertEqual(qr.data_list[3].mode, MODE_ALPHA_NUM)
+        self.assertEqual(qr.data_list[4].mode, MODE_8BIT_BYTE)
+        self.assertEqual(qr.version, 2)
+
+    def test_optimize_size(self):
+        text = 'A1abc12345123451234512345def1HELLOHELLOHELLOHELLOa' * 5
+
+        qr = qrcode.QRCode()
+        qr.add_data(text)
+        qr.make()
+        self.assertEqual(qr.version, 10)
+
+        qr = qrcode.QRCode()
+        qr.add_data(text, optimize=0)
+        qr.make()
+        self.assertEqual(qr.version, 11)
