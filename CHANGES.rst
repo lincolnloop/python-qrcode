@@ -2,8 +2,24 @@
 Change log
 ==========
 
-HEAD
-====
+Version 3.1
+===========
+
+* Important fixes for incorrect matches of the alpha-numeric encoding mode.
+  Previously, the pattern would match if a single line was alpha-numeric only
+  (even if others wern't). Also, the two characters ``{`` and ``}`` had snuck
+  in as valid characters. Thanks to Eran Tromer for the report and fix.
+
+* Optimized chunking -- if the parts of the data stream can be encoded more
+  efficiently, the data will be split into chunks of the most efficient modes.
+
+Version 3.1.1
+-------------
+
+* Update change log for to contain version 3.1 changes. :P
+
+* Give the ``qr`` script an ``--optimize`` argument to control the chunk
+  optimization setting.
 
 
 Version 3.0

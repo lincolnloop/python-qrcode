@@ -20,10 +20,15 @@ def main(*args):
     qr = qrcode.QRCode()
 
     parser = optparse.OptionParser(usage=__doc__.strip())
-    parser.add_option("--factory", action="store",
-        help="Full python path to the image factory class to create the image "
-        "with. You can use the following shortcuts to the built-in image "
-        "factory classes: %s." % ", ".join(sorted(default_factories.keys())))
+    parser.add_option(
+        "--factory", help="Full python path to the image factory class to "
+        "create the image with. You can use the following shortcuts to the "
+        "built-in image factory classes: {0}.".format(
+            ", ".join(sorted(default_factories.keys()))))
+    parser.add_option(
+        "--optimize", type=int, help="Optimize the data by looking for chunks "
+        "of at least this many characters that could use a more efficient "
+        "encoding method. Use 0 to turn off chunk optimization.")
     opts, args = parser.parse_args(list(args))
 
     if opts.factory:
@@ -37,9 +42,13 @@ def main(*args):
         image_factory = None
 
     if args:
-        qr.add_data(args[0])
+        data = args[0]
     else:
-        qr.add_data(sys.stdin.read())
+        data = sys.stdin.read()
+    if opts.optimize is None:
+        qr.add_data(data)
+    else:
+        qr.add_data(data, optimize=opts.optimize)
 
     if image_factory is None and sys.stdout.isatty():
         qr.print_tty()
