@@ -3,6 +3,12 @@ import math
 
 import six
 
+def _iife(tval, cond, fval):
+    ret = fval
+    if cond:
+        ret = tval
+    return ret
+
 from qrcode import base, exceptions
 
 # QR encoding modes.
@@ -261,7 +267,7 @@ def optimal_data_chunks(data, minimum=4):
             yield QRData(chunk, mode=MODE_NUMBER, check_data=False)
         else:
             for is_alpha, sub_chunk in _optimal_split(chunk, alpha_pattern):
-                mode = MODE_ALPHA_NUM if is_alpha else MODE_8BIT_BYTE
+                mode = _iife(MODE_ALPHA_NUM, is_alpha, MODE_8BIT_BYTE)
                 yield QRData(sub_chunk, mode=mode, check_data=False)
 
 
@@ -482,6 +488,6 @@ def create_data(version, error_correction, data_list):
     # Add special alternating padding bitstrings until buffer is full.
     bytes_to_fill = (bit_limit - len(buffer)) // 8
     for i in range(bytes_to_fill):
-        buffer.put(PAD0 if i % 2 == 0 else PAD1, 8)
+        buffer.put(_iife(PAD0, i % 2 == 0, PAD1), 8)
 
     return create_bytes(buffer, rs_blocks)
