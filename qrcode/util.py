@@ -479,7 +479,7 @@ def create_data(version, error_correction, data_list):
         for i in range(8 - delimit):
             buffer.put_bit(False)
 
-    # Add special alternating padding bitstrings until buffer if full.
+    # Add special alternating padding bitstrings until buffer is full.
     bytes_to_fill = (bit_limit - len(buffer)) // 8
     for i in range(bytes_to_fill):
         buffer.put(PAD0 if i % 2 == 0 else PAD1, 8)
