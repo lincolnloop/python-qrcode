@@ -1,1 +1,1 @@
-include LICENSE *.rst
+include LICENSE *.rst doc/qr.1
