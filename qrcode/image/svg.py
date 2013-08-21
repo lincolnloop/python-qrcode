@@ -68,15 +68,16 @@ class SvgImage(SvgFragmentImage):
 
 class SvgPathImage(SvgFragmentImage):
     """
-    SVG image builder with one single <path> element (removes white spaces between individual QR points)"""
+    SVG image builder with one single <path> element (removes white spaces
+    between individual QR points)"""
 
     SCALE = 1
     UNITS = 'mm'
-    QR_PATH_STYLE = 'fill: #000000; fill-opacity: 1; fill-rule: nonzero; stroke: none'
+    QR_PATH_STYLE = 'fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none'
 
     def __init__(self, border, width, box_size):
         self._points = set()
-        super().__init__(border, width, box_size)
+        super(SvgPathImage, self).__init__(border, width, box_size)
 
     def _svg(self, tag=ET.QName("svg")):
         dimension = self.width * self.SCALE + (2 * self.border * self.SCALE)
@@ -113,8 +114,15 @@ class SvgPathImage(SvgFragmentImage):
 
     def make_path(self):
         subpaths = self._generate_subpaths()
-        return ET.Element(ET.QName("path"), style=self.QR_PATH_STYLE, d=' '.join(subpaths), id="qr-path")
+
+        return ET.Element(
+            ET.QName("path"),
+            style=self.QR_PATH_STYLE,
+            d=' '.join(subpaths),
+            id="qr-path"
+        )
 
     def _write(self, stream):
         self._img.append(self.make_path())
-        ET.ElementTree(self._img).write(stream, encoding="UTF-8", xml_declaration=True)
+        ET.ElementTree(self._img).write(stream,
+                                        encoding="UTF-8", xml_declaration=True)
