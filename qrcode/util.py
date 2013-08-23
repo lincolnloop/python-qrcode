@@ -31,8 +31,8 @@ MODE_SIZE_LARGE = {
     MODE_KANJI: 12,
 }
 
-ALPHA_NUM = b'0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:'
-RE_ALPHA_NUM = re.compile(b'^[' + ALPHA_NUM + b']*\Z')
+ALPHA_NUM = six.b('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:')
+RE_ALPHA_NUM = re.compile(six.b('^[') + ALPHA_NUM + six.b(']*\Z'))
 
 # The number of bits for numeric delimited data lengths.
 NUMBER_LENGTH = {3: 10, 2: 7, 1: 4}
@@ -252,16 +252,19 @@ def optimal_data_chunks(data, minimum=4):
     :param minimum: The minimum number of bytes in a row to split as a chunk.
     """
     data = to_bytestring(data)
-    re_repeat = b'{' + six.text_type(minimum).encode('ascii') + b',}'
-    num_pattern = re.compile(b'\d' + re_repeat)
+    re_repeat = six.b('{') + six.text_type(minimum).encode('ascii') + six.b(',}')
+    num_pattern = re.compile(six.b('\d') + re_repeat)
     num_bits = _optimal_split(data, num_pattern)
-    alpha_pattern = re.compile(b'[' + ALPHA_NUM + b']' + re_repeat)
+    alpha_pattern = re.compile(six.b('[') + ALPHA_NUM + six.b(']') + re_repeat)
     for is_num, chunk in num_bits:
         if is_num:
             yield QRData(chunk, mode=MODE_NUMBER, check_data=False)
         else:
             for is_alpha, sub_chunk in _optimal_split(chunk, alpha_pattern):
-                mode = MODE_ALPHA_NUM if is_alpha else MODE_8BIT_BYTE
+                if is_alpha:
+                    mode = MODE_ALPHA_NUM
+                else:
+                    mode = MODE_8BIT_BYTE
                 yield QRData(sub_chunk, mode=mode, check_data=False)
 
 
@@ -482,6 +485,9 @@ def create_data(version, error_correction, data_list):
     # Add special alternating padding bitstrings until buffer is full.
     bytes_to_fill = (bit_limit - len(buffer)) // 8
     for i in range(bytes_to_fill):
-        buffer.put(PAD0 if i % 2 == 0 else PAD1, 8)
+        if i % 2 == 0:
+            buffer.put(PAD0, 8)
+        else:
+            buffer.put(PAD1, 8)
 
     return create_bytes(buffer, rs_blocks)
