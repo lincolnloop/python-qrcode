@@ -23,7 +23,7 @@ setup(
     data_files=[('share/man/man1', ['doc/qr.1'])],
     package_data={'': ['LICENSE']},
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 5 - Production/Stable',
         'License :: OSI Approved :: BSD License',
         'Operating System :: OS Independent',
         'Intended Audience :: Developers',

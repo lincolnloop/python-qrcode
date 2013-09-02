@@ -22,7 +22,7 @@ Version 3.1
 Version 3.1.1
 -------------
 
-* Update change log for to contain version 3.1 changes. :P
+* Update change log to contain version 3.1 changes. :P
 
 * Give the ``qr`` script an ``--optimize`` argument to control the chunk
   optimization setting.
