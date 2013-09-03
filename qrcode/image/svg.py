@@ -13,45 +13,52 @@ class SvgFragmentImage(qrcode.image.base.BaseImage):
     SVG image builder
 
     Creates a QR-code image as a SVG document fragment.
-    A box_size of 10 (default) equals 1mm.
     """
 
     _SVG_namespace = "http://www.w3.org/2000/svg"
     kind = "SVG"
+    allowed_kinds = ("SVG",)
 
     def __init__(self, *args, **kwargs):
         ET.register_namespace("svg", self._SVG_namespace)
         super(SvgFragmentImage, self).__init__(*args, **kwargs)
-        # Save the mm size, for example the default boxsize of 10 is '1mm'.
-        self.mm_size = self.mm(self.box_size)
+        # Save the unit size, for example the default box_size of 10 is '1mm'.
+        self.unit_size = self.units(self.box_size)
 
     def drawrect(self, row, col):
         self._img.append(self._rect(row, col))
 
-    def mm(self, pixels, text=True):
-        mm = Decimal(pixels) / 10
+    def units(self, pixels, text=True):
+        """
+        A box_size of 10 (default) equals 1mm.
+        """
+        units = Decimal(pixels) / 10
         if not text:
-            return mm
-        return '%smm' % mm
+            return units
+        return '%smm' % units
 
     def save(self, stream, kind=None):
-        if kind is not None and kind != self.kind:
-            raise ValueError("Cannot set SVG image type to " + kind)
+        self.check_kind(kind=kind)
         self._write(stream)
 
     def new_image(self, **kwargs):
         return self._svg()
 
-    def _svg(self, tag=ET.QName(_SVG_namespace, "svg")):
-        dimension = self.mm(self.pixel_size)
+    def _svg(self, tag=None, version='1.1', **kwargs):
+        if tag is None:
+            tag = ET.QName(self._SVG_namespace, "svg")
+        dimension = self.units(self.pixel_size)
         return ET.Element(
-            tag, version="1.1", width=dimension, height=dimension)
+            tag, width=dimension, height=dimension, version=version,
+            **kwargs)
 
-    def _rect(self, row, col, tag=ET.QName(_SVG_namespace, "rect")):
+    def _rect(self, row, col, tag=None):
+        if tag is None:
+            tag = ET.QName(self._SVG_namespace, "rect")
         x, y = self.pixel_box(row, col)[0]
         return ET.Element(
-            tag, x=self.mm(x), y=self.mm(y),
-            width=self.mm_size, height=self.mm_size)
+            tag, x=self.units(x), y=self.units(y),
+            width=self.unit_size, height=self.unit_size)
 
     def _write(self, stream):
         ET.ElementTree(self._img).write(stream, xml_declaration=False)
@@ -64,8 +71,8 @@ class SvgImage(SvgFragmentImage):
     Creates a QR-code image as a standalone SVG document.
     """
 
-    def _svg(self):
-        svg = super(SvgImage, self)._svg(tag="svg")
+    def _svg(self, tag='svg', **kwargs):
+        svg = super(SvgImage, self)._svg(tag=tag, **kwargs)
         svg.set("xmlns", self._SVG_namespace)
         return svg
 
@@ -77,31 +84,23 @@ class SvgImage(SvgFragmentImage):
                                         xml_declaration=True)
 
 
-class SvgPathImage(SvgFragmentImage):
+class SvgPathImage(SvgImage):
     """
     SVG image builder with one single <path> element (removes white spaces
-    between individual QR points)"""
+    between individual QR points).
+    """
 
-    SCALE = 1
-    UNITS = 'mm'
     QR_PATH_STYLE = 'fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none'
 
-    def __init__(self, border, width, box_size):
+    def __init__(self, *args, **kwargs):
         self._points = set()
-        super(SvgPathImage, self).__init__(border, width, box_size)
+        super(SvgPathImage, self).__init__(*args, **kwargs)
 
-    def _svg(self, tag=ET.QName("svg")):
-        dimension = self.width * self.SCALE + (2 * self.border * self.SCALE)
-
-        svg = ET.Element(
-            tag,
-            version="1.1",
-            width="{0}{units}".format(dimension, units=self.UNITS),
-            height="{0}{units}".format(dimension, units=self.UNITS),
-            viewBox="0 0 {s} {s}".format(s=dimension)
-        )
-        svg.set("xmlns", self._SVG_namespace)
-        return svg
+    def _svg(self, viewBox=None, **kwargs):
+        if viewBox is None:
+            dimension = self.units(self.pixel_size, text=False)
+            viewBox = '0 0 %(d)s %(d)s' % {'d': dimension}
+        return super(SvgPathImage, self)._svg(viewBox=viewBox, **kwargs)
 
     def drawrect(self, row, col):
         # (x, y)
@@ -110,18 +109,20 @@ class SvgPathImage(SvgFragmentImage):
     def _generate_subpaths(self):
         """Generates individual QR points as subpaths"""
 
-        scale = self.SCALE
+        rect_size = self.units(self.box_size, text=False)
 
         for point in self._points:
-            x_base = point[0] * scale + self.border * scale
-            y_base = point[1] * scale + self.border * scale
+            x_base = self.units(
+                (point[0]+self.border)*self.box_size, text=False)
+            y_base = self.units(
+                (point[1]+self.border)*self.box_size, text=False)
 
-            yield 'M {x0} {y0} L {x0} {y1} L {x1} {y1} L {x1} {y0} z'.format(
-                x0=x_base,
-                y0=y_base,
-                x1=x_base + scale,
-                y1=y_base + scale
-            )
+            yield (
+                'M %(x0)s %(y0)s L %(x0)s %(y1)s L %(x1)s %(y1)s L %(x1)s '
+                '%(y0)s z' % dict(
+                    x0=x_base, y0=y_base,
+                    x1=x_base+rect_size, y1=y_base+rect_size,
+                ))
 
     def make_path(self):
         subpaths = self._generate_subpaths()
@@ -135,5 +136,4 @@ class SvgPathImage(SvgFragmentImage):
 
     def _write(self, stream):
         self._img.append(self.make_path())
-        ET.ElementTree(self._img).write(stream,
-                                        encoding="UTF-8", xml_declaration=True)
+        super(SvgPathImage, self)._write(stream)

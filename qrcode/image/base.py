@@ -3,6 +3,7 @@ class BaseImage(object):
     Base QRCode image output class.
     """
     kind = None
+    allowed_kinds = None
 
     def __init__(self, border, width, box_size, *args, **kwargs):
         self.border = border
@@ -38,12 +39,15 @@ class BaseImage(object):
         """
         return None
 
-    def checked_kind(self, kind):
+    def check_kind(self, kind, transform=None):
         """
         Get the image type.
-
-        Subclasses can use this to raise ValueErrors for invalid types.
         """
         if kind is None:
-            return self.kind
+            kind = self.kind
+        if transform:
+            kind = transform(kind)
+        if self.allowed_kinds and kind not in self.allowed_kinds:
+            raise ValueError(
+                "Cannot set %s type to %s" % (type(self).__name__, kind))
         return kind

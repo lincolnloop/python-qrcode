@@ -13,6 +13,7 @@ class PymagingImage(qrcode.image.base.BaseImage):
     pymaging image builder, default format is PNG.
     """
     kind = "PNG"
+    allowed_kinds = ("PNG",)
 
     def __init__(self, *args, **kwargs):
         """
@@ -36,13 +37,13 @@ class PymagingImage(qrcode.image.base.BaseImage):
             self._img.draw(line, Black)
 
     def save(self, stream, kind=None):
-        self._img.save(stream, self.checked_kind(kind))
+        self._img.save(stream, self.check_kind(kind))
 
-    def checked_kind(self, kind=None):
-        kind = super(PymagingImage, self).checked_kind(kind)
-        # pymaging (pymaging_png at least) uses lower case for the type.
-        kind = kind.lower()
-        if kind != 'png':
-            raise ValueError(
-                "Only currently supporting PNG generation for pymaging")
-        return kind
+    def check_kind(self, kind, transform=None, **kwargs):
+        """
+        pymaging (pymaging_png at least) uses lower case for the type.
+        """
+        if transform is None:
+            transform = lambda x: x.lower()
+        return super(PymagingImage, self).check_kind(
+            kind, transform=transform, **kwargs)
