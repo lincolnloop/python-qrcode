@@ -71,6 +71,11 @@ class QRCodeTests(unittest.TestCase):
         qr.add_data(UNICODE_TEXT)
         qr.make_image(image_factory=qrcode.image.svg.SvgImage)
 
+    def test_render_svg_path(self):
+        qr = qrcode.QRCode()
+        qr.add_data(UNICODE_TEXT)
+        qr.make_image(image_factory=qrcode.image.svg.SvgPathImage)
+
     @unittest.skipIf(ANCIENT_PYTHON, "Only Python 2.6 and greater")
     def test_render_pymaging_png(self):
         qr = qrcode.QRCode()
