@@ -2,8 +2,8 @@
 Pure python QR Code generator
 =============================
 
-This module uses the Python Imaging Library (PIL) to allow for the generation
-of QR Codes.
+This module uses image libraries, Python Imaging Library (PIL) by default, to
+allow for the generation of QR Codes.
 
 What is a QR Code?
 ==================
@@ -17,7 +17,11 @@ alphanumeric, or Kanji symbols)
 Usage
 =====
 
-Use the ``make`` shortcut function::
+From the command line, use the installed ``qr`` script::
+
+    qr "Some text" > test.png
+
+Or in Python, use the ``make`` shortcut function::
 
     import qrcode
     img = qrcode.make('Some data here')
@@ -62,3 +66,54 @@ is.
 
 The ``border`` parameter controls how many boxes thick the border should be
 (the default is 4, which is the minimum according to the specs).
+
+Other image factories
+=====================
+
+You can encode as SVG, or use a new pure Python image processor to encode to
+PNG images.
+
+The Python examples below use the ``make`` shortcut. The same ``image_factory``
+keyword argument is a valid option for the ``QRCode`` class for more advanced
+usage.
+
+SVG
+---
+
+On Python 2.6 must install lxml since the older xml.etree.ElementTree version
+can not be used to create SVG images.
+
+You can create the entire svg or an svg fragment.
+
+From your command line::
+
+    qr --factory=svg "Some text" > test.svg
+    qr --factory=svg-fragment "Some text" > test.svg
+
+Or in Python::
+
+    import qrcode
+    import qrcode.image.svg
+    if use_fragment:
+        factory = qrcode.image.svg.SvgImageFragment
+    else:
+        factory = qrcode.image.svg.SvgImage
+    img = qrcode.make('Some data here', image_factory=factory)
+
+Pure Python PNG
+---------------
+
+Install the following two packages::
+
+    pip install git+git://github.com/ojii/pymaging.git#egg=pymaging
+    pip install git+git://github.com/ojii/pymaging-png.git#egg=pymaging-png
+
+From your command line::
+
+    qr --factory=qrcode.image.pure.PymagingImage "Some text" > test.png
+
+Or in Python::
+
+    import qrcode
+    from qrcode.image.pure import PymagingImage
+    img = qrcode.make('Some data here', image_factory=PymagingImage)
