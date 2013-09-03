@@ -6,13 +6,16 @@ HEAD
 ====
 
 * Made qrcode work on Python 2.4 - Thanks tcely.
-  Note: officially, qrcode supports 2.5+.
+  Note: officially, qrcode only supports 2.5+.
 
 * Support pure-python PNG generation (via pymaging) for Python 2.6+ -- thanks
   Adam Wisniewski!
 
 * SVG image generation now supports alternate sizing (the default box size of
   10 == 1mm per rectangle).
+
+* SVG path image generation allows cleaner SVG output by combining all QR rects
+  into a single path. Thank you, Viktor Stískala.
 
 
 Version 3.1

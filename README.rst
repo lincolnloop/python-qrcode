@@ -83,10 +83,13 @@ SVG
 On Python 2.6 must install lxml since the older xml.etree.ElementTree version
 can not be used to create SVG images.
 
-You can create the entire svg or an svg fragment.
+You can create the entire SVG or an SVG fragment. When building an entire SVG
+image, you can use the factory that combines as a path (recommended, and
+default for the script) or a factory that creates a simple set of rectangles.
 
 From your command line::
 
+    qr --factory=svg-path "Some text" > test.svg
     qr --factory=svg "Some text" > test.svg
     qr --factory=svg-fragment "Some text" > test.svg
 
@@ -94,10 +97,17 @@ Or in Python::
 
     import qrcode
     import qrcode.image.svg
-    if use_fragment:
-        factory = qrcode.image.svg.SvgImageFragment
-    else:
+
+    if method == 'basic':
+        # Simple factory, just a set of rects.
         factory = qrcode.image.svg.SvgImage
+    elif method == 'fragment':
+        # Fragment factory (also just a set of rects)
+        factory = qrcode.image.svg.SvgFragmentImage
+    else:
+        # Combined path factory, fixes white space that may occur when zooming
+        factory = qrcode.image.svg.SvgPathImage
+
     img = qrcode.make('Some data here', image_factory=factory)
 
 Pure Python PNG
@@ -110,7 +120,7 @@ Install the following two packages::
 
 From your command line::
 
-    qr --factory=qrcode.image.pure.PymagingImage "Some text" > test.png
+    qr --factory=pymaging "Some text" > test.png
 
 Or in Python::
 

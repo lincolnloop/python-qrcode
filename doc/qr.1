@@ -6,7 +6,7 @@ qr \- script to create QR codes at the command line
 qr [--help] [--factory=FACTORY] [--optimize=OPTIMIZE] [data]
 .SH DESCRIPTION
 This script uses the python qrcode module. It can take data from stdin or from the commandline and generate a QR code.
-Normally it will output the QR code as ascii art to the terminal. If the output is piped to a file, it will output a PNG image.
+Normally it will output the QR code as ascii art to the terminal. If the output is piped to a file, it will output the image (default type of PNG).
 .SH OPTIONS
 .PP
 \fB\ -h, --help\fR
@@ -19,7 +19,8 @@ Show a help message.
 .RS 4
 Full python path to the image factory class to create the
 image with. You can use the following shortcuts to the
-built-in image factory classes: pil, svg, svg-fragment.
+built-in image factory classes: pil (default), pymaging,
+svg, svg-fragment, svg-path.
 .RE
 
 .PP
