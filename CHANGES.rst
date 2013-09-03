@@ -2,8 +2,8 @@
 Change log
 ==========
 
-HEAD
-====
+Version 4.0
+===========
 
 * Made qrcode work on Python 2.4 - Thanks tcely.
   Note: officially, qrcode only supports 2.5+.
@@ -16,6 +16,8 @@ HEAD
 
 * SVG path image generation allows cleaner SVG output by combining all QR rects
   into a single path. Thank you, Viktor Stískala.
+
+* Added some extra simple SVG factories that fill the background white.
 
 
 Version 3.1
