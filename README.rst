@@ -110,6 +110,13 @@ Or in Python::
 
     img = qrcode.make('Some data here', image_factory=factory)
 
+Two other related factories are available that work the same, but also fill the
+background of the SVG with white::
+
+    qrcode.image.svg.SvgFillImage
+    qrcode.image.svg.SvgPathFillImage
+
+
 Pure Python PNG
 ---------------
 

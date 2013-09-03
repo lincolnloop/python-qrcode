@@ -70,10 +70,16 @@ class SvgImage(SvgFragmentImage):
 
     Creates a QR-code image as a standalone SVG document.
     """
+    background = None
 
     def _svg(self, tag='svg', **kwargs):
         svg = super(SvgImage, self)._svg(tag=tag, **kwargs)
         svg.set("xmlns", self._SVG_namespace)
+        if self.background:
+            svg.append(
+                ET.Element(
+                    'rect', fill=self.background, x='0', y='0', width='100%',
+                    height='100%'))
         return svg
 
     def _rect(self, row, col):
@@ -137,3 +143,17 @@ class SvgPathImage(SvgImage):
     def _write(self, stream):
         self._img.append(self.make_path())
         super(SvgPathImage, self)._write(stream)
+
+
+class SvgFillImage(SvgImage):
+    """
+    An SvgImage that fills the background to white.
+    """
+    background = 'white'
+
+
+class SvgPathFillImage(SvgPathImage):
+    """
+    An SvgPathImage that fills the background to white.
+    """
+    background = 'white'
