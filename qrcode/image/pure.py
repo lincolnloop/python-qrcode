@@ -1,5 +1,5 @@
 from pymaging import Image
-from pymaging.colors import RGBA
+from pymaging.colors import RGB
 from pymaging.formats import registry
 from pymaging.shapes import Line
 from pymaging.webcolors import Black, White
@@ -7,39 +7,42 @@ from pymaging_png.png import PNG
 
 import qrcode.image.base
 
+
 class PymagingImage(qrcode.image.base.BaseImage):
-    """pymaging image builder, default format is PNG."""
+    """
+    pymaging image builder, default format is PNG.
+    """
+    kind = "PNG"
 
-    def __init__(self, border, width, box_size):
-        if Image is None:
-            raise NotImplementedError("pymaging not available")
-        super(PymagingImage, self).__init__(border, width, box_size)
-
-        self.kind = "png"
-
-        # Register PNG with pymaging
+    def __init__(self, *args, **kwargs):
+        """
+        Register PNG with pymaging.
+        """
         registry.formats = []
         registry.names = {}
         registry._populate()
         registry.register(PNG)
 
-        pixelsize = (self.width + self.border * 2) * self.box_size
-        self._img = Image.new(pixelsize, pixelsize, White, RGBA)
+        super(PymagingImage, self).__init__(*args, **kwargs)
+
+    def new_image(self, **kwargs):
+        return Image.new(RGB, self.pixel_size, self.pixel_size, White)
 
     def drawrect(self, row, col):
-        x = (col + self.border) * self.box_size
-        y = (row + self.border) * self.box_size
-
+        (x, y), (x2, y2) = self.pixel_box(row, col)
         for r in range(self.box_size):
-            line = Line(x, y + r, x + self.box_size - 1, y + r)
+            line_y = y + r
+            line = Line(x, line_y, x2, line_y)
             self._img.draw(line, Black)
 
-    def save(self, path, kind=None):
-        if kind is None:
-            kind = self.kind
-        self._img.save_to_path(path, kind)
+    def save(self, stream, kind=None):
+        self._img.save(stream, self.checked_kind(kind))
 
-    def save_stream(self, stream, kind=None):
-        if kind is None:
-            kind = self.kind
-        self._img.save(stream, kind)
+    def checked_kind(self, kind=None):
+        kind = super(PymagingImage, self).checked_kind(kind)
+        # pymaging (pymaging_png at least) uses lower case for the type.
+        kind = kind.lower()
+        if kind != 'png':
+            raise ValueError(
+                "Only currently supporting PNG generation for pymaging")
+        return kind

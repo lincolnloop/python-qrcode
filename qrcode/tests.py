@@ -1,5 +1,11 @@
+import sys
+
+ANCIENT_PYTHON = sys.version_info[:2] < (2, 6)
+
 import qrcode
 import qrcode.image.svg
+if not ANCIENT_PYTHON:
+    import qrcode.image.pure
 from qrcode.exceptions import DataOverflowError
 from qrcode.util import (
     MODE_NUMBER, MODE_ALPHA_NUM, MODE_8BIT_BYTE)
@@ -64,6 +70,12 @@ class QRCodeTests(unittest.TestCase):
         qr = qrcode.QRCode()
         qr.add_data(UNICODE_TEXT)
         qr.make_image(image_factory=qrcode.image.svg.SvgImage)
+
+    @unittest.skipIf(ANCIENT_PYTHON, "Only Python 2.6 and greater")
+    def test_render_pymaging_png(self):
+        qr = qrcode.QRCode()
+        qr.add_data(UNICODE_TEXT)
+        qr.make_image(image_factory=qrcode.image.pure.PymagingImage)
 
     def test_optimize(self):
         qr = qrcode.QRCode()

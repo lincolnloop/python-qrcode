@@ -2,30 +2,25 @@
 try:
     from PIL import Image, ImageDraw
 except ImportError:
-    import Image, ImageDraw
+    import Image
+    import ImageDraw
 
 import qrcode.image.base
 
 
 class PilImage(qrcode.image.base.BaseImage):
-    """PIL image builder, default format is PNG."""
+    """
+    PIL image builder, default format is PNG.
+    """
+    kind = "PNG"
 
-    def __init__(self, border, width, box_size):
-        if Image is None and ImageDraw is None:
-            raise NotImplementedError("PIL not available")
-        super(PilImage, self).__init__(border, width, box_size)
-        self.kind = "PNG"
-
-        pixelsize = (self.width + self.border * 2) * self.box_size
-        self._img = Image.new("1", (pixelsize, pixelsize), "white")
-        self._idr = ImageDraw.Draw(self._img)
+    def new_image(self, **kwargs):
+        img = Image.new("1", (self.pixel_size, self.pixel_size), "white")
+        self._idr = ImageDraw.Draw(img)
+        return img
 
     def drawrect(self, row, col):
-        x = (col + self.border) * self.box_size
-        y = (row + self.border) * self.box_size
-        box = [(x, y),
-               (x + self.box_size - 1,
-                y + self.box_size - 1)]
+        box = self.pixel_box(row, col)
         self._idr.rectangle(box, fill="black")
 
     def save(self, stream, kind=None):

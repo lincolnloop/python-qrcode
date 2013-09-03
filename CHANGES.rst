@@ -5,7 +5,12 @@ Change log
 HEAD
 ====
 
-* 
+* Support pure-python PNG generation (via pymaging) for Python 2.6+.
+
+* SVG image generation now supports alternate sizing (the default box size of
+  10 == 1mm per rectangle).
+
+* Upgrade tox.ini to allow testing with the latest tox version.
 
 
 Version 3.1
