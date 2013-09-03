@@ -75,3 +75,65 @@ class SvgImage(SvgFragmentImage):
     def _write(self, stream):
         ET.ElementTree(self._img).write(stream, encoding="UTF-8",
                                         xml_declaration=True)
+
+
+class SvgPathImage(SvgFragmentImage):
+    """
+    SVG image builder with one single <path> element (removes white spaces
+    between individual QR points)"""
+
+    SCALE = 1
+    UNITS = 'mm'
+    QR_PATH_STYLE = 'fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none'
+
+    def __init__(self, border, width, box_size):
+        self._points = set()
+        super(SvgPathImage, self).__init__(border, width, box_size)
+
+    def _svg(self, tag=ET.QName("svg")):
+        dimension = self.width * self.SCALE + (2 * self.border * self.SCALE)
+
+        svg = ET.Element(
+            tag,
+            version="1.1",
+            width="{0}{units}".format(dimension, units=self.UNITS),
+            height="{0}{units}".format(dimension, units=self.UNITS),
+            viewBox="0 0 {s} {s}".format(s=dimension)
+        )
+        svg.set("xmlns", self._SVG_namespace)
+        return svg
+
+    def drawrect(self, row, col):
+        # (x, y)
+        self._points.add((col, row))
+
+    def _generate_subpaths(self):
+        """Generates individual QR points as subpaths"""
+
+        scale = self.SCALE
+
+        for point in self._points:
+            x_base = point[0] * scale + self.border * scale
+            y_base = point[1] * scale + self.border * scale
+
+            yield 'M {x0} {y0} L {x0} {y1} L {x1} {y1} L {x1} {y0} z'.format(
+                x0=x_base,
+                y0=y_base,
+                x1=x_base + scale,
+                y1=y_base + scale
+            )
+
+    def make_path(self):
+        subpaths = self._generate_subpaths()
+
+        return ET.Element(
+            ET.QName("path"),
+            style=self.QR_PATH_STYLE,
+            d=' '.join(subpaths),
+            id="qr-path"
+        )
+
+    def _write(self, stream):
+        self._img.append(self.make_path())
+        ET.ElementTree(self._img).write(stream,
+                                        encoding="UTF-8", xml_declaration=True)
