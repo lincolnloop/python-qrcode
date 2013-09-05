@@ -43,11 +43,16 @@ class BaseImage(object):
         """
         Get the image type.
         """
+        orig_kind = None
         if kind is None:
             kind = self.kind
         if transform:
+            orig_kind = kind
             kind = transform(kind)
-        if self.allowed_kinds and kind not in self.allowed_kinds:
+        if self.allowed_kinds and not (
+            (kind in self.allowed_kinds) or 
+            (orig_kind in self.allowed_kinds if orig_kind else False)
+            ):
             raise ValueError(
                 "Cannot set %s type to %s" % (type(self).__name__, kind))
         return kind
