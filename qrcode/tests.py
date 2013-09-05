@@ -1,4 +1,4 @@
-import sys
+import sys, io
 
 ANCIENT_PYTHON = sys.version_info[:2] < (2, 6)
 
@@ -67,20 +67,23 @@ class QRCodeTests(unittest.TestCase):
         self.assertEqual(qr.data_list[0].mode, MODE_8BIT_BYTE)
 
     def test_render_svg(self):
+        buf = io.BytesIO()
         qr = qrcode.QRCode()
         qr.add_data(UNICODE_TEXT)
-        qr.make_image(image_factory=qrcode.image.svg.SvgImage)
+        qr.make_image(image_factory=qrcode.image.svg.SvgImage).save(buf)
 
     def test_render_svg_path(self):
+        buf = io.BytesIO()
         qr = qrcode.QRCode()
         qr.add_data(UNICODE_TEXT)
-        qr.make_image(image_factory=qrcode.image.svg.SvgPathImage)
+        qr.make_image(image_factory=qrcode.image.svg.SvgPathImage).save(buf)
 
     @unittest.skipIf(ANCIENT_PYTHON, "Only Python 2.6 and greater")
     def test_render_pymaging_png(self):
+        buf = io.BytesIO()
         qr = qrcode.QRCode()
         qr.add_data(UNICODE_TEXT)
-        qr.make_image(image_factory=qrcode.image.pure.PymagingImage)
+        qr.make_image(image_factory=qrcode.image.pure.PymagingImage).save(buf)
 
     def test_optimize(self):
         qr = qrcode.QRCode()
