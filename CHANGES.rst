@@ -2,12 +2,6 @@
 Change log
 ==========
 
-HEAD
-====
-
-* 
-
-
 Version 4.0
 ===========
 
@@ -24,6 +18,11 @@ Version 4.0
   into a single path. Thank you, Viktor Stískala.
 
 * Added some extra simple SVG factories that fill the background white.
+
+Version 4.0.1
+-------------
+
+* Fix the pymaging backend not able to save the image to a buffer. Thanks ilj!
 
 
 Version 3.1

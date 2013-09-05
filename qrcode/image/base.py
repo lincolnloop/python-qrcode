@@ -45,9 +45,12 @@ class BaseImage(object):
         """
         if kind is None:
             kind = self.kind
+        allowed = not self.allowed_kinds or kind in self.allowed_kinds
         if transform:
             kind = transform(kind)
-        if self.allowed_kinds and kind not in self.allowed_kinds:
+            if not allowed:
+                allowed = kind in self.allowed_kinds
+        if not allowed:
             raise ValueError(
                 "Cannot set %s type to %s" % (type(self).__name__, kind))
         return kind

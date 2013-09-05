@@ -2,6 +2,7 @@ import sys
 
 ANCIENT_PYTHON = sys.version_info[:2] < (2, 6)
 
+import six
 import qrcode
 import qrcode.image.svg
 if not ANCIENT_PYTHON:
@@ -69,18 +70,21 @@ class QRCodeTests(unittest.TestCase):
     def test_render_svg(self):
         qr = qrcode.QRCode()
         qr.add_data(UNICODE_TEXT)
-        qr.make_image(image_factory=qrcode.image.svg.SvgImage)
+        img = qr.make_image(image_factory=qrcode.image.svg.SvgImage)
+        img.save(six.BytesIO())
 
     def test_render_svg_path(self):
         qr = qrcode.QRCode()
         qr.add_data(UNICODE_TEXT)
-        qr.make_image(image_factory=qrcode.image.svg.SvgPathImage)
+        img = qr.make_image(image_factory=qrcode.image.svg.SvgPathImage)
+        img.save(six.BytesIO())
 
     @unittest.skipIf(ANCIENT_PYTHON, "Only Python 2.6 and greater")
     def test_render_pymaging_png(self):
         qr = qrcode.QRCode()
         qr.add_data(UNICODE_TEXT)
-        qr.make_image(image_factory=qrcode.image.pure.PymagingImage)
+        img = qr.make_image(image_factory=qrcode.image.pure.PymagingImage)
+        img.save(six.BytesIO())
 
     def test_optimize(self):
         qr = qrcode.QRCode()
