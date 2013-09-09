@@ -20,6 +20,9 @@ setup(
         'scripts/qr',
     ],
     requires=['six'],
+    # Use install_required even though it's not a distutils command because
+    # pip uses it still?
+    install_requires=['six'],
     data_files=[('share/man/man1', ['doc/qr.1'])],
     package_data={'': ['LICENSE']},
     classifiers=[
