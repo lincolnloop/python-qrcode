@@ -3,7 +3,12 @@ Pure python QR Code generator
 =============================
 
 This module uses image libraries, Python Imaging Library (PIL) by default, to
-allow for the generation of QR Codes.
+generate QR Codes.
+
+It is recommended to use the pillow_ fork rather than PIL itself.
+
+.. _pillow: https://pypi.python.org/pypi/Pillow
+
 
 What is a QR Code?
 ==================
