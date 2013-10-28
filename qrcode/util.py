@@ -31,7 +31,7 @@ MODE_SIZE_LARGE = {
     MODE_KANJI: 12,
 }
 
-ALPHA_NUM = six.b('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:')
+ALPHA_NUM = six.b('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+\-./:')
 RE_ALPHA_NUM = re.compile(six.b('^[') + ALPHA_NUM + six.b(']*\Z'))
 
 # The number of bits for numeric delimited data lengths.

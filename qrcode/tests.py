@@ -54,6 +54,12 @@ class QRCodeTests(unittest.TestCase):
         self.assertEqual(qr.version, 1)
         self.assertEqual(qr.data_list[0].mode, MODE_ALPHA_NUM)
 
+    def test_regression_mode_comma(self):
+        qr = qrcode.QRCode()
+        qr.add_data(',', optimize=0)
+        qr.make()
+        self.assertEqual(qr.data_list[0].mode, MODE_8BIT_BYTE)
+
     def test_mode_8bit(self):
         qr = qrcode.QRCode()
         qr.add_data(u'abcABC' + UNICODE_TEXT, optimize=0)
