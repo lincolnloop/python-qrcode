@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name='qrcode',
@@ -12,19 +12,13 @@ setup(
     author='Lincoln Loop',
     author_email='info@lincolnloop.com',
     platforms=['any'],
-    packages=[
-        'qrcode',
-        'qrcode.image',
-    ],
+    packages=find_packages(),
     scripts=[
         'scripts/qr',
     ],
-    requires=['six'],
-    # Use install_required even though it's not a distutils command because
-    # pip uses it still?
     install_requires=['six'],
     data_files=[('share/man/man1', ['doc/qr.1'])],
-    package_data={'': ['LICENSE']},
+    include_package_data=True,
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'License :: OSI Approved :: BSD License',
