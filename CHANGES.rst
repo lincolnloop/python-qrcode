@@ -2,11 +2,6 @@
 Change log
 ==========
 
-HEAD
-====
-
-* 
-
 
 Version 4.0
 ===========
@@ -29,6 +24,14 @@ Version 4.0.1
 -------------
 
 * Fix the pymaging backend not able to save the image to a buffer. Thanks ilj!
+
+Version 4.0.2
+-------------
+
+* Fix incorrect regex causing a comma to be considered part of the alphanumeric
+  set.
+
+* Switch to using setuptools for setup.py.
 
 
 Version 3.1
