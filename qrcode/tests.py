@@ -1,12 +1,15 @@
 import sys
 
-ANCIENT_PYTHON = sys.version_info[:2] < (2, 6)
-
 import six
 import qrcode
 import qrcode.image.svg
-if not ANCIENT_PYTHON:
+
+try:
     import qrcode.image.pure
+    import pymaging_png  # ensure that PNG support is installed
+except ImportError:
+    pymaging_png = None
+
 from qrcode.exceptions import DataOverflowError
 from qrcode.util import (
     MODE_NUMBER, MODE_ALPHA_NUM, MODE_8BIT_BYTE)
@@ -85,7 +88,7 @@ class QRCodeTests(unittest.TestCase):
         img = qr.make_image(image_factory=qrcode.image.svg.SvgPathImage)
         img.save(six.BytesIO())
 
-    @unittest.skipIf(ANCIENT_PYTHON, "Only Python 2.6 and greater")
+    @unittest.skipIf(not pymaging_png, "Requires pymaging with PNG support")
     def test_render_pymaging_png(self):
         qr = qrcode.QRCode()
         qr.add_data(UNICODE_TEXT)
