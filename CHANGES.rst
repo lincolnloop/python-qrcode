@@ -37,6 +37,11 @@ Version 4.0.3
 
 * Fix bad QR code generation due to the regex comma fix in version 4.0.2.
 
+Version 4.0.4
+-------------
+
+* Bad version number for previous hotfix release.
+
 
 Version 3.1
 ===========
