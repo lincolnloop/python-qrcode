@@ -2,12 +2,6 @@
 Change log
 ==========
 
-HEAD
-====
-
-* 
-
-
 Version 4.0
 ===========
 
@@ -37,6 +31,11 @@ Version 4.0.2
   set.
 
 * Switch to using setuptools for setup.py.
+
+Version 4.0.3
+-------------
+
+* Fix bad QR code generation due to the regex comma fix in version 4.0.2.
 
 
 Version 3.1

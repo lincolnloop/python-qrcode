@@ -1,5 +1,3 @@
-import sys
-
 import six
 import qrcode
 import qrcode.image.svg
