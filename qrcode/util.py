@@ -165,33 +165,69 @@ def lost_point(modules):
 
     lost_point = 0
 
-    # LEVEL1
+    lost_point = _lost_point_level1(modules, modules_count)
+    lost_point += _lost_point_level2(modules, modules_count)
+    lost_point += _lost_point_level3(modules, modules_count)
+    lost_point += _lost_point_level4(modules, modules_count)
 
-    for row in xrange(modules_count):
+    return lost_point
 
-        for col in xrange(modules_count):
+
+def _lost_point_level1(modules, modules_count):
+    lost_point = 0
+
+    modules_range = xrange(modules_count)
+    row_range_first = (0, 1)
+    row_range_last = (-1, 0)
+    row_range_standard = (-1, 0, 1)
+
+    col_range_first = ((0, 1), (1,))
+    col_range_last = ((-1, 0), (-1,))
+    col_range_standard = ((-1, 0, 1), (-1, 1))
+
+    for row in modules_range:
+
+        if row == 0:
+            row_range = row_range_first
+        elif row == modules_count-1:
+            row_range = row_range_last
+        else:
+            row_range = row_range_standard
+
+        for col in modules_range:
 
             sameCount = 0
             dark = modules[row][col]
 
-            for r in xrange(-1, 2):
+            if col == 0:
+                col_range = col_range_first
+            elif col == modules_count-1:
+                col_range = col_range_last
+            else:
+                col_range = col_range_standard
 
-                if row + r < 0 or modules_count <= row + r:
-                    continue
+            for r in row_range:
 
-                for c in xrange(-1, 2):
+                row_offset = row + r
 
-                    if col + c < 0 or modules_count <= col + c:
-                        continue
-                    if r == 0 and c == 0:
-                        continue
+                if r != 0:
+                    col_idx = 0
+                else:
+                    col_idx = 1
 
-                    if dark == modules[row + r][col + c]:
+                for c in col_range[col_idx]:
+
+                    if dark == modules[row_offset][col + c]:
                         sameCount += 1
+
             if sameCount > 5:
                 lost_point += (3 + sameCount - 5)
 
-    # LEVEL2
+    return lost_point
+
+
+def _lost_point_level2(modules, modules_count):
+    lost_point = 0
 
     for row in xrange(modules_count - 1):
         for col in xrange(modules_count - 1):
@@ -207,8 +243,11 @@ def lost_point(modules):
             if count == 0 or count == 4:
                 lost_point += 3
 
-    # LEVEL3
+    return lost_point
 
+
+def _lost_point_level3(modules, modules_count):
+    lost_point = 0
     for row in xrange(modules_count):
         for col in xrange(modules_count - 6):
             if (modules[row][col]
@@ -231,19 +270,20 @@ def lost_point(modules):
                     and modules[row + 6][col]):
                 lost_point += 40
 
-    # LEVEL4
+    return lost_point
 
-    darkCount = 0
+
+def _lost_point_level4(modules, modules_count):
+    dark_count = 0
 
     for col in xrange(modules_count):
         for row in xrange(modules_count):
             if modules[row][col]:
-                darkCount += 1
+                dark_count += 1
 
-    ratio = abs(100 * darkCount / modules_count / modules_count - 50) / 5
-    lost_point += ratio * 10
+    ratio = abs(100 * dark_count / modules_count / modules_count - 50) / 5
+    return ratio * 10
 
-    return lost_point
 
 
 def optimal_data_chunks(data, minimum=4):
