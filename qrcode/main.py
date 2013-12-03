@@ -1,6 +1,8 @@
 from qrcode import constants, exceptions, util
 from qrcode.image.base import BaseImage
 
+import six
+
 
 def make(data=None, **kwargs):
     qr = QRCode(**kwargs)
@@ -278,20 +280,22 @@ class QRCode:
 
         mask_func = util.mask_func(mask_pattern)
 
-        for col in range(self.modules_count - 1, 0, -2):
+        for col in six.moves.xrange(self.modules_count - 1, 0, -2):
 
             if col <= 6:
                 col -= 1
 
+            data_len = len(data)
+
             while True:
 
-                for c in range(2):
+                for c in six.moves.xrange(2):
 
                     if self.modules[row][col - c] is None:
 
                         dark = False
 
-                        if byteIndex < len(data):
+                        if byteIndex < data_len:
                             dark = (((data[byteIndex] >> bitIndex) & 1) == 1)
 
                         if mask_func(row, col - c):

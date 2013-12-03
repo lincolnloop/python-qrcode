@@ -2,6 +2,7 @@ import re
 import math
 
 import six
+from six.moves import xrange
 
 from qrcode import base, exceptions
 
@@ -166,19 +167,19 @@ def lost_point(modules):
 
     # LEVEL1
 
-    for row in range(modules_count):
+    for row in xrange(modules_count):
 
-        for col in range(modules_count):
+        for col in xrange(modules_count):
 
             sameCount = 0
             dark = modules[row][col]
 
-            for r in range(-1, 2):
+            for r in xrange(-1, 2):
 
                 if row + r < 0 or modules_count <= row + r:
                     continue
 
-                for c in range(-1, 2):
+                for c in xrange(-1, 2):
 
                     if col + c < 0 or modules_count <= col + c:
                         continue
@@ -192,8 +193,8 @@ def lost_point(modules):
 
     # LEVEL2
 
-    for row in range(modules_count - 1):
-        for col in range(modules_count - 1):
+    for row in xrange(modules_count - 1):
+        for col in xrange(modules_count - 1):
             count = 0
             if modules[row][col]:
                 count += 1
@@ -208,8 +209,8 @@ def lost_point(modules):
 
     # LEVEL3
 
-    for row in range(modules_count):
-        for col in range(modules_count - 6):
+    for row in xrange(modules_count):
+        for col in xrange(modules_count - 6):
             if (modules[row][col]
                     and not modules[row][col + 1]
                     and modules[row][col + 2]
@@ -219,8 +220,8 @@ def lost_point(modules):
                     and modules[row][col + 6]):
                 lost_point += 40
 
-    for col in range(modules_count):
-        for row in range(modules_count - 6):
+    for col in xrange(modules_count):
+        for row in xrange(modules_count - 6):
             if (modules[row][col]
                     and not modules[row + 1][col]
                     and modules[row + 2][col]
@@ -234,8 +235,8 @@ def lost_point(modules):
 
     darkCount = 0
 
-    for col in range(modules_count):
-        for row in range(modules_count):
+    for col in xrange(modules_count):
+        for row in xrange(modules_count):
             if modules[row][col]:
                 darkCount += 1
 
@@ -338,12 +339,12 @@ class QRData:
 
     def write(self, buffer):
         if self.mode == MODE_NUMBER:
-            for i in six.moves.xrange(0, len(self.data), 3):
+            for i in xrange(0, len(self.data), 3):
                 chars = self.data[i:i + 3]
                 bit_length = NUMBER_LENGTH[len(chars)]
                 buffer.put(int(chars), bit_length)
         elif self.mode == MODE_ALPHA_NUM:
-            for i in six.moves.xrange(0, len(self.data), 2):
+            for i in xrange(0, len(self.data), 2):
                 chars = self.data[i:i + 2]
                 if len(chars) > 1:
                     buffer.put(ALPHA_NUM.find(chars[0]) * 45 +
