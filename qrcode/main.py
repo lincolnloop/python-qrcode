@@ -280,28 +280,30 @@ class QRCode:
 
         mask_func = util.mask_func(mask_pattern)
 
+        data_len = len(data)
+
         for col in six.moves.xrange(self.modules_count - 1, 0, -2):
 
             if col <= 6:
                 col -= 1
 
-            data_len = len(data)
+            col_range = (col, col-1)
 
             while True:
 
-                for c in six.moves.xrange(2):
+                for c in col_range:
 
-                    if self.modules[row][col - c] is None:
+                    if self.modules[row][c] is None:
 
                         dark = False
 
                         if byteIndex < data_len:
                             dark = (((data[byteIndex] >> bitIndex) & 1) == 1)
 
-                        if mask_func(row, col - c):
+                        if mask_func(row, c):
                             dark = not dark
 
-                        self.modules[row][col - c] = dark
+                        self.modules[row][c] = dark
                         bitIndex -= 1
 
                         if bitIndex == -1:
