@@ -312,17 +312,19 @@ class Polynomial:
         return Polynomial(num, 0)
 
     def __mod__(self, e):
-        if len(self) - len(e) < 0:
+        len_self = len(self)
+        len_e = len(e)
+        if len_self - len_e < 0:
             return self
 
         ratio = glog(self[0]) - glog(e[0])
 
-        num = [0] * len(self)
+        num = [0] * len_self
 
-        for i in range(len(self)):
+        for i in range(len_self):
             num[i] = self[i]
 
-        for i in range(len(e)):
+        for i in range(len_e):
             num[i] ^= gexp(glog(e[i]) + ratio)
 
         # recursive call
