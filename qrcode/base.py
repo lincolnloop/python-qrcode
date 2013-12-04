@@ -289,7 +289,9 @@ class Polynomial:
 
         offset = 0
 
-        while offset < len(num) and num[offset] == 0:
+        for item in num:
+            if item != 0:
+                break
             offset += 1
 
         self.num = [0] * (len(num) - offset + shift)
@@ -299,36 +301,38 @@ class Polynomial:
     def __getitem__(self, index):
         return self.num[index]
 
+    def __iter__(self):
+        return iter(self.num)
+
     def __len__(self):
         return len(self.num)
 
-    def __mul__(self, e):
-        num = [0] * (len(self) + len(e) - 1)
+    def __mul__(self, other):
+        num = [0] * (len(self) + len(other) - 1)
 
-        for i in range(len(self)):
-            for j in range(len(e)):
-                num[i + j] ^= gexp(glog(self[i]) + glog(e[j]))
+        for i, item in enumerate(self):
+            for j, other_item in enumerate(other):
+                num[i + j] ^= gexp(glog(item) + glog(other_item))
 
         return Polynomial(num, 0)
 
-    def __mod__(self, e):
-        len_self = len(self)
-        len_e = len(e)
-        if len_self - len_e < 0:
+    def __mod__(self, other):
+        difference = len(self) - len(other)
+        if difference < 0:
             return self
 
-        ratio = glog(self[0]) - glog(e[0])
+        ratio = glog(self[0]) - glog(other[0])
 
-        num = [0] * len_self
+        num = self[:]
 
-        for i in range(len_self):
-            num[i] = self[i]
-
-        for i in range(len_e):
-            num[i] ^= gexp(glog(e[i]) + ratio)
+        num = [
+            item ^ gexp(glog(other_item) + ratio)
+            for item, other_item in zip(self, other)]
+        if difference:
+            num.extend(self[-difference:])
 
         # recursive call
-        return Polynomial(num, 0) % e
+        return Polynomial(num, 0) % other
 
 
 class RSBlock:
