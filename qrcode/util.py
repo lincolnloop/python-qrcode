@@ -230,16 +230,20 @@ def _lost_point_level1(modules, modules_count):
 def _lost_point_level2(modules, modules_count):
     lost_point = 0
 
-    for row in xrange(modules_count - 1):
-        for col in xrange(modules_count - 1):
+    modules_range = xrange(modules_count - 1)
+
+    for row in modules_range:
+        this_row = modules[row]
+        next_row = modules[row+1]
+        for col in modules_range:
             count = 0
-            if modules[row][col]:
+            if this_row[col]:
                 count += 1
-            if modules[row + 1][col]:
+            if next_row[col]:
                 count += 1
-            if modules[row][col + 1]:
+            if this_row[col + 1]:
                 count += 1
-            if modules[row + 1][col + 1]:
+            if next_row[col + 1]:
                 count += 1
             if count == 0 or count == 4:
                 lost_point += 3
@@ -248,20 +252,23 @@ def _lost_point_level2(modules, modules_count):
 
 
 def _lost_point_level3(modules, modules_count):
+    modules_range_short = xrange(modules_count-6)
+
     lost_point = 0
     for row in xrange(modules_count):
-        for col in xrange(modules_count - 6):
-            if (modules[row][col]
-                    and not modules[row][col + 1]
-                    and modules[row][col + 2]
-                    and modules[row][col + 3]
-                    and modules[row][col + 4]
-                    and not modules[row][col + 5]
-                    and modules[row][col + 6]):
+        this_row = modules[row]
+        for col in modules_range_short:
+            if (this_row[col]
+                    and not this_row[col + 1]
+                    and this_row[col + 2]
+                    and this_row[col + 3]
+                    and this_row[col + 4]
+                    and not this_row[col + 5]
+                    and this_row[col + 6]):
                 lost_point += 40
 
     for col in xrange(modules_count):
-        for row in xrange(modules_count - 6):
+        for row in modules_range_short:
             if (modules[row][col]
                     and not modules[row + 1][col]
                     and modules[row + 2][col]
@@ -275,16 +282,17 @@ def _lost_point_level3(modules, modules_count):
 
 
 def _lost_point_level4(modules, modules_count):
+    modules_range = xrange(modules_count)
     dark_count = 0
 
-    for col in xrange(modules_count):
-        for row in xrange(modules_count):
-            if modules[row][col]:
+    for row in modules_range:
+        this_row = modules[row]
+        for col in modules_range:
+            if this_row[col]:
                 dark_count += 1
 
     ratio = abs(100 * dark_count / modules_count / modules_count - 50) / 5
     return ratio * 10
-
 
 
 def optimal_data_chunks(data, minimum=4):
