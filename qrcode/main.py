@@ -112,16 +112,10 @@ class QRCode:
         """
         Find the minimum size required to fit in the data.
         """
-        size = start or 1
-        while True:
-            try:
-                self.data_cache = util.create_data(
-                    size, self.error_correction, self.data_list)
-            except exceptions.DataOverflowError:
-                size += 1
-            else:
-                self.version = size
-                return size
+        self.data_cache, self.version = (
+            util.BestFit(self.error_correction, self.data_list)
+            .data_and_version(start))
+        return self.version
 
     def best_mask_pattern(self):
         """
