@@ -53,7 +53,7 @@ def main(*args):
         qr.add_data(data, optimize=opts.optimize)
 
     if image_factory is None and sys.stdout.isatty():
-        qr.print_tty()
+        qr.print_tty(ascii=True)
         return
 
     img = qr.make_image(image_factory=image_factory)

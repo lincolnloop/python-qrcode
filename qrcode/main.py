@@ -135,7 +135,7 @@ class QRCode:
 
         return pattern
 
-    def print_tty(self, out=None):
+    def print_tty(self, out=None, ascii=False):
         """
         Output the QR Code to a TTY (potentially useful for debugging).
 
@@ -152,16 +152,36 @@ class QRCode:
             self.make()
 
         modcount = self.modules_count
-        out.write("\x1b[1;47m" + (" " * (modcount * 2 + 4)) + "\x1b[0m\n")
-        for r in range(modcount):
-            out.write("\x1b[1;47m  \x1b[40m")
-            for c in range(modcount):
-                if self.modules[r][c]:
-                    out.write("  ")
-                else:
-                    out.write("\x1b[1;47m  \x1b[40m")
-            out.write("\x1b[1;47m  \x1b[0m\n")
-        out.write("\x1b[1;47m" + (" " * (modcount * 2 + 4)) + "\x1b[0m\n")
+        if ascii:
+            codes = [
+                chr(code).decode('cp437') for code in (219, 220, 223, 255)]
+
+            def get_module(x, y):
+                if self.border and max(x, y) >= modcount+self.border:
+                    return 1
+                if min(x, y) < 0 or max(x, y) >= modcount:
+                    return 0
+                return self.modules[x][y]
+
+            for r in range(-self.border, modcount+self.border, 2):
+                if r < modcount+self.border-1:
+                    out.write('\x1b[48;5;232m')
+                out.write('\x1b[38;5;255m')
+                for c in range(-self.border, modcount+self.border):
+                    pos = get_module(r, c) + (get_module(r+1, c) << 1)
+                    out.write(codes[pos])
+                out.write('\x1b[0m\n')
+        else:
+            out.write("\x1b[1;47m" + (" " * (modcount * 2 + 4)) + "\x1b[0m\n")
+            for r in range(modcount):
+                out.write("\x1b[1;47m  \x1b[40m")
+                for c in range(modcount):
+                    if self.modules[r][c]:
+                        out.write("  ")
+                    else:
+                        out.write("\x1b[1;47m  \x1b[40m")
+                out.write("\x1b[1;47m  \x1b[0m\n")
+            out.write("\x1b[1;47m" + (" " * (modcount * 2 + 4)) + "\x1b[0m\n")
         out.flush()
 
     def make_image(self, image_factory=None, **kwargs):
