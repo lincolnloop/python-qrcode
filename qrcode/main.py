@@ -135,9 +135,9 @@ class QRCode:
 
         return pattern
 
-    def print_tty(self, out=None, ascii=False):
+    def print_tty(self, out=None):
         """
-        Output the QR Code to a TTY (potentially useful for debugging).
+        Output the QR Code only using TTY colors.
 
         If the data has not been compiled yet, make it first.
         """
@@ -152,36 +152,62 @@ class QRCode:
             self.make()
 
         modcount = self.modules_count
-        if ascii:
-            codes = [
-                chr(code).decode('cp437') for code in (219, 220, 223, 255)]
+        out.write("\x1b[1;47m" + (" " * (modcount * 2 + 4)) + "\x1b[0m\n")
+        for r in range(modcount):
+            out.write("\x1b[1;47m  \x1b[40m")
+            for c in range(modcount):
+                if self.modules[r][c]:
+                    out.write("  ")
+                else:
+                    out.write("\x1b[1;47m  \x1b[40m")
+            out.write("\x1b[1;47m  \x1b[0m\n")
+        out.write("\x1b[1;47m" + (" " * (modcount * 2 + 4)) + "\x1b[0m\n")
+        out.flush()
 
-            def get_module(x, y):
-                if self.border and max(x, y) >= modcount+self.border:
-                    return 1
-                if min(x, y) < 0 or max(x, y) >= modcount:
-                    return 0
-                return self.modules[x][y]
+    def print_ascii(self, out=None, tty=False, invert=False):
+        """
+        Output the QR Code using ASCII characters.
 
-            for r in range(-self.border, modcount+self.border, 2):
-                if r < modcount+self.border-1:
-                    out.write('\x1b[48;5;232m')
-                out.write('\x1b[38;5;255m')
-                for c in range(-self.border, modcount+self.border):
-                    pos = get_module(r, c) + (get_module(r+1, c) << 1)
-                    out.write(codes[pos])
-                out.write('\x1b[0m\n')
-        else:
-            out.write("\x1b[1;47m" + (" " * (modcount * 2 + 4)) + "\x1b[0m\n")
-            for r in range(modcount):
-                out.write("\x1b[1;47m  \x1b[40m")
-                for c in range(modcount):
-                    if self.modules[r][c]:
-                        out.write("  ")
-                    else:
-                        out.write("\x1b[1;47m  \x1b[40m")
-                out.write("\x1b[1;47m  \x1b[0m\n")
-            out.write("\x1b[1;47m" + (" " * (modcount * 2 + 4)) + "\x1b[0m\n")
+        :param tty: use fixed TTY color codes (forces invert=True)
+        :param invert: invert the ASCII characters (solid <-> transparent)
+        """
+        if out is None:
+            import sys
+            out = sys.stdout
+
+        if tty and not out.isatty():
+            raise OSError("Not a tty")
+
+        if self.data_cache is None:
+            self.make()
+
+        modcount = self.modules_count
+        codes = [
+            chr(code).decode('cp437') for code in (255, 223, 220, 219)]
+        if tty:
+            invert = True
+        if invert:
+            codes.reverse()
+
+        def get_module(x, y):
+            if (invert and self.border and
+                    max(x, y) >= modcount+self.border):
+                return 1
+            if min(x, y) < 0 or max(x, y) >= modcount:
+                return 0
+            return self.modules[x][y]
+
+        for r in range(-self.border, modcount+self.border, 2):
+            if tty:
+                if not invert or r < modcount+self.border-1:
+                    out.write('\x1b[48;5;232m')   # Background black
+                out.write('\x1b[38;5;255m')   # Foreground white
+            for c in range(-self.border, modcount+self.border):
+                pos = get_module(r, c) + (get_module(r+1, c) << 1)
+                out.write(codes[pos])
+            if tty:
+                out.write('\x1b[0m')
+            out.write('\n')
         out.flush()
 
     def make_image(self, image_factory=None, **kwargs):
