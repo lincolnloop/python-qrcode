@@ -1,3 +1,6 @@
+# Needed on case-insensitive filesystems
+from __future__ import absolute_import
+
 # Try to import PIL in either of the two ways it can be installed.
 try:
     from PIL import Image, ImageDraw
