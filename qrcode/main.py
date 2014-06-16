@@ -2,6 +2,7 @@ from qrcode import constants, exceptions, util
 from qrcode.image.base import BaseImage
 
 import six
+from bisect import bisect_left
 
 
 def make(data=None, **kwargs):
@@ -112,9 +113,31 @@ class QRCode:
         """
         Find the minimum size required to fit in the data.
         """
-        self.data_cache, self.version = (
-            util.BestFit(self.error_correction, self.data_list)
-            .data_and_version(start))
+        if start is None:
+            start = 1
+        elif start < 1 or start > 40:
+            raise ValueError("Invalid version (was %s, expected 1 to 40)" %
+                version)
+
+        # Corresponds to the code in util.create_data, except we don't yet know
+        # version, so optimistically assume start and check later
+        mode_sizes = util.mode_sizes_for_version(start)
+        buffer = util.BitBuffer()
+        for data in self.data_list:
+            buffer.put(data.mode, 4)
+            buffer.put(len(data), mode_sizes[data.mode])
+            data.write(buffer)
+
+        needed_bits = len(buffer)
+        self.version = bisect_left(util.BIT_LIMIT_TABLE[self.error_correction],
+                                   needed_bits, start)
+        if self.version == 41:
+            raise exceptions.DataOverflowError()
+
+        # Now check whether we need more bits for the mode sizes, recursing if
+        # our guess was too low
+        if mode_sizes is not util.mode_sizes_for_version(self.version):
+            self.best_fit(start=self.version)
         return self.version
 
     def best_mask_pattern(self):
