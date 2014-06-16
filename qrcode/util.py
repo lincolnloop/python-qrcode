@@ -1,4 +1,3 @@
-from bisect import bisect
 import re
 import math
 
@@ -550,31 +549,3 @@ def create_data(version, error_correction, data_list):
             buffer.put(PAD1, 8)
 
     return create_bytes(buffer, rs_blocks)
-
-
-class BestFit(object):
-
-    def __init__(self, error_correction, data_list):
-        self.error_correction = error_correction
-        self.data_list = data_list
-        self.iterations = 0
-
-    def data_and_version(self, start=None):
-        if not start:
-            start = 1
-        version = bisect(self, 0, start, 41)
-        if version == 41:
-            raise exceptions.DataOverflowError()
-        return self.data_cache, version
-
-    def __getitem__(self, size):
-        """
-        Returns 0 if it overflowed, 1 if it fit.
-        """
-        self.iterations += 1
-        try:
-            self.data_cache = create_data(
-                size, self.error_correction, self.data_list)
-        except exceptions.DataOverflowError:
-            return 0
-        return 1
