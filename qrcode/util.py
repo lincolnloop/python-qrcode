@@ -1,4 +1,3 @@
-from bisect import bisect
 import re
 import math
 
@@ -91,6 +90,14 @@ G15_MASK = (1 << 14) | (1 << 12) | (1 << 10) | (1 << 4) | (1 << 1)
 PAD0 = 0xEC
 PAD1 = 0x11
 
+# Precompute bit count limits, indexed by error correction level and code size
+_data_count = lambda block: block.data_count
+BIT_LIMIT_TABLE = [
+    [0] + [8*sum(map(_data_count, base.rs_blocks(version, error_correction)))
+           for version in xrange(1, 41)]
+    for error_correction in xrange(4)
+]
+
 
 def BCH_type_info(data):
         d = data << 10
@@ -141,6 +148,13 @@ def mask_func(pattern):
         return lambda i, j: ((i * j) % 3 + (i + j) % 2) % 2 == 0
     raise TypeError("Bad mask pattern: " + pattern)
 
+def mode_sizes_for_version(version):
+    if version < 10:
+        return MODE_SIZE_SMALL
+    elif version < 27:
+        return MODE_SIZE_MEDIUM
+    else:
+        return MODE_SIZE_LARGE
 
 def length_in_bits(mode, version):
     if mode not in (MODE_NUMBER, MODE_ALPHA_NUM, MODE_8BIT_BYTE,
@@ -151,14 +165,7 @@ def length_in_bits(mode, version):
         raise ValueError("Invalid version (was %s, expected 1 to 40)" %
             version)
 
-    if version < 10:
-        mode_size = MODE_SIZE_SMALL
-    elif version < 27:
-        mode_size = MODE_SIZE_MEDIUM
-    else:
-        mode_size = MODE_SIZE_LARGE
-
-    return mode_size[mode]
+    return mode_sizes_for_version(version)[mode]
 
 
 def lost_point(modules):
@@ -541,31 +548,3 @@ def create_data(version, error_correction, data_list):
             buffer.put(PAD1, 8)
 
     return create_bytes(buffer, rs_blocks)
-
-
-class BestFit(object):
-
-    def __init__(self, error_correction, data_list):
-        self.error_correction = error_correction
-        self.data_list = data_list
-        self.iterations = 0
-
-    def data_and_version(self, start=None):
-        if not start:
-            start = 1
-        version = bisect(self, 0, start, 41)
-        if version == 41:
-            raise exceptions.DataOverflowError()
-        return self.data_cache, version
-
-    def __getitem__(self, size):
-        """
-        Returns 0 if it overflowed, 1 if it fit.
-        """
-        self.iterations += 1
-        try:
-            self.data_cache = create_data(
-                size, self.error_correction, self.data_list)
-        except exceptions.DataOverflowError:
-            return 0
-        return 1
