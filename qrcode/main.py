@@ -205,8 +205,8 @@ class QRCode:
             self.make()
 
         modcount = self.modules_count
-        codes = [
-            chr(code).decode('cp437') for code in (255, 223, 220, 219)]
+        codes = [six.int2byte(code).decode('cp437')
+                 for code in (255, 223, 220, 219)]
         if tty:
             invert = True
         if invert:
