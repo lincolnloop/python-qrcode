@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='qrcode',
-    version='5.0.1',
+    version='5.0.1.post',
     url='https://github.com/lincolnloop/python-qrcode',
     #download_url='',
     description='QR Code image generator',
