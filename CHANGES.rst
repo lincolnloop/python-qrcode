@@ -2,12 +2,22 @@
 Change log
 ==========
 
-HEAD
-====
+Version 5.0
+===========
 
-* Speed optimizations
+* Speed optimizations.
 
-* Fix a bug in passing bytecode data directly when in Python 3
+* Change the output when using the ``qr`` script to use ASCII rather than
+  just colors, better using the terminal real estate.
+
+* Fix a bug in passing bytecode data directly when in Python 3.
+
+* Substation speed optimizations to best-fit algorithm (thanks Jacob Welsh!).
+
+Version 5.0.1
+-------------
+
+* Update version numbers correctly.
 
 
 Version 4.0
