@@ -411,7 +411,7 @@ class QRData:
                 buffer.put(c, 8)
 
     def __repr__(self):
-        return self.data
+        return repr(self.data)
 
 
 class BitBuffer:

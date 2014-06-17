@@ -1,5 +1,6 @@
 import six
 import qrcode
+import qrcode.util
 import qrcode.image.svg
 
 try:
@@ -118,3 +119,8 @@ class QRCodeTests(unittest.TestCase):
         qr.add_data(text, optimize=0)
         qr.make()
         self.assertEqual(qr.version, 11)
+
+    def test_qrdata_repr(self):
+        data = b'hello'
+        data_obj = qrcode.util.QRData(data)
+        self.assertEqual(repr(data_obj), repr(data))
