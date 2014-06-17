@@ -335,12 +335,11 @@ def _optimal_split(data, pattern):
 
 def to_bytestring(data):
     """
-    Convert data to a (utf-8 encoded) byte-string.
+    Convert data to a (utf-8 encoded) byte-string if it isn't a byte-string
+    already.
     """
-    if not isinstance(data, six.string_types):
-        data = six.text_type(data)
-    if isinstance(data, six.text_type):
-        data = data.encode('utf-8')
+    if not isinstance(data, six.binary_type):
+        data = six.text_type(data).encode('utf-8')
     return data
 
 

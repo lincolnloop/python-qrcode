@@ -5,7 +5,9 @@ Change log
 HEAD
 ====
 
-* 
+* Speed optimizations
+
+* Fix a bug in passing bytecode data directly when in Python 3
 
 
 Version 4.0
