@@ -10,6 +10,10 @@ def make(data=None, **kwargs):
     qr.add_data(data)
     return qr.make_image()
 
+def _check_version(version):
+    if version < 1 or version > 40:
+        raise ValueError("Invalid version (was %s, expected 1 to 40)" %
+            version)
 
 class QRCode:
 
@@ -61,11 +65,12 @@ class QRCode:
         :param fit: If ``True`` (or if a size has not been provided), find the
             best fit for the data to avoid data overflow errors.
         """
-        if fit or not self.version:
+        if fit or (self.version is None):
             self.best_fit(start=self.version)
         self.makeImpl(False, self.best_mask_pattern())
 
     def makeImpl(self, test, mask_pattern):
+        _check_version(self.version)
         self.modules_count = self.version * 4 + 17
         self.modules = [None] * self.modules_count
 
@@ -115,9 +120,7 @@ class QRCode:
         """
         if start is None:
             start = 1
-        elif start < 1 or start > 40:
-            raise ValueError("Invalid version (was %s, expected 1 to 40)" %
-                version)
+        _check_version(start)
 
         # Corresponds to the code in util.create_data, except we don't yet know
         # version, so optimistically assume start and check later
