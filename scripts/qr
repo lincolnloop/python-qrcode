@@ -19,7 +19,6 @@ default_factories = {
 
 
 def main(*args):
-    qr = qrcode.QRCode()
 
     parser = optparse.OptionParser(usage=__doc__.strip())
     parser.add_option(
@@ -31,6 +30,11 @@ def main(*args):
         "--optimize", type=int, help="Optimize the data by looking for chunks "
         "of at least this many characters that could use a more efficient "
         "encoding method. Use 0 to turn off chunk optimization.")
+    parser.add_option(
+        "--version", help="The version parameter is an integer from 1 to 40 "
+        "that controls the size of the QR Code (the smallest, version 1, "
+        "is a 21x21 matrix). Set to None and use the fit parameter when making "
+        "the code to determine this automatically.")
     opts, args = parser.parse_args(list(args))
 
     if opts.factory:
@@ -47,6 +51,13 @@ def main(*args):
         data = args[0]
     else:
         data = sys.stdin.read()
+
+    # Create QR object
+    if opts.version is None:
+        qr = qrcode.QRCode()
+    else:
+        qr = qrcode.QRCode(version=opts.version)
+
     if opts.optimize is None:
         qr.add_data(data)
     else:
