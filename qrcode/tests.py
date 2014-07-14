@@ -2,6 +2,7 @@ import six
 import qrcode
 import qrcode.util
 import qrcode.image.svg
+from six.moves import StringIO
 
 try:
     import qrcode.image.pure
@@ -124,3 +125,14 @@ class QRCodeTests(unittest.TestCase):
         data = b'hello'
         data_obj = qrcode.util.QRData(data)
         self.assertEqual(repr(data_obj), repr(data))
+
+    def test_print_ascii(self):
+        qr = qrcode.QRCode(border=0)
+        f = StringIO()
+        qr.print_ascii(out=f)
+        actual = f.getvalue()[:7]
+        f.close()
+        expected = b''.join(
+                map(six.int2byte, (219,223,223,223,223,223,219))
+                ).decode('cp437')
+        self.assertEqual(actual, expected)
