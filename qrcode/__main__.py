@@ -18,7 +18,7 @@ default_factories = {
 }
 
 
-def main(*args):
+def main(argv=sys.argv):
     qr = qrcode.QRCode()
 
     parser = optparse.OptionParser(usage=__doc__.strip())
@@ -31,7 +31,7 @@ def main(*args):
         "--optimize", type=int, help="Optimize the data by looking for chunks "
         "of at least this many characters that could use a more efficient "
         "encoding method. Use 0 to turn off chunk optimization.")
-    opts, args = parser.parse_args(list(args))
+    opts, args = parser.parse_args(argv)
 
     if opts.factory:
         module = default_factories.get(opts.factory, opts.factory)
@@ -61,4 +61,4 @@ def main(*args):
 
 
 if __name__ == "__main__":
-    main(*sys.argv[1:])
+    main()
