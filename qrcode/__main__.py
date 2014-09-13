@@ -18,7 +18,7 @@ default_factories = {
 }
 
 
-def main(argv=sys.argv):
+def main(argv=sys.argv[1:]):
     qr = qrcode.QRCode()
 
     parser = optparse.OptionParser(usage=__doc__.strip())
