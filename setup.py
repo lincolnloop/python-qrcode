@@ -1,5 +1,22 @@
 #!/usr/bin/env python
+from __future__ import unicode_literals
+import io
+import os
 from setuptools import setup, find_packages
+
+
+def long_description():
+    """
+    Build the long description from a README file located in the same directory
+    as this module.
+    """
+    base_path = os.path.dirname(os.path.realpath(__file__))
+    content = []
+    for name in ('README.rst', 'CHANGES.rst'):
+        with io.open(os.path.join(base_path, name), encoding='utf-8') as f:
+            content.append(f.read())
+    '\n\n'.join(content)
+
 
 setup(
     name='qrcode',
@@ -8,7 +25,7 @@ setup(
     #download_url='',
     description='QR Code image generator',
     license='BSD',
-    long_description=open('README.rst').read(),
+    long_description=long_description(),
     author='Lincoln Loop',
     author_email='info@lincolnloop.com',
     platforms=['any'],
