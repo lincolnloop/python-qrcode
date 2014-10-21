@@ -8,7 +8,8 @@ for i in range(8):
     EXP_TABLE[i] = 1 << i
 
 for i in range(8, 256):
-    EXP_TABLE[i] = (EXP_TABLE[i - 4] ^ EXP_TABLE[i - 5] ^ EXP_TABLE[i - 6] ^
+    EXP_TABLE[i] = (
+        EXP_TABLE[i - 4] ^ EXP_TABLE[i - 5] ^ EXP_TABLE[i - 6] ^
         EXP_TABLE[i - 8])
 
 for i in range(255):
@@ -344,7 +345,8 @@ class RSBlock:
 
 def rs_blocks(version, error_correction):
     if error_correction not in RS_BLOCK_OFFSET:
-        raise Exception("bad rs block @ version: %s / error_correction: %s" %
+        raise Exception(
+            "bad rs block @ version: %s / error_correction: %s" %
             (version, error_correction))
     offset = RS_BLOCK_OFFSET[error_correction]
     rs_block = RS_BLOCK_TABLE[(version - 1) * 4 + offset]

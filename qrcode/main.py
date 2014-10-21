@@ -10,10 +10,12 @@ def make(data=None, **kwargs):
     qr.add_data(data)
     return qr.make_image()
 
+
 def _check_version(version):
     if version < 1 or version > 40:
-        raise ValueError("Invalid version (was %s, expected 1 to 40)" %
-            version)
+        raise ValueError(
+            "Invalid version (was %s, expected 1 to 40)" % version)
+
 
 class QRCode:
 

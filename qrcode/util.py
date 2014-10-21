@@ -81,9 +81,11 @@ PATTERN_POSITION_TABLE = [
     [6, 30, 58, 86, 114, 142, 170]
 ]
 
-G15 = ((1 << 10) | (1 << 8) | (1 << 5) | (1 << 4) | (1 << 2) | (1 << 1) |
+G15 = (
+    (1 << 10) | (1 << 8) | (1 << 5) | (1 << 4) | (1 << 2) | (1 << 1) |
     (1 << 0))
-G18 = ((1 << 12) | (1 << 11) | (1 << 10) | (1 << 9) | (1 << 8) | (1 << 5) |
+G18 = (
+    (1 << 12) | (1 << 11) | (1 << 10) | (1 << 9) | (1 << 8) | (1 << 5) |
     (1 << 2) | (1 << 0))
 G15_MASK = (1 << 14) | (1 << 12) | (1 << 10) | (1 << 4) | (1 << 1)
 
@@ -148,6 +150,7 @@ def mask_func(pattern):
         return lambda i, j: ((i * j) % 3 + (i + j) % 2) % 2 == 0
     raise TypeError("Bad mask pattern: " + pattern)
 
+
 def mode_sizes_for_version(version):
     if version < 10:
         return MODE_SIZE_SMALL
@@ -156,14 +159,15 @@ def mode_sizes_for_version(version):
     else:
         return MODE_SIZE_LARGE
 
+
 def length_in_bits(mode, version):
-    if mode not in (MODE_NUMBER, MODE_ALPHA_NUM, MODE_8BIT_BYTE,
-            MODE_KANJI):
+    if mode not in (
+            MODE_NUMBER, MODE_ALPHA_NUM, MODE_8BIT_BYTE, MODE_KANJI):
         raise TypeError("Invalid mode (%s)" % mode)
 
     if version < 1 or version > 40:
-        raise ValueError("Invalid version (was %s, expected 1 to 40)" %
-            version)
+        raise ValueError(
+            "Invalid version (was %s, expected 1 to 40)" % version)
 
     return mode_sizes_for_version(version)[mode]
 
@@ -309,7 +313,8 @@ def optimal_data_chunks(data, minimum=4):
     :param minimum: The minimum number of bytes in a row to split as a chunk.
     """
     data = to_bytestring(data)
-    re_repeat = six.b('{') + six.text_type(minimum).encode('ascii') + six.b(',}')
+    re_repeat = (
+        six.b('{') + six.text_type(minimum).encode('ascii') + six.b(',}'))
     num_pattern = re.compile(six.b('\d') + re_repeat)
     num_bits = _optimal_split(data, num_pattern)
     alpha_pattern = re.compile(
@@ -402,7 +407,8 @@ class QRData:
             for i in xrange(0, len(self.data), 2):
                 chars = self.data[i:i + 2]
                 if len(chars) > 1:
-                    buffer.put(ALPHA_NUM.find(chars[0]) * 45 +
+                    buffer.put(
+                        ALPHA_NUM.find(chars[0]) * 45 +
                         ALPHA_NUM.find(chars[1]), 11)
                 else:
                     buffer.put(ALPHA_NUM.find(chars), 6)

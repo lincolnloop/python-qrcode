@@ -139,8 +139,9 @@ class QRCodeTests(unittest.TestCase):
         qr.print_ascii(out=f, tty=True)
         printed = f.getvalue()
         f.close()
-        expected = (u'\x1b[48;5;232m\x1b[38;5;255m' +
-                u'\xa0\u2584\u2584\u2584\u2584\u2584\xa0')
+        expected = (
+            u'\x1b[48;5;232m\x1b[38;5;255m' +
+            u'\xa0\u2584\u2584\u2584\u2584\u2584\xa0')
         self.assertEqual(printed[:len(expected)], expected)
 
     def test_print_tty(self):
@@ -154,6 +155,7 @@ class QRCodeTests(unittest.TestCase):
         BLACK_BG = '\x1b[40m'
         WHITE_BLOCK = BOLD_WHITE_BG + '  ' + BLACK_BG
         EOL = '\x1b[0m\n'
-        expected = (BOLD_WHITE_BG + '  '*23 + EOL +
-                WHITE_BLOCK + '  '*7 + WHITE_BLOCK)
+        expected = (
+            BOLD_WHITE_BG + '  '*23 + EOL +
+            WHITE_BLOCK + '  '*7 + WHITE_BLOCK)
         self.assertEqual(printed[:len(expected)], expected)
