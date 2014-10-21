@@ -15,14 +15,13 @@ def long_description():
     for name in ('README.rst', 'CHANGES.rst'):
         with io.open(os.path.join(base_path, name), encoding='utf-8') as f:
             content.append(f.read())
-    '\n\n'.join(content)
+    return '\n\n'.join(content)
 
 
 setup(
     name='qrcode',
     version='5.0.1.post',
     url='https://github.com/lincolnloop/python-qrcode',
-    #download_url='',
     description='QR Code image generator',
     license='BSD',
     long_description=long_description(),
