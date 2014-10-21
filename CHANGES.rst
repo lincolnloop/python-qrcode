@@ -20,6 +20,9 @@ Version 5.0
 
 * Substation speed optimizations to best-fit algorithm (thanks Jacob Welsh!).
 
+* Introduce a ``print_ascii`` method and use it as the default for the ``qr``
+  script rather than ``print_tty``.
+
 Version 5.0.1
 -------------
 
