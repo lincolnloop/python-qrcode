@@ -7,6 +7,11 @@ HEAD
 
 * Make ``qr`` script work in Windows. Thanks Ionel Cristian Mărieș
 
+* Fixed print_ascii function in Python 3.
+
+* Out-of-bounds code version numbers are handled more consistently with a
+  ValueError.
+
 
 Version 5.0
 ===========

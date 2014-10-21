@@ -124,3 +124,36 @@ class QRCodeTests(unittest.TestCase):
         data = b'hello'
         data_obj = qrcode.util.QRData(data)
         self.assertEqual(repr(data_obj), repr(data))
+
+    def test_print_ascii(self):
+        qr = qrcode.QRCode(border=0)
+        f = six.StringIO()
+        qr.print_ascii(out=f)
+        printed = f.getvalue()
+        f.close()
+        expected = u'\u2588\u2580\u2580\u2580\u2580\u2580\u2588'
+        self.assertEqual(printed[:len(expected)], expected)
+
+        f = six.StringIO()
+        f.isatty = lambda: True
+        qr.print_ascii(out=f, tty=True)
+        printed = f.getvalue()
+        f.close()
+        expected = (u'\x1b[48;5;232m\x1b[38;5;255m' +
+                u'\xa0\u2584\u2584\u2584\u2584\u2584\xa0')
+        self.assertEqual(printed[:len(expected)], expected)
+
+    def test_print_tty(self):
+        qr = qrcode.QRCode()
+        f = six.StringIO()
+        f.isatty = lambda: True
+        qr.print_tty(out=f)
+        printed = f.getvalue()
+        f.close()
+        BOLD_WHITE_BG = '\x1b[1;47m'
+        BLACK_BG = '\x1b[40m'
+        WHITE_BLOCK = BOLD_WHITE_BG + '  ' + BLACK_BG
+        EOL = '\x1b[0m\n'
+        expected = (BOLD_WHITE_BG + '  '*23 + EOL +
+                WHITE_BLOCK + '  '*7 + WHITE_BLOCK)
+        self.assertEqual(printed[:len(expected)], expected)
