@@ -13,9 +13,11 @@ setup(
     author_email='info@lincolnloop.com',
     platforms=['any'],
     packages=find_packages(),
-    scripts=[
-        'scripts/qr',
-    ],
+    entry_points={
+        'console_scripts': [
+            'qr = qrcode.console_scripts:main',
+        ],
+    },
     install_requires=['six'],
     data_files=[('share/man/man1', ['doc/qr.1'])],
     include_package_data=True,

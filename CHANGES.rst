@@ -5,7 +5,7 @@ Change log
 HEAD
 ====
 
-* 
+* Make ``qr`` script work in Windows. Thanks Ionel Cristian Mărieș
 
 
 Version 5.0
