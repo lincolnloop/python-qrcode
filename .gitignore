@@ -1,3 +1,5 @@
 *.pyc
 .tox
 dist/
+.coverage
+htmlcov/
