@@ -20,7 +20,7 @@ def long_description():
 
 setup(
     name='qrcode',
-    version='5.0.1.post',
+    version='5.1',
     url='https://github.com/lincolnloop/python-qrcode',
     description='QR Code image generator',
     license='BSD',

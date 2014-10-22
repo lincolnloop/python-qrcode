@@ -2,8 +2,8 @@
 Change log
 ==========
 
-HEAD
-====
+Version 5.1
+===========
 
 * Make ``qr`` script work in Windows. Thanks Ionel Cristian Mărieș
 
