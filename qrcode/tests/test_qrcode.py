@@ -6,12 +6,14 @@ import qrcode.image.svg
 try:
     import qrcode.image.pure
     import pymaging_png  # ensure that PNG support is installed
-except ImportError:
+except ImportError:  # pragma: no cover
     pymaging_png = None
 
+import qrcode
 from qrcode.exceptions import DataOverflowError
 from qrcode.util import (
-    MODE_NUMBER, MODE_ALPHA_NUM, MODE_8BIT_BYTE)
+    QRData, MODE_NUMBER, MODE_ALPHA_NUM, MODE_8BIT_BYTE)
+from qrcode.tests.svg import SvgImageWhite
 
 try:
     import unittest2 as unittest
@@ -28,10 +30,25 @@ class QRCodeTests(unittest.TestCase):
         qr.add_data('a')
         qr.make(fit=False)
 
+    def test_large(self):
+        qr = qrcode.QRCode(version=27)
+        qr.add_data('a')
+        qr.make(fit=False)
+
+    def test_invalid_version(self):
+        qr = qrcode.QRCode(version=41)
+        self.assertRaises(ValueError, qr.make, fit=False)
+
     def test_overflow(self):
         qr = qrcode.QRCode(version=1)
         qr.add_data('abcdefghijklmno')
         self.assertRaises(DataOverflowError, qr.make, fit=False)
+
+    def test_add_qrdata(self):
+        qr = qrcode.QRCode(version=1)
+        data = QRData('a')
+        qr.add_data(data)
+        qr.make(fit=False)
 
     def test_fit(self):
         qr = qrcode.QRCode()
@@ -75,6 +92,12 @@ class QRCodeTests(unittest.TestCase):
         qr.make()
         self.assertEqual(qr.data_list[0].mode, MODE_8BIT_BYTE)
 
+    def test_render_pil(self):
+        qr = qrcode.QRCode()
+        qr.add_data(UNICODE_TEXT)
+        img = qr.make_image()
+        img.save(six.BytesIO())
+
     def test_render_svg(self):
         qr = qrcode.QRCode()
         qr.add_data(UNICODE_TEXT)
@@ -87,12 +110,31 @@ class QRCodeTests(unittest.TestCase):
         img = qr.make_image(image_factory=qrcode.image.svg.SvgPathImage)
         img.save(six.BytesIO())
 
+    def test_render_svg_fragment(self):
+        qr = qrcode.QRCode()
+        qr.add_data(UNICODE_TEXT)
+        img = qr.make_image(image_factory=qrcode.image.svg.SvgFragmentImage)
+        img.save(six.BytesIO())
+
+    def test_render_svg_with_background(self):
+        qr = qrcode.QRCode()
+        qr.add_data(UNICODE_TEXT)
+        img = qr.make_image(image_factory=SvgImageWhite)
+        img.save(six.BytesIO())
+
     @unittest.skipIf(not pymaging_png, "Requires pymaging with PNG support")
     def test_render_pymaging_png(self):
         qr = qrcode.QRCode()
         qr.add_data(UNICODE_TEXT)
         img = qr.make_image(image_factory=qrcode.image.pure.PymagingImage)
         img.save(six.BytesIO())
+
+    @unittest.skipIf(not pymaging_png, "Requires pymaging")
+    def test_render_pymaging_png_bad_kind(self):
+        qr = qrcode.QRCode()
+        qr.add_data(UNICODE_TEXT)
+        img = qr.make_image(image_factory=qrcode.image.pure.PymagingImage)
+        self.assertRaises(ValueError, img.save, six.BytesIO(), kind='FISH')
 
     def test_optimize(self):
         qr = qrcode.QRCode()
@@ -159,3 +201,9 @@ class QRCodeTests(unittest.TestCase):
             BOLD_WHITE_BG + '  '*23 + EOL +
             WHITE_BLOCK + '  '*7 + WHITE_BLOCK)
         self.assertEqual(printed[:len(expected)], expected)
+
+
+class ShortcutTest(unittest.TestCase):
+
+    def runTest(self):
+        qrcode.make('image')

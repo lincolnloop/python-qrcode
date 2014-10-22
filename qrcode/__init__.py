@@ -20,6 +20,6 @@ def run_example(data="http://www.lincolnloop.com", *args, **kwargs):
     im.show()
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover
     import sys
     run_example(*sys.argv[1:])

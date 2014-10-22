@@ -148,7 +148,7 @@ def mask_func(pattern):
         return lambda i, j: ((i * j) % 2 + (i * j) % 3) % 2 == 0
     if pattern == 7:  # 111
         return lambda i, j: ((i * j) % 3 + (i + j) % 2) % 2 == 0
-    raise TypeError("Bad mask pattern: " + pattern)
+    raise TypeError("Bad mask pattern: " + pattern)  # pragma: no cover
 
 
 def mode_sizes_for_version(version):
@@ -163,9 +163,9 @@ def mode_sizes_for_version(version):
 def length_in_bits(mode, version):
     if mode not in (
             MODE_NUMBER, MODE_ALPHA_NUM, MODE_8BIT_BYTE, MODE_KANJI):
-        raise TypeError("Invalid mode (%s)" % mode)
+        raise TypeError("Invalid mode (%s)" % mode)  # pragma: no cover
 
-    if version < 1 or version > 40:
+    if version < 1 or version > 40:  # pragma: no cover
         raise ValueError(
             "Invalid version (was %s, expected 1 to 40)" % version)
 
@@ -386,8 +386,8 @@ class QRData:
         else:
             self.mode = mode
             if mode not in (MODE_NUMBER, MODE_ALPHA_NUM, MODE_8BIT_BYTE):
-                raise TypeError("Invalid mode (%s)" % mode)
-            if check_data and mode < optimal_mode(data):
+                raise TypeError("Invalid mode (%s)" % mode)  # pragma: no cover
+            if check_data and mode < optimal_mode(data):  # pragma: no cover
                 raise ValueError(
                     "Provided data can not be represented in mode "
                     "{0}".format(mode))

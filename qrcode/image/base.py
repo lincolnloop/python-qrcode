@@ -33,7 +33,7 @@ class BaseImage(object):
         y = (row + self.border) * self.box_size
         return [(x, y), (x + self.box_size - 1, y + self.box_size - 1)]
 
-    def new_image(self, **kwargs):
+    def new_image(self, **kwargs):  # pragma: no cover
         """
         Build the image class. Subclasses should return the class created.
         """

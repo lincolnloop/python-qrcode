@@ -273,7 +273,7 @@ RS_BLOCK_TABLE = [
 
 
 def glog(n):
-    if n < 1:
+    if n < 1:  # pragma: no cover
         raise ValueError("glog(%s)" % n)
     return LOG_TABLE[n]
 
@@ -285,7 +285,7 @@ def gexp(n):
 class Polynomial:
 
     def __init__(self, num, shift):
-        if not num:
+        if not num:  # pragma: no cover
             raise Exception("%s/%s" % (len(num), shift))
 
         offset = 0
@@ -344,7 +344,7 @@ class RSBlock:
 
 
 def rs_blocks(version, error_correction):
-    if error_correction not in RS_BLOCK_OFFSET:
+    if error_correction not in RS_BLOCK_OFFSET:  # pragma: no cover
         raise Exception(
             "bad rs block @ version: %s / error_correction: %s" %
             (version, error_correction))

@@ -12,6 +12,8 @@ HEAD
 * Out-of-bounds code version numbers are handled more consistently with a
   ValueError.
 
+* Much better test coverage (now only officially supporting Python 2.6+)
+
 
 Version 5.0
 ===========
