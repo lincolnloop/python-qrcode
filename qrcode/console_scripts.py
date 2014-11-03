@@ -57,7 +57,18 @@ def main(args=sys.argv[1:]):
         return
 
     img = qr.make_image(image_factory=image_factory)
-    img.save(sys.stdout)
+
+    sys.stdout.flush()
+    if sys.version_info[0] >= 3:
+        buff = sys.stdout.buffer
+    else:
+        if sys.platform == 'win32':
+            import os
+            import msvcrt
+            msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
+        buff = sys.stdout
+
+    img.save(buff)
 
 
 if __name__ == "__main__":
