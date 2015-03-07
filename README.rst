@@ -46,7 +46,15 @@ For more control, use the ``QRCode`` class. For example::
     qr.add_data('Some data')
     qr.make(fit=True)
 
+
     img = qr.make_image()
+    
+    import cStringIO
+    out = cStringIO.StringIO()
+    img.save(stream=out)
+
+    with open('/tmp/test.gif', 'w') as f:
+        f.write(out.getvalue())    
 
 The ``version`` parameter is an integer from 1 to 40 that controls the size of
 the QR Code (the smallest, version 1, is a 21x21 matrix).
