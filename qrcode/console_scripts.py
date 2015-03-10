@@ -17,10 +17,15 @@ default_factories = {
     'svg-path': 'qrcode.image.svg.SvgPathImage',
 }
 
+error_correction = {
+    'L': qrcode.ERROR_CORRECT_L,
+    'M': qrcode.ERROR_CORRECT_M,
+    'Q': qrcode.ERROR_CORRECT_Q,
+    'H': qrcode.ERROR_CORRECT_H,
+}
+
 
 def main(args=sys.argv[1:]):
-    qr = qrcode.QRCode()
-
     parser = optparse.OptionParser(usage=__doc__.strip())
     parser.add_option(
         "--factory", help="Full python path to the image factory class to "
@@ -31,7 +36,15 @@ def main(args=sys.argv[1:]):
         "--optimize", type=int, help="Optimize the data by looking for chunks "
         "of at least this many characters that could use a more efficient "
         "encoding method. Use 0 to turn off chunk optimization.")
+    parser.add_option(
+        "--error-correction", type='choice', choices=error_correction.keys(),
+        default='M',
+        help="The error correction level to use. Choices are L (7%), "
+        "M (15%, default), Q (25%), and H (30%).")
     opts, args = parser.parse_args(args)
+
+    qr = qrcode.QRCode(
+        error_correction=error_correction[opts.error_correction])
 
     if opts.factory:
         module = default_factories.get(opts.factory, opts.factory)

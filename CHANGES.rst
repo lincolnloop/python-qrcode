@@ -5,7 +5,7 @@ Change log
 HEAD
 ====
 
-* 
+* Add ``--error-correction`` option to qr script.
 
 
 Version 5.1
