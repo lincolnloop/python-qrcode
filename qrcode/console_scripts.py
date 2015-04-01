@@ -37,7 +37,7 @@ def main(args=sys.argv[1:]):
         "of at least this many characters that could use a more efficient "
         "encoding method. Use 0 to turn off chunk optimization.")
     parser.add_option(
-        "--error-correction", type='choice', choices=error_correction.keys(),
+        "--error-correction", type='choice', choices=sorted(error_correction.keys()),
         default='M',
         help="The error correction level to use. Choices are L (7%), "
         "M (15%, default), Q (25%), and H (30%).")
