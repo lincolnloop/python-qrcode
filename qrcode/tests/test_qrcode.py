@@ -11,6 +11,7 @@ except ImportError:  # pragma: no cover
     pymaging_png = None
 
 import qrcode
+from qrcode.image.base import BaseImage
 from qrcode.exceptions import DataOverflowError
 from qrcode.util import (
     QRData, MODE_NUMBER, MODE_ALPHA_NUM, MODE_8BIT_BYTE)
@@ -20,6 +21,11 @@ try:
     import unittest2 as unittest
 except ImportError:
     import unittest
+
+try:
+    from unittest import mock
+except ImportError:
+    import mock
 
 UNICODE_TEXT = u'\u03b1\u03b2\u03b3'
 
@@ -98,6 +104,22 @@ class QRCodeTests(unittest.TestCase):
         qr.add_data(UNICODE_TEXT)
         img = qr.make_image()
         img.save(six.BytesIO())
+
+    def test_qrcode_bad_factory(self):
+        self.assertRaises(
+            TypeError, qrcode.QRCode, image_factory='not_BaseImage')
+        self.assertRaises(
+            AssertionError, qrcode.QRCode, image_factory=dict)
+
+    def test_qrcode_factory(self):
+
+        class MockFactory(BaseImage):
+            drawrect = mock.Mock()
+
+        qr = qrcode.QRCode(image_factory=MockFactory)
+        qr.add_data(UNICODE_TEXT)
+        qr.make_image()
+        self.assertTrue(MockFactory.drawrect.called)
 
     def test_render_svg(self):
         qr = qrcode.QRCode()
