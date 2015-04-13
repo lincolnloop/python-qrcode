@@ -212,6 +212,13 @@ class QRCodeTests(unittest.TestCase):
             u'\xa0\u2584\u2584\u2584\u2584\u2584\xa0')
         self.assertEqual(printed[:len(expected)], expected)
 
+    def test_print_tty_stdout(self):
+        qr = qrcode.QRCode()
+        with mock.patch('sys.stdout') as fake_stdout:
+            fake_stdout.isatty.return_value = None
+            self.assertRaises(OSError, qr.print_tty)
+            self.assertTrue(fake_stdout.isatty.called)
+
     def test_print_tty(self):
         qr = qrcode.QRCode()
         f = six.StringIO()
