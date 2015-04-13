@@ -38,8 +38,8 @@ def main(args=sys.argv[1:]):
         "of at least this many characters that could use a more efficient "
         "encoding method. Use 0 to turn off chunk optimization.")
     parser.add_option(
-        "--error-correction", type='choice', choices=sorted(error_correction.keys()),
-        default='M',
+        "--error-correction", type='choice',
+        choices=sorted(error_correction.keys()), default='M',
         help="The error correction level to use. Choices are L (7%), "
         "M (15%, default), Q (25%), and H (30%).")
     opts, args = parser.parse_args(args)
@@ -76,7 +76,7 @@ def main(args=sys.argv[1:]):
     if sys.version_info[0] >= 3:
         buff = sys.stdout.buffer
     else:
-        if sys.platform == 'win32':
+        if sys.platform == 'win32':  # pragma: no cover
             import msvcrt
             msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
         buff = sys.stdout
