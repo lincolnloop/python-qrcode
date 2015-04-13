@@ -7,6 +7,7 @@ a pipe to a file an image is written. The default image format is PNG.
 """
 import sys
 import optparse
+import os
 import qrcode
 
 default_factories = {
@@ -65,7 +66,7 @@ def main(args=sys.argv[1:]):
     else:
         qr.add_data(data, optimize=opts.optimize)
 
-    if image_factory is None and sys.stdout.isatty():
+    if image_factory is None and os.isatty(sys.stdout.fileno()):
         qr.print_ascii(tty=True)
         return
 
@@ -76,7 +77,6 @@ def main(args=sys.argv[1:]):
         buff = sys.stdout.buffer
     else:
         if sys.platform == 'win32':
-            import os
             import msvcrt
             msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
         buff = sys.stdout
