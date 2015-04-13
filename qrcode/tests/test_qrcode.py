@@ -1,3 +1,4 @@
+import warnings
 import six
 import qrcode
 import qrcode.util
@@ -127,7 +128,10 @@ class QRCodeTests(unittest.TestCase):
         qr = qrcode.QRCode()
         qr.add_data(UNICODE_TEXT)
         img = qr.make_image(image_factory=qrcode.image.pure.PymagingImage)
-        img.save(six.BytesIO())
+        with warnings.catch_warnings():
+            if six.PY3:
+                warnings.simplefilter('ignore', DeprecationWarning)
+            img.save(six.BytesIO())
 
     @unittest.skipIf(not pymaging_png, "Requires pymaging")
     def test_render_pymaging_png_bad_kind(self):
