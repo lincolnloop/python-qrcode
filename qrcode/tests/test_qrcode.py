@@ -242,6 +242,17 @@ class QRCodeTests(unittest.TestCase):
             WHITE_BLOCK + '  '*7 + WHITE_BLOCK)
         self.assertEqual(printed[:len(expected)], expected)
 
+    def test_get_matrix(self):
+        qr = qrcode.QRCode(border=0)
+        qr.add_data('1')
+        self.assertEqual(qr.get_matrix(), qr.modules)
+
+    def test_get_matrix_border(self):
+        qr = qrcode.QRCode(border=1)
+        qr.add_data('1')
+        matrix = [row[1:-1] for row in qr.get_matrix()[1:-1]]
+        self.assertEqual(matrix, qr.modules)
+
 
 class ShortcutTest(unittest.TestCase):
 
