@@ -193,6 +193,13 @@ class QRCodeTests(unittest.TestCase):
         data_obj = qrcode.util.QRData(data)
         self.assertEqual(repr(data_obj), repr(data))
 
+    def test_print_ascii_stdout(self):
+        qr = qrcode.QRCode()
+        with mock.patch('sys.stdout') as fake_stdout:
+            fake_stdout.isatty.return_value = None
+            self.assertRaises(OSError, qr.print_ascii, tty=True)
+            self.assertTrue(fake_stdout.isatty.called)
+
     def test_print_ascii(self):
         qr = qrcode.QRCode(border=0)
         f = six.StringIO()
