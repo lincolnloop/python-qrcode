@@ -139,3 +139,19 @@ Or in Python::
     import qrcode
     from qrcode.image.pure import PymagingImage
     img = qrcode.make('Some data here', image_factory=PymagingImage)
+    
+
+Use ImageMagick Wand 
+---------------
+
+First install ImageMagic Libary from http://www.imagemagick.org/
+
+Install wand package::
+
+    pip install wand
+
+In Python::
+
+    import qrcode
+    from qrcode.image.imagemagick import WandImage
+    img = qrcode.make('Some data here', image_factory=WandImage)
