@@ -16,6 +16,7 @@ default_factories = {
     'svg': 'qrcode.image.svg.SvgImage',
     'svg-fragment': 'qrcode.image.svg.SvgFragmentImage',
     'svg-path': 'qrcode.image.svg.SvgPathImage',
+    'dxf': 'qrcode.image.dxf.DxfImage',
 }
 
 error_correction = {
