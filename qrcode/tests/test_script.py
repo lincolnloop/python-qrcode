@@ -1,3 +1,4 @@
+import sys
 try:
     import unittest2 as unittest
 except ImportError:
@@ -8,6 +9,10 @@ except ImportError:
     import mock
 
 from qrcode.console_scripts import main
+
+
+def bad_read():
+    raise UnicodeDecodeError('utf-8', b'0x80', 0, 1, 'invalid start byte')
 
 
 class ScriptTest(unittest.TestCase):
@@ -26,11 +31,23 @@ class ScriptTest(unittest.TestCase):
     @mock.patch('os.isatty', lambda *args: True)
     @mock.patch('qrcode.main.QRCode.print_ascii')
     def test_stdin(self, mock_print_ascii):
-        mock_stdin = mock.Mock()
-        mock_stdin.configure_mock(**{'read.return_value': 'testtext'})
-        with mock.patch('sys.stdin', mock_stdin) as stdin:
+        mock_stdin = mock.Mock(sys.stdin)
+        stdin_buffer = getattr(mock_stdin, 'buffer', mock_stdin)
+        stdin_buffer.read.return_value = 'testtext'
+        with mock.patch('sys.stdin', mock_stdin):
             main([])
-            self.assertTrue(stdin.read.called)
+        self.assertTrue(stdin_buffer.read.called)
+        mock_print_ascii.assert_called_with(tty=True)
+
+    @unittest.skipIf(sys.version_info[0] < 3, 'Python 3')
+    @mock.patch('os.isatty', lambda *args: True)
+    @mock.patch('qrcode.main.QRCode.print_ascii')
+    def test_stdin_py3_unicodedecodeerror(self, mock_print_ascii):
+        mock_stdin = mock.Mock(sys.stdin)
+        mock_stdin.buffer.read.return_value = 'testtext'
+        mock_stdin.read.side_effect = bad_read
+        with mock.patch('sys.stdin', mock_stdin):
+            main([])
         mock_print_ascii.assert_called_with(tty=True)
 
     @mock.patch('os.isatty', lambda *args: True)

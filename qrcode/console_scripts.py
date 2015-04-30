@@ -60,7 +60,10 @@ def main(args=sys.argv[1:]):
     if args:
         data = args[0]
     else:
-        data = sys.stdin.read()
+        # Use sys.stdin.buffer if available (Python 3) avoiding
+        # UnicodeDecodeErrors.
+        stdin_buffer = getattr(sys.stdin, 'buffer', sys.stdin)
+        data = stdin_buffer.read()
     if opts.optimize is None:
         qr.add_data(data)
     else:
@@ -73,15 +76,16 @@ def main(args=sys.argv[1:]):
     img = qr.make_image(image_factory=image_factory)
 
     sys.stdout.flush()
-    if sys.version_info[0] >= 3:
-        buff = sys.stdout.buffer
-    else:
+    # Use sys.stdout.buffer if available (Python 3), avoiding
+    # UnicodeDecodeErrors.
+    stdout_buffer = getattr(sys.stdout, 'buffer', None)
+    if not stdout_buffer:
         if sys.platform == 'win32':  # pragma: no cover
             import msvcrt
             msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
-        buff = sys.stdout
+        stdout_buffer = sys.stdout
 
-    img.save(buff)
+    img.save(stdout_buffer)
 
 
 if __name__ == "__main__":
