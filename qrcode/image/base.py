@@ -5,7 +5,7 @@ class BaseImage(object):
     kind = None
     allowed_kinds = None
 
-    def __init__(self, border, width, box_size, back_color *args, **kwargs):
+    def __init__(self, border, width, box_size, back_color, *args, **kwargs):
         self.border = border
         self.width = width
         self.box_size = box_size

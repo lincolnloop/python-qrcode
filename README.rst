@@ -42,6 +42,8 @@ For more control, use the ``QRCode`` class. For example::
         error_correction=qrcode.constants.ERROR_CORRECT_L,
         box_size=10,
         border=4,
+        back_color="yellow",
+        fill_color="#3333ff",
     )
     qr.add_data('Some data')
     qr.make(fit=True)
@@ -71,6 +73,11 @@ is.
 
 The ``border`` parameter controls how many boxes thick the border should be
 (the default is 4, which is the minimum according to the specs).
+
+The ``back_color`` string parameter controls the background color for the
+generated image
+
+ The ``fill_color`` string parameter controls the Qr code color
 
 Other image factories
 =====================
