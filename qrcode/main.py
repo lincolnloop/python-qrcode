@@ -22,10 +22,13 @@ class QRCode:
     def __init__(self, version=None,
                  error_correction=constants.ERROR_CORRECT_M,
                  box_size=10, border=4,
+                 back_color=None, fill_color="black",
                  image_factory=None):
         self.version = version and int(version)
         self.error_correction = int(error_correction)
         self.box_size = int(box_size)
+        self.fill_color = fill_color
+        self.back_color = back_color
         # Spec says border should be at least four boxes wide, but allow for
         # any (e.g. for producing printable QR codes).
         self.border = int(border)
@@ -257,11 +260,12 @@ class QRCode:
                 image_factory = PilImage
 
         im = image_factory(
-            self.border, self.modules_count, self.box_size, **kwargs)
+            self.border, self.modules_count, self.box_size,
+            self.back_color, **kwargs)
         for r in range(self.modules_count):
             for c in range(self.modules_count):
                 if self.modules[r][c]:
-                    im.drawrect(r, c)
+                    im.drawrect(r, c, self.fill_color)
         return im
 
     def setup_timing_pattern(self):
