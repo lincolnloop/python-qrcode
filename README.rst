@@ -77,7 +77,7 @@ The ``border`` parameter controls how many boxes thick the border should be
 The ``back_color`` string parameter controls the background color for the
 generated image
 
- The ``fill_color`` string parameter controls the Qr code color
+The ``fill_color`` string parameter controls the Qr code color
 
 Other image factories
 =====================
