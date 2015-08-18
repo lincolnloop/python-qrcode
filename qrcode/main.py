@@ -21,7 +21,7 @@ class QRCode:
 
     def __init__(self, version=None,
                  error_correction=constants.ERROR_CORRECT_M,
-                 box_size=10, border=4,
+                 box_size=10, border=4, force_ascii=False,
                  image_factory=None):
         self.version = version and int(version)
         self.error_correction = int(error_correction)
@@ -29,6 +29,7 @@ class QRCode:
         # Spec says border should be at least four boxes wide, but allow for
         # any (e.g. for producing printable QR codes).
         self.border = int(border)
+        self.force_ascii = bool(force_ascii)
         self.image_factory = image_factory
         if image_factory is not None:
             assert issubclass(image_factory, BaseImage)
@@ -173,7 +174,7 @@ class QRCode:
             import sys
             out = sys.stdout
 
-        if not out.isatty():
+        if not out.isatty() and not self.force_ascii:
             raise OSError("Not a tty")
 
         if self.data_cache is None:
@@ -203,7 +204,7 @@ class QRCode:
             import sys
             out = sys.stdout
 
-        if tty and not out.isatty():
+        if tty and not out.isatty() and not self.force_ascii:
             raise OSError("Not a tty")
 
         if self.data_cache is None:
