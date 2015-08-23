@@ -18,13 +18,26 @@ class PilImage(qrcode.image.base.BaseImage):
     kind = "PNG"
 
     def new_image(self, **kwargs):
-        img = Image.new("1", (self.pixel_size, self.pixel_size), "white")
+        back_color = kwargs.get("fill_color", "white")
+        fill_color = kwargs.get("back_color", "black")
+
+        if fill_color.lower() != "black" or back_color.lower() != "white":
+            if back_color.lower() == "transparent":
+                mode = "RGBA"
+                back_color = None
+            else:
+                mode = "RGB"
+        else:
+            mode = "1"
+
+        img = Image.new(mode, (self.pixel_size, self.pixel_size), back_color)
+        self.fill_color = fill_color
         self._idr = ImageDraw.Draw(img)
         return img
 
     def drawrect(self, row, col):
         box = self.pixel_box(row, col)
-        self._idr.rectangle(box, fill="black")
+        self._idr.rectangle(box, fill=self.fill_color)
 
     def save(self, stream, kind=None):
         if kind is None:
