@@ -26,10 +26,12 @@ class PilImage(qrcode.image.base.BaseImage):
         box = self.pixel_box(row, col)
         self._idr.rectangle(box, fill="black")
 
-    def save(self, stream, kind=None):
-        if kind is None:
-            kind = self.kind
-        self._img.save(stream, kind)
+    def save(self, stream, format=None, **kwargs):
+        if format is None:
+            format = kwargs.get("kind", self.kind)
+        if "kind" in kwargs:
+            del kwargs["kind"]
+        self._img.save(stream, format=format, **kwargs)
 
     def __getattr__(self, name):
         return getattr(self._img, name)
