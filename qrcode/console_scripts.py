@@ -9,6 +9,10 @@ import sys
 import optparse
 import os
 import qrcode
+# The next two lines added to get the terminal to display properly on MS platforms
+import colorama
+
+colorama.init()
 
 default_factories = {
     'pil': 'qrcode.image.pil.PilImage',

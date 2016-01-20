@@ -34,7 +34,7 @@ setup(
             'qr = qrcode.console_scripts:main',
         ],
     },
-    install_requires=['six'],
+    install_requires=['six', 'colorama'],
     data_files=[('share/man/man1', ['doc/qr.1'])],
     include_package_data=True,
     classifiers=[
