@@ -44,7 +44,9 @@ def main(args=sys.argv[1:]):
         "M (15%, default), Q (25%), and H (30%).")
     opts, args = parser.parse_args(args)
 
-    qr = qrcode.QRCode(
+    # qr = qrcode.QRCode(
+    #     error_correction=error_correction[opts.error_correction])
+    qr = qrcode.MicroQRCode(
         error_correction=error_correction[opts.error_correction])
 
     if opts.factory:

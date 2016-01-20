@@ -11,28 +11,42 @@ def make(data=None, **kwargs):
     return qr.make_image()
 
 
-def _check_version(version):
-    if version < 1 or version > 40:
-        raise ValueError(
-            "Invalid version (was %s, expected 1 to 40)" % version)
-
-
-class QRCode:
+class QRCode(object):
+    valid_error_correction = (
+        constants.ERROR_CORRECT_L,
+        constants.ERROR_CORRECT_M,
+        constants.ERROR_CORRECT_Q,
+        constants.ERROR_CORRECT_H,
+    )
+    mask_patterns = list(range(8))
+    default_border = 4
+    max_version = 40
 
     def __init__(self, version=None,
                  error_correction=constants.ERROR_CORRECT_M,
-                 box_size=10, border=4,
+                 box_size=10, border=None,
                  image_factory=None):
         self.version = version and int(version)
         self.error_correction = int(error_correction)
+        if self.error_correction not in self.valid_error_correction:
+            raise ValueError('Invalid error correction')
         self.box_size = int(box_size)
         # Spec says border should be at least four boxes wide, but allow for
         # any (e.g. for producing printable QR codes).
+        if border is None:
+            border = self.default_border
         self.border = int(border)
         self.image_factory = image_factory
         if image_factory is not None:
             assert issubclass(image_factory, BaseImage)
         self.clear()
+
+    def check_version(self, version):
+        if version < 1 or version > self.max_version:
+            raise ValueError(
+                "Invalid version (was %s, expected 1 to %s)" %
+                (version, self.max_version))
+        return version
 
     def clear(self):
         """
@@ -71,22 +85,19 @@ class QRCode:
             self.best_fit(start=self.version)
         self.makeImpl(False, self.best_mask_pattern())
 
-    def makeImpl(self, test, mask_pattern):
-        _check_version(self.version)
+    def set_modules_count(self):
         self.modules_count = self.version * 4 + 17
-        self.modules = [None] * self.modules_count
 
+    def makeImpl(self, test, mask_pattern):
+        self.version = self.check_version(self.version)
+        self.set_modules_count()
+
+        self.modules = []
         for row in range(self.modules_count):
+            self.modules.append([None] * self.modules_count)
 
-            self.modules[row] = [None] * self.modules_count
-
-            for col in range(self.modules_count):
-                self.modules[row][col] = None   # (col + row) % 3
-
-        self.setup_position_probe_pattern(0, 0)
-        self.setup_position_probe_pattern(self.modules_count - 7, 0)
-        self.setup_position_probe_pattern(0, self.modules_count - 7)
-        self.setup_position_adjust_pattern()
+        self.setup_position_probe_patterns()
+        self.setup_position_alignment_patterns()
         self.setup_timing_pattern()
         self.setup_type_info(test, mask_pattern)
 
@@ -94,9 +105,17 @@ class QRCode:
             self.setup_type_number(test)
 
         if self.data_cache is None:
-            self.data_cache = util.create_data(
-                self.version, self.error_correction, self.data_list)
+            self.create_data_cache()
         self.map_data(self.data_cache, mask_pattern)
+
+    def create_data_cache(self):
+        self.data_cache = util.create_data(
+            self.version, self.error_correction, self.data_list)
+
+    def setup_position_probe_patterns(self):
+        self.setup_position_probe_pattern(0, 0)
+        self.setup_position_probe_pattern(self.modules_count - 7, 0)
+        self.setup_position_probe_pattern(0, self.modules_count - 7)
 
     def setup_position_probe_pattern(self, row, col):
         for r in range(-1, 8):
@@ -122,7 +141,7 @@ class QRCode:
         """
         if start is None:
             start = 1
-        _check_version(start)
+        start = self.check_version(start)
 
         # Corresponds to the code in util.create_data, except we don't yet know
         # version, so optimistically assume start and check later
@@ -136,7 +155,7 @@ class QRCode:
         needed_bits = len(buffer)
         self.version = bisect_left(util.BIT_LIMIT_TABLE[self.error_correction],
                                    needed_bits, start)
-        if self.version == 41:
+        if self.version > self.max_version:
             raise exceptions.DataOverflowError()
 
         # Now check whether we need more bits for the mode sizes, recursing if
@@ -152,7 +171,7 @@ class QRCode:
         min_lost_point = 0
         pattern = 0
 
-        for i in range(8):
+        for i in self.mask_patterns:
             self.makeImpl(True, i)
 
             lost_point = util.lost_point(self.modules)
@@ -275,7 +294,7 @@ class QRCode:
                 continue
             self.modules[6][c] = (c % 2 == 0)
 
-    def setup_position_adjust_pattern(self):
+    def setup_position_alignment_patterns(self):
         pos = util.pattern_position(self.version)
 
         for i in range(len(pos)):
@@ -352,7 +371,7 @@ class QRCode:
 
         for col in six.moves.xrange(self.modules_count - 1, 0, -2):
 
-            if col <= 6:
+            if col <= 6 and not isinstance(self, MicroQRCode):
                 col -= 1
 
             col_range = (col, col-1)
@@ -405,3 +424,62 @@ class QRCode:
         code += [[False]*width] * self.border
 
         return code
+
+
+class MicroQRCode(QRCode):
+    valid_error_correction = (
+        constants.ERROR_CORRECT_L,
+        constants.ERROR_CORRECT_M,
+        constants.ERROR_CORRECT_Q,
+    )
+    default_border = 2
+    mask_patterns = [1, 4, 6, 7]
+    max_version = 4
+
+    def check_version(self, version):
+        version = super(MicroQRCode, self).check_version(version)
+        minimum_version = {
+            constants.ERROR_CORRECT_L: 1,
+            constants.ERROR_CORRECT_M: 2,
+            constants.ERROR_CORRECT_Q: 4,
+        }[self.error_correction]
+        return max(version, minimum_version)
+
+    def set_modules_count(self):
+        self.modules_count = self.version * 2 + 9
+
+    def setup_position_probe_patterns(self):
+        self.setup_position_probe_pattern(0, 0)
+
+    def setup_position_alignment_patterns(self):
+        pass
+
+    def setup_timing_pattern(self):
+        for r in range(8, self.modules_count):
+            if self.modules[r][0] is not None:
+                continue
+            self.modules[r][0] = (r % 2 == 0)
+
+        for c in range(8, self.modules_count):
+            if self.modules[0][c] is not None:
+                continue
+            self.modules[0][c] = (c % 2 == 0)
+
+    def setup_type_info(self, test, mask_pattern):
+        # TODO: Fixme
+        data = (self.error_correction << 3) | mask_pattern
+        bits = util.BCH_type_info(data, mask=util.MICRO_G15_MASK)
+
+        for i, bit in enumerate(util.bits_iter(bits)):
+            mod = bool(not test and bit)
+
+            if i <= 7:
+                self.modules[i + 1][8] = mod
+            else:
+                self.modules[8][15-i] = mod
+
+    def create_data_cache(self):
+        version = 'M%s' % self.version
+        self.data_cache = util.create_data(
+            version, self.error_correction, self.data_list)
+        self.data_cache

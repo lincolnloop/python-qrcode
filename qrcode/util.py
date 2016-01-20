@@ -12,7 +12,30 @@ MODE_ALPHA_NUM = 1 << 1
 MODE_8BIT_BYTE = 1 << 2
 MODE_KANJI = 1 << 3
 
+MICRO_VERSIONS = ['M1', 'M2', 'M3', 'M4']
+
 # Encoding mode sizes.
+MODE_SIZE_MICRO = {
+    'M1': {
+        MODE_NUMBER: 3,
+    },
+    'M2': {
+        MODE_NUMBER: 4,
+        MODE_ALPHA_NUM: 3,
+    },
+    'M3': {
+        MODE_NUMBER: 5,
+        MODE_ALPHA_NUM: 4,
+        MODE_8BIT_BYTE: 4,
+        MODE_KANJI: 3,
+    },
+    'M4': {
+        MODE_NUMBER: 6,
+        MODE_ALPHA_NUM: 5,
+        MODE_8BIT_BYTE: 5,
+        MODE_KANJI: 4,
+    },
+}
 MODE_SIZE_SMALL = {
     MODE_NUMBER: 10,
     MODE_ALPHA_NUM: 9,
@@ -88,6 +111,7 @@ G18 = (
     (1 << 12) | (1 << 11) | (1 << 10) | (1 << 9) | (1 << 8) | (1 << 5) |
     (1 << 2) | (1 << 0))
 G15_MASK = (1 << 14) | (1 << 12) | (1 << 10) | (1 << 4) | (1 << 1)
+MICRO_G15_MASK = (1 << 14) | (1 << 10) | (1 << 6) | (1 << 2) | (1 << 0)
 
 PAD0 = 0xEC
 PAD1 = 0x11
@@ -101,12 +125,12 @@ BIT_LIMIT_TABLE = [
 ]
 
 
-def BCH_type_info(data):
-        d = data << 10
-        while BCH_digit(d) - BCH_digit(G15) >= 0:
-            d ^= (G15 << (BCH_digit(d) - BCH_digit(G15)))
+def BCH_type_info(data, mask=G15_MASK):
+    d = data << 10
+    while BCH_digit(d) - BCH_digit(G15) >= 0:
+        d ^= (G15 << (BCH_digit(d) - BCH_digit(G15)))
 
-        return ((data << 10) | d) ^ G15_MASK
+    return ((data << 10) | d) ^ mask
 
 
 def BCH_type_number(data):
@@ -152,6 +176,8 @@ def mask_func(pattern):
 
 
 def mode_sizes_for_version(version):
+    if version in MICRO_VERSIONS:
+        return MODE_SIZE_MICRO[version]
     if version < 10:
         return MODE_SIZE_SMALL
     elif version < 27:
@@ -161,13 +187,19 @@ def mode_sizes_for_version(version):
 
 
 def length_in_bits(mode, version):
-    if mode not in (
-            MODE_NUMBER, MODE_ALPHA_NUM, MODE_8BIT_BYTE, MODE_KANJI):
-        raise TypeError("Invalid mode (%s)" % mode)  # pragma: no cover
+    if version in MICRO_VERSIONS:
+        if mode not in MODE_SIZE_MICRO[version]:
+            raise TypeError(
+                "Invalid mode (%s) for MicroQR %s" %
+                (mode, version))  # pragma: no cover
+    else:
+        if mode not in (
+                MODE_NUMBER, MODE_ALPHA_NUM, MODE_8BIT_BYTE, MODE_KANJI):
+            raise TypeError("Invalid mode (%s)" % mode)  # pragma: no cover
 
-    if version < 1 or version > 40:  # pragma: no cover
-        raise ValueError(
-            "Invalid version (was %s, expected 1 to 40)" % version)
+        if version < 1 or version > 40:  # pragma: no cover
+            raise ValueError(
+                "Invalid version (was %s, expected 1 to 40)" % version)
 
     return mode_sizes_for_version(version)[mode]
 
@@ -313,6 +345,8 @@ def optimal_data_chunks(data, minimum=4):
     :param minimum: The minimum number of bytes in a row to split as a chunk.
     """
     data = to_bytestring(data)
+    if data:
+        minimum = min(minimum, len(data))
     re_repeat = (
         six.b('{') + six.text_type(minimum).encode('ascii') + six.b(',}'))
     num_pattern = re.compile(six.b('\d') + re_repeat)
@@ -554,3 +588,10 @@ def create_data(version, error_correction, data_list):
             buffer.put(PAD1, 8)
 
     return create_bytes(buffer, rs_blocks)
+
+
+def bits_iter(num):
+    while num:
+        bit = num & (~num+1)
+        yield bit
+        num ^= bit
