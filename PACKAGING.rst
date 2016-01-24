@@ -17,7 +17,8 @@ Ensure version numbers in ``setup.py`` and ``doc/qr.1`` have been updated.
 
 4. Sign it::
 
-    gpg --detach-sign -a dist/*
+    gpg --detach-sign -a dist/*.gz
+    gpg --detach-sign -a dist/*.whl
 
 5. Upload it::
 
