@@ -201,7 +201,11 @@ class QRCode:
         """
         if out is None:
             import sys
-            out = sys.stdout
+            if sys.version_info < (2, 7):
+                import codecs
+                out = codecs.getwriter(sys.stdout.encoding)(sys.stdout)
+            else:
+                out = sys.stdout
 
         if tty and not out.isatty():
             raise OSError("Not a tty")
