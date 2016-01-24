@@ -2,10 +2,21 @@
 Change log
 ==========
 
-HEAD
-====
+Version 5.2
+===========
 
 * Add ``--error-correction`` option to qr script.
+
+* Fix script piping to stdout in Python 3 and reading non-UTF-8 characters in
+  Python 3.
+
+* Fix script piping in Windows.
+
+* Add some useful behind-the-curtain methods for tinkerers.
+
+* Fix terminal output when using Python 2.6
+
+* Fix terminal output to display correctly on MS command line.
 
 
 Version 5.1
