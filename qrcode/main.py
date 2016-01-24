@@ -180,16 +180,16 @@ class QRCode:
             self.make()
 
         modcount = self.modules_count
-        out.write("\x1b[1;47m" + (" " * (modcount * 2 + 4)) + "\x1b[0m\n")
+        out.write(b"\x1b[1;47m" + (b" " * (modcount * 2 + 4)) + b"\x1b[0m\n")
         for r in range(modcount):
-            out.write("\x1b[1;47m  \x1b[40m")
+            out.write(b"\x1b[1;47m  \x1b[40m")
             for c in range(modcount):
                 if self.modules[r][c]:
-                    out.write("  ")
+                    out.write(b"  ")
                 else:
-                    out.write("\x1b[1;47m  \x1b[40m")
-            out.write("\x1b[1;47m  \x1b[0m\n")
-        out.write("\x1b[1;47m" + (" " * (modcount * 2 + 4)) + "\x1b[0m\n")
+                    out.write(b"\x1b[1;47m  \x1b[40m")
+            out.write(b"\x1b[1;47m  \x1b[0m\n")
+        out.write(b"\x1b[1;47m" + (b" " * (modcount * 2 + 4)) + b"\x1b[0m\n")
         out.flush()
 
     def print_ascii(self, out=None, tty=False, invert=False):
@@ -228,14 +228,14 @@ class QRCode:
         for r in range(-self.border, modcount+self.border, 2):
             if tty:
                 if not invert or r < modcount+self.border-1:
-                    out.write('\x1b[48;5;232m')   # Background black
-                out.write('\x1b[38;5;255m')   # Foreground white
+                    out.write(b'\x1b[48;5;232m')   # Background black
+                out.write(b'\x1b[38;5;255m')   # Foreground white
             for c in range(-self.border, modcount+self.border):
                 pos = get_module(r, c) + (get_module(r+1, c) << 1)
                 out.write(codes[pos])
             if tty:
-                out.write('\x1b[0m')
-            out.write('\n')
+                out.write(b'\x1b[0m')
+            out.write(b'\n')
         out.flush()
 
     def make_image(self, image_factory=None, **kwargs):
