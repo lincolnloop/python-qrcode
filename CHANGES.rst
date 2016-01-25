@@ -23,6 +23,12 @@ Version 5.5.1
 
 * Small fix to terminal output in Python 3 (and fix tests)
 
+Version 5.5.2
+-------------
+
+* Revert some terminal changes from 5.2 that broke Python 3's real life tty
+  code generation and introduce a better way from Jacob Welsh.
+
 
 Version 5.1
 ===========
