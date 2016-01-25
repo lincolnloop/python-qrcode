@@ -180,16 +180,16 @@ class QRCode:
             self.make()
 
         modcount = self.modules_count
-        out.write(b"\x1b[1;47m" + (b" " * (modcount * 2 + 4)) + b"\x1b[0m\n")
+        out.write("\x1b[1;47m" + (" " * (modcount * 2 + 4)) + "\x1b[0m\n")
         for r in range(modcount):
-            out.write(b"\x1b[1;47m  \x1b[40m")
+            out.write("\x1b[1;47m  \x1b[40m")
             for c in range(modcount):
                 if self.modules[r][c]:
-                    out.write(b"  ")
+                    out.write("  ")
                 else:
-                    out.write(b"\x1b[1;47m  \x1b[40m")
-            out.write(b"\x1b[1;47m  \x1b[0m\n")
-        out.write(b"\x1b[1;47m" + (b" " * (modcount * 2 + 4)) + b"\x1b[0m\n")
+                    out.write("\x1b[1;47m  \x1b[40m")
+            out.write("\x1b[1;47m  \x1b[0m\n")
+        out.write("\x1b[1;47m" + (" " * (modcount * 2 + 4)) + "\x1b[0m\n")
         out.flush()
 
     def print_ascii(self, out=None, tty=False, invert=False):
@@ -201,7 +201,14 @@ class QRCode:
         """
         if out is None:
             import sys
-            out = sys.stdout
+            if sys.version_info < (2, 7):
+                # On Python versions 2.6 and earlier, stdout tries to encode
+                # strings using ASCII rather than stdout.encoding, so use this
+                # workaround.
+                import codecs
+                out = codecs.getwriter(sys.stdout.encoding)(sys.stdout)
+            else:
+                out = sys.stdout
 
         if tty and not out.isatty():
             raise OSError("Not a tty")
@@ -210,7 +217,7 @@ class QRCode:
             self.make()
 
         modcount = self.modules_count
-        codes = [six.int2byte(code).decode('cp437').encode('utf-8')
+        codes = [six.int2byte(code).decode('cp437')
                  for code in (255, 223, 220, 219)]
         if tty:
             invert = True
@@ -228,14 +235,14 @@ class QRCode:
         for r in range(-self.border, modcount+self.border, 2):
             if tty:
                 if not invert or r < modcount+self.border-1:
-                    out.write(b'\x1b[48;5;232m')   # Background black
-                out.write(b'\x1b[38;5;255m')   # Foreground white
+                    out.write('\x1b[48;5;232m')   # Background black
+                out.write('\x1b[38;5;255m')   # Foreground white
             for c in range(-self.border, modcount+self.border):
                 pos = get_module(r, c) + (get_module(r+1, c) << 1)
                 out.write(codes[pos])
             if tty:
-                out.write(b'\x1b[0m')
-            out.write(b'\n')
+                out.write('\x1b[0m')
+            out.write('\n')
         out.flush()
 
     def make_image(self, image_factory=None, **kwargs):

@@ -1,5 +1,6 @@
 import warnings
 import six
+import sys
 import qrcode
 import qrcode.util
 import qrcode.image.svg
@@ -195,29 +196,31 @@ class QRCodeTests(unittest.TestCase):
 
     def test_print_ascii_stdout(self):
         qr = qrcode.QRCode()
+        stdout_encoding = sys.stdout.encoding
         with mock.patch('sys.stdout') as fake_stdout:
+            # Python 2.6 needs sys.stdout.encoding to be a real string.
+            sys.stdout.encoding = stdout_encoding
             fake_stdout.isatty.return_value = None
             self.assertRaises(OSError, qr.print_ascii, tty=True)
             self.assertTrue(fake_stdout.isatty.called)
 
     def test_print_ascii(self):
         qr = qrcode.QRCode(border=0)
-        f = six.BytesIO()
+        f = six.StringIO()
         qr.print_ascii(out=f)
         printed = f.getvalue()
         f.close()
-        expected = u'\u2588\u2580\u2580\u2580\u2580\u2580\u2588'.encode(
-            'utf-8')
+        expected = u'\u2588\u2580\u2580\u2580\u2580\u2580\u2588'
         self.assertEqual(printed[:len(expected)], expected)
 
-        f = six.BytesIO()
+        f = six.StringIO()
         f.isatty = lambda: True
         qr.print_ascii(out=f, tty=True)
         printed = f.getvalue()
         f.close()
         expected = (
             u'\x1b[48;5;232m\x1b[38;5;255m' +
-            u'\xa0\u2584\u2584\u2584\u2584\u2584\xa0').encode('utf-8')
+            u'\xa0\u2584\u2584\u2584\u2584\u2584\xa0')
         self.assertEqual(printed[:len(expected)], expected)
 
     def test_print_tty_stdout(self):
@@ -229,18 +232,18 @@ class QRCodeTests(unittest.TestCase):
 
     def test_print_tty(self):
         qr = qrcode.QRCode()
-        f = six.BytesIO()
+        f = six.StringIO()
         f.isatty = lambda: True
         qr.print_tty(out=f)
         printed = f.getvalue()
         f.close()
-        BOLD_WHITE_BG = b'\x1b[1;47m'
-        BLACK_BG = b'\x1b[40m'
-        WHITE_BLOCK = BOLD_WHITE_BG + b'  ' + BLACK_BG
-        EOL = b'\x1b[0m\n'
+        BOLD_WHITE_BG = '\x1b[1;47m'
+        BLACK_BG = '\x1b[40m'
+        WHITE_BLOCK = BOLD_WHITE_BG + '  ' + BLACK_BG
+        EOL = '\x1b[0m\n'
         expected = (
-            BOLD_WHITE_BG + b'  '*23 + EOL +
-            WHITE_BLOCK + b'  '*7 + WHITE_BLOCK)
+            BOLD_WHITE_BG + '  '*23 + EOL +
+            WHITE_BLOCK + '  '*7 + WHITE_BLOCK)
         self.assertEqual(printed[:len(expected)], expected)
 
     def test_get_matrix(self):
