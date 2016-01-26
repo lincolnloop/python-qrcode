@@ -18,12 +18,12 @@ Version 5.2
 
 * Fix terminal output to display correctly on MS command line.
 
-Version 5.5.1
+Version 5.2.1
 -------------
 
 * Small fix to terminal output in Python 3 (and fix tests)
 
-Version 5.5.2
+Version 5.2.2
 -------------
 
 * Revert some terminal changes from 5.2 that broke Python 3's real life tty
