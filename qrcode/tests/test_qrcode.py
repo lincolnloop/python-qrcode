@@ -257,6 +257,14 @@ class QRCodeTests(unittest.TestCase):
         matrix = [row[1:-1] for row in qr.get_matrix()[1:-1]]
         self.assertEqual(matrix, qr.modules)
 
+    def test_negative_size_at_construction(self):
+        self.assertRaises(ValueError, qrcode.QRCode, box_size=-1)
+
+    def test_negative_size_at_usage(self):
+        qr = qrcode.QRCode()
+        qr.box_size = -1
+        self.assertRaises(ValueError, qr.make_image)
+
 
 class ShortcutTest(unittest.TestCase):
 
