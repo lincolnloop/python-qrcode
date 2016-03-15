@@ -38,12 +38,12 @@ class BaseImage(object):
         Build the image class. Subclasses should return the class created.
         """
         return None
-        
+
     def get_image(self, **kwargs):
         """
         Return the image class for further processing.
         """
-        return _img
+        return self._img
 
     def check_kind(self, kind, transform=None):
         """
