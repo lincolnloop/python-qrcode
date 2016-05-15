@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 import io
 import os
 from setuptools import setup, find_packages
+import sys
 
 
 def long_description():
@@ -17,6 +18,11 @@ def long_description():
             content.append(f.read())
     return '\n\n'.join(content)
 
+# Colorama is needed for proper terminal support on MS platforms
+if sys.platform.startswith(('win', 'cygwin')):
+    dependencies = ['six', 'colorama']
+else:
+    dependencies = ['six']
 
 setup(
     name='qrcode',
@@ -34,7 +40,7 @@ setup(
             'qr = qrcode.console_scripts:main',
         ],
     },
-    install_requires=['six', 'colorama'],
+    install_requires=dependencies,
     data_files=[('share/man/man1', ['doc/qr.1'])],
     include_package_data=True,
     classifiers=[
