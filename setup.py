@@ -18,6 +18,7 @@ def long_description():
             content.append(f.read())
     return '\n\n'.join(content)
 
+
 # Colorama is needed for proper terminal support on MS platforms
 if sys.platform.startswith(('win', 'cygwin')):
     dependencies = ['six', 'colorama']
@@ -26,7 +27,7 @@ else:
 
 setup(
     name='qrcode',
-    version='5.2.2.post',
+    version='5.3',
     url='https://github.com/lincolnloop/python-qrcode',
     description='QR Code image generator',
     license='BSD',

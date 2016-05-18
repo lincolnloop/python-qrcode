@@ -2,6 +2,17 @@
 Change log
 ==========
 
+Version 5.3
+===========
+
+* Fix incomplete block table for QR version 15. Thanks Rodrigo Queiro for the
+  report and Jacob Welsh for the investigation and fix.
+
+* Avoid unnecessary dependency for non MS platforms, thanks to Noah Vesely.
+
+* Make ``BaseImage.get_image()`` actually work.
+
+
 Version 5.2
 ===========
 
