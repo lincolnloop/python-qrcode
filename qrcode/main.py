@@ -252,6 +252,45 @@ class QRCode:
             out.write('\n')
         out.flush()
 
+    def get_ascii(self, invert=False):
+        """
+        Get the QR Code using ASCII characters as a string.
+
+        :param invert: invert the ASCII characters (solid <-> transparent)
+        """
+
+        if self.data_cache is None:
+            self.make()
+
+        modcount = self.modules_count
+        codes = [six.int2byte(code).decode('cp437')
+                 for code in (255, 223, 220, 219)]
+
+        if invert:
+            codes.reverse()
+
+        def get_module(x, y):
+            if (invert and self.border and
+                    max(x, y) >= modcount+self.border):
+                return 1
+            if min(x, y) < 0 or max(x, y) >= modcount:
+                return 0
+            return self.modules[x][y]
+
+        outString = ""
+
+        for r in range(-self.border, modcount+self.border, 2):
+            if not invert or r < modcount+self.border-1:
+                outString += '\x1b[48;5;232m'   # Background black
+            outString += '\x1b[38;5;255m'   # Foreground white
+            for c in range(-self.border, modcount+self.border):
+                pos = get_module(r, c) + (get_module(r+1, c) << 1)
+                outString += codes[pos]
+            outString += '\x1b[0m'
+            outString += '\n'
+        
+        return outString
+
     def make_image(self, image_factory=None, **kwargs):
         """
         Make an image from the QR Code data.
