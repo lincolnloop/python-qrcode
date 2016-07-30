@@ -1,9 +1,11 @@
 import re
 import math
+import bisect
 
 import six
 from six.moves import xrange
 
+from collections import defaultdict
 from qrcode import base, exceptions
 
 # QR encoding modes.
@@ -32,7 +34,11 @@ MODE_SIZE_LARGE = {
     MODE_KANJI: 12,
 }
 
+BITS_FOR_MODE = 4
+
+NUMERIC_ONLY = six.b('0123456789')
 ALPHA_NUM = six.b('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:')
+BINARY_BYTE = six.b(''.join([chr(x) for x in range(0x100)]))
 RE_ALPHA_NUM = re.compile(six.b('^[') + re.escape(ALPHA_NUM) + six.b(']*\Z'))
 
 # The number of bits for numeric delimited data lengths.
@@ -92,11 +98,13 @@ G15_MASK = (1 << 14) | (1 << 12) | (1 << 10) | (1 << 4) | (1 << 1)
 PAD0 = 0xEC
 PAD1 = 0x11
 
+MAX_VERSION = 40
+
 # Precompute bit count limits, indexed by error correction level and code size
 _data_count = lambda block: block.data_count
 BIT_LIMIT_TABLE = [
     [0] + [8*sum(map(_data_count, base.rs_blocks(version, error_correction)))
-           for version in xrange(1, 41)]
+           for version in xrange(1, MAX_VERSION+1)]
     for error_correction in xrange(4)
 ]
 
@@ -306,30 +314,34 @@ def _lost_point_level4(modules, modules_count):
     return ratio * 10
 
 
-def optimal_data_chunks(data, minimum=4):
+def optimal_data_chunks(data, minimum=4, error_correction=0):
     """
     An iterator returning QRData chunks optimized to the data content.
 
     :param minimum: The minimum number of bytes in a row to split as a chunk.
     """
     data = to_bytestring(data)
-    re_repeat = (
-        six.b('{') + six.text_type(minimum).encode('ascii') + six.b(',}'))
-    num_pattern = re.compile(six.b('\d') + re_repeat)
-    num_bits = _optimal_split(data, num_pattern)
-    alpha_pattern = re.compile(
-        six.b('[') + re.escape(ALPHA_NUM) + six.b(']') + re_repeat)
-    for is_num, chunk in num_bits:
-        if is_num:
-            yield QRData(chunk, mode=MODE_NUMBER, check_data=False)
+    for version in xrange(1, MAX_VERSION + 1):
+        data_list = encode_with_version(data, version)
+        if None != data_list and len(data_list) <= BIT_LIMIT_TABLE[error_correction][version]:
+            break
         else:
-            for is_alpha, sub_chunk in _optimal_split(chunk, alpha_pattern):
-                if is_alpha:
-                    mode = MODE_ALPHA_NUM
-                else:
-                    mode = MODE_8BIT_BYTE
-                yield QRData(sub_chunk, mode=mode, check_data=False)
+            data_list = None
+    if None == data_list:
+        raise exceptions.DataOverflowError()
 
+    data_chunks = []
+    last_mode = data_list[0][1]
+    chunk = ''
+    for data, mode in data_list:
+        if last_mode != mode:
+            data_chunks.append(QRData(chunk, last_mode))
+            chunk = data
+            last_mode = mode
+        else:
+            chunk += data
+    data_chunks.append(QRData(chunk, last_mode))
+    return data_chunks
 
 def _optimal_split(data, pattern):
     while data:
@@ -554,3 +566,234 @@ def create_data(version, error_correction, data_list):
             buffer.put(PAD1, 8)
 
     return create_bytes(buffer, rs_blocks)
+
+def add_edge(graph, source, char_index, char, mode_sizes):
+    targets = set()
+    if char in NUMERIC_ONLY:
+        bits_for_char = 4
+        combined = 0
+        if source.startswith('NUM_'):
+            bits_for_mode = 0
+            if source.endswith('_0'):
+                bits_for_char = 3
+                combined = 1
+            elif source.endswith('_1'):
+                bits_for_char = 3
+                combined = 2
+        else:
+            bits_for_mode = BITS_FOR_MODE + mode_sizes[MODE_NUMBER]
+        target = 'NUM_%04d_%s_%d' % (char_index, char, combined)
+        graph[source][target] = bits_for_mode + bits_for_char
+        targets.add(target)
+    if char in ALPHA_NUM:
+        bits_for_char = 6
+        combined = 0
+        if source.startswith('ALP_'):
+            bits_for_mode = 0
+            if source.endswith('_0'):
+                bits_for_char = 5
+                combined = 1
+        else:
+            bits_for_mode = BITS_FOR_MODE + mode_sizes[MODE_ALPHA_NUM]
+        target = 'ALP_%04d_%s_%d' % (char_index, char, combined)
+        graph[source][target] = bits_for_mode + bits_for_char
+        targets.add(target)
+    if char in BINARY_BYTE:
+        if source.startswith('BIN_'):
+            bits_for_mode = 0
+        else:
+            bits_for_mode = BITS_FOR_MODE + mode_sizes[MODE_8BIT_BYTE]
+        target = 'BIN_%04d_%s' % (char_index, char)
+        graph[source][target] = bits_for_mode + 8
+        targets.add(target)
+    if source.startswith('KAN_'):
+        bits_for_mode = 0
+    else:
+        bits_for_mode = BITS_FOR_MODE + mode_sizes[MODE_KANJI]
+    target = 'KAN_%04d_%s' % (char_index, char)
+    graph[source][target] = bits_for_mode + 13
+    targets.add(target)
+    return targets
+
+def make_flow_graph_from_data(data, mode_sizes):
+    graph = defaultdict(dict)
+    if 0 == len(data):
+        return graph
+    sources = add_edge(graph, 'start', 0, data[0], mode_sizes)
+    for i in xrange(1, len(data)):
+        targets = set()
+        for src in sources:
+            targets.update(add_edge(graph, src, i, data[i], mode_sizes))
+        sources = targets
+    for src in sources:
+        graph[src]['end'] = 0
+    return graph
+
+# http://code.activestate.com/recipes/117228/
+# Priority dictionary using binary heaps
+# David Eppstein, UC Irvine, 8 Mar 2002
+class priorityDictionary(dict):
+    def __init__(self):
+        '''Initialize priorityDictionary by creating binary heap
+of pairs (value,key).  Note that changing or removing a dict entry will
+not remove the old pair from the heap until it is found by smallest() or
+until the heap is rebuilt.'''
+        self.__heap = []
+        dict.__init__(self)
+
+    def smallest(self):
+        '''Find smallest item after removing deleted items from heap.'''
+        if len(self) == 0:
+            raise IndexError, "smallest of empty priorityDictionary"
+        heap = self.__heap
+        while heap[0][1] not in self or self[heap[0][1]] != heap[0][0]:
+            lastItem = heap.pop()
+            insertionPoint = 0
+            while 1:
+                smallChild = 2*insertionPoint+1
+                if smallChild+1 < len(heap) and \
+                        heap[smallChild] > heap[smallChild+1]:
+                    smallChild += 1
+                if smallChild >= len(heap) or lastItem <= heap[smallChild]:
+                    heap[insertionPoint] = lastItem
+                    break
+                heap[insertionPoint] = heap[smallChild]
+                insertionPoint = smallChild
+        return heap[0][1]
+
+    def __iter__(self):
+        '''Create destructive sorted iterator of priorityDictionary.'''
+        def iterfn():
+            while len(self) > 0:
+                x = self.smallest()
+                yield x
+                del self[x]
+        return iterfn()
+
+    def __setitem__(self,key,val):
+        '''Change value stored in dictionary and add corresponding
+pair to heap.  Rebuilds the heap if the number of deleted items grows
+too large, to avoid memory leakage.'''
+        dict.__setitem__(self,key,val)
+        heap = self.__heap
+        if len(heap) > 2 * len(self):
+            self.__heap = [(v,k) for k,v in self.iteritems()]
+            self.__heap.sort()  # builtin sort likely faster than O(n) heapify
+        else:
+            newPair = (val,key)
+            insertionPoint = len(heap)
+            heap.append(None)
+            while insertionPoint > 0 and \
+                    newPair < heap[(insertionPoint-1)//2]:
+                heap[insertionPoint] = heap[(insertionPoint-1)//2]
+                insertionPoint = (insertionPoint-1)//2
+            heap[insertionPoint] = newPair
+
+    def setdefault(self,key,val):
+        '''Reimplement setdefault to call our customized __setitem__.'''
+        if key not in self:
+            self[key] = val
+        return self[key]
+
+# Dijkstra's algorithm for shortest paths
+# David Eppstein, UC Irvine, 4 April 2002
+# http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/117228
+def Dijkstra(G, start, end=None):
+    """
+    Find shortest paths from the start vertex to all
+    vertices nearer than or equal to the end.
+
+    The input graph G is assumed to have the following
+    representation: A vertex can be any object that can
+    be used as an index into a dictionary.  G is a
+    dictionary, indexed by vertices.  For any vertex v,
+    G[v] is itself a dictionary, indexed by the neighbors
+    of v.  For any edge v->w, G[v][w] is the length of
+    the edge.  This is related to the representation in
+    <http://www.python.org/doc/essays/graphs.html>
+    where Guido van Rossum suggests representing graphs
+    as dictionaries mapping vertices to lists of neighbors,
+    however dictionaries of edges have many advantages
+    over lists: they can store extra information (here,
+    the lengths), they support fast existence tests,
+    and they allow easy modification of the graph by edge
+    insertion and removal.  Such modifications are not
+    needed here but are important in other graph algorithms.
+    Since dictionaries obey iterator protocol, a graph
+    represented as described here could be handed without
+    modification to an algorithm using Guido's representation.
+
+    Of course, G and G[v] need not be Python dict objects;
+    they can be any other object that obeys dict protocol,
+    for instance a wrapper in which vertices are URLs
+    and a call to G[v] loads the web page and finds its links.
+
+    The output is a pair (D,P) where D[v] is the distance
+    from start to v and P[v] is the predecessor of v along
+    the shortest path from s to v.
+
+    Dijkstra's algorithm is only guaranteed to work correctly
+    when all edge lengths are positive. This code does not
+    verify this property for all edges (only the edges seen
+    before the end vertex is reached), but will correctly
+    compute shortest paths even for some graphs with negative
+    edges, and will raise an exception if it discovers that
+    a negative edge has caused it to make a mistake.
+    """
+
+    D = {}  # dictionary of final distances
+    P = {}  # dictionary of predecessors
+    Q = priorityDictionary()   # est.dist. of non-final vert.
+    Q[start] = 0
+
+    for v in Q:
+        D[v] = Q[v]
+        if v == end: break
+
+        for w in G[v]:
+            vwLength = D[v] + G[v][w]
+            if w in D:
+                if vwLength < D[w]:
+                    raise ValueError, \
+  "Dijkstra: found better path to already-final vertex"
+            elif w not in Q or vwLength < Q[w]:
+                Q[w] = vwLength
+                P[w] = v
+
+    return (D,P)
+
+def shortestPath(G, start, end):
+    """
+    Find a single shortest path from the given start vertex
+    to the given end vertex.
+    The input has the same conventions as Dijkstra().
+    The output is a list of the vertices in order along
+    the shortest path.
+    """
+
+    D,P = Dijkstra(G,start,end)
+    Path = []
+    while 1:
+        Path.append(end)
+        if end == start: break
+        end = P[end]
+    Path.reverse()
+    return Path
+
+def mode_name_to_mode(name):
+    if name == 'BIN':
+        return MODE_8BIT_BYTE
+    elif name == 'NUM':
+        return MODE_NUMBER
+    elif name == 'ALP':
+        return MODE_ALPHA_NUM
+    elif name == 'KAN':
+        return MODE_KANJI
+    else:
+        raise ValueError, "Invalid mode %r" % name
+
+def encode_with_version(data, version):
+    mode_sizes = mode_sizes_for_version(version)
+    flow_graph = make_flow_graph_from_data(data, mode_sizes)
+    shortest_path = shortestPath(flow_graph, 'start', 'end')
+    return [(c, mode_name_to_mode(enc[:3])) for c, enc in zip(data, shortest_path[1:-1])]
