@@ -1,5 +1,4 @@
 import re
-import math
 import bisect
 
 import six
@@ -149,7 +148,7 @@ def mask_func(pattern):
     if pattern == 3:   # 011
         return lambda i, j: (i + j) % 3 == 0
     if pattern == 4:   # 100
-        return lambda i, j: (math.floor(i / 2) + math.floor(j / 3)) % 2 == 0
+        return lambda i, j: ((i // 2) + (j // 3)) % 2 == 0
     if pattern == 5:  # 101
         return lambda i, j: (i * j) % 2 + (i * j) % 3 == 0
     if pattern == 6:  # 110
@@ -448,7 +447,7 @@ class BitBuffer:
         return ".".join([str(n) for n in self.buffer])
 
     def get(self, index):
-        buf_index = math.floor(index / 8)
+        buf_index = index // 8
         return ((self.buffer[buf_index] >> (7 - index % 8)) & 1) == 1
 
     def put(self, num, length):
