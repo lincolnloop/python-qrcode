@@ -1,6 +1,7 @@
 from qrcode import constants, exceptions, util
 from qrcode.image.base import BaseImage
 
+from collections import defaultdict
 import six
 from bisect import bisect_left
 
@@ -24,11 +25,14 @@ def _check_box_size(size):
 
 
 class QRCode:
-
     def __init__(self, version=None,
                  error_correction=constants.ERROR_CORRECT_M,
                  box_size=10, border=4,
-                 image_factory=None):
+                 image_factory=None,
+                 false_color=(255,255,255),
+                 true_color=(0,0,0),
+                 extended_colors=None,
+                 copy_colors_to_ec=False):
         _check_box_size(box_size)
         self.version = version and int(version)
         self.error_correction = int(error_correction)
@@ -40,6 +44,13 @@ class QRCode:
         if image_factory is not None:
             assert issubclass(image_factory, BaseImage)
         self.clear()
+        self.control_colors = defaultdict(lambda :true_color)
+        self.control_colors[False] = false_color
+        self.control_colors[0] = false_color
+        self.control_colors[None] = false_color
+        if extended_colors:
+            self.control_colors.update(extended_colors)
+        self.copy_colors_to_ec = copy_colors_to_ec
 
     def clear(self):
         """
@@ -50,24 +61,25 @@ class QRCode:
         self.data_cache = None
         self.data_list = []
         self.raw_data = ''
+        self.colors = []
 
-    def add_data(self, data, optimize=20):
+    def add_data(self, data, color=None, optimize=True):
         """
         Add data to this QR Code.
-
-        :param optimize: Data will be split into multiple chunks to optimize
-            the QR size by finding to more compressed modes of at least this
-            length. Set to ``0`` to avoid optimizing at all.
         """
+        if None == color:
+            color = self.control_colors[True]
         if isinstance(data, util.QRData):
             self.data_list.append(data)
             self.raw_data += data.data
+            self.colors += [color] * len(data.data)
         else:
             self.raw_data += data
+            self.colors += [color] * len(data)
             if optimize:
                 self.data_list = util.optimal_data_chunks(self.raw_data)
             else:
-                self.data_list.append(util.QRData(data))
+                self.data_list.append(util.QRData(data, color=color))
         self.data_cache = None
 
     def make(self, fit=True):
@@ -81,7 +93,7 @@ class QRCode:
             self.best_fit(start=self.version)
         self.makeImpl(False, self.best_mask_pattern())
 
-    def makeImpl(self, test, mask_pattern):
+    def makeImpl(self, test, mask_pattern, use_colors=True):
         _check_version(self.version)
         self.modules_count = self.version * 4 + 17
         self.modules = [None] * self.modules_count
@@ -93,22 +105,39 @@ class QRCode:
             for col in range(self.modules_count):
                 self.modules[row][col] = None   # (col + row) % 3
 
-        self.setup_position_probe_pattern(0, 0)
-        self.setup_position_probe_pattern(self.modules_count - 7, 0)
-        self.setup_position_probe_pattern(0, self.modules_count - 7)
-        self.setup_position_adjust_pattern()
-        self.setup_timing_pattern()
-        self.setup_type_info(test, mask_pattern)
+        self.setup_position_probe_pattern(0, 0, use_colors=use_colors)
+        self.setup_position_probe_pattern(self.modules_count - 7, 0, use_colors=use_colors)
+        self.setup_position_probe_pattern(0, self.modules_count - 7, use_colors=use_colors)
+        self.setup_position_adjust_pattern(use_colors=use_colors)
+        self.setup_timing_pattern(use_colors=use_colors)
+        self.setup_type_info(test, mask_pattern, use_colors=use_colors)
 
         if self.version >= 7:
             self.setup_type_number(test)
 
         if self.data_cache is None:
             self.data_cache = util.create_data(
-                self.version, self.error_correction, self.data_list)
-        self.map_data(self.data_cache, mask_pattern)
+                                    self.version,
+                                    self.error_correction,
+                                    self.data_list,
+                                    self.colors,
+                                    self.control_colors,
+                                    copy_colors_to_ec=self.copy_colors_to_ec)
+        self.map_data(self.data_cache, mask_pattern, use_colors=use_colors)
 
-    def setup_position_probe_pattern(self, row, col):
+    def get_false_and_true_colors(self, color_index, use_colors=True):
+        if use_colors:
+            true_color = self.control_colors[color_index]
+            false_color = self.control_colors[False]
+        else:
+            true_color = True
+            false_color = False
+        return (false_color, true_color)
+
+    def setup_position_probe_pattern(self, row, col, use_colors=True):
+
+        false_color, true_color = self.get_false_and_true_colors('prob', use_colors=use_colors)
+
         for r in range(-1, 8):
 
             if row + r <= -1 or self.modules_count <= row + r:
@@ -122,9 +151,9 @@ class QRCode:
                 if (0 <= r and r <= 6 and (c == 0 or c == 6)
                         or (0 <= c and c <= 6 and (r == 0 or r == 6))
                         or (2 <= r and r <= 4 and 2 <= c and c <= 4)):
-                    self.modules[row + r][col + c] = True
+                    self.modules[row + r][col + c] = true_color
                 else:
-                    self.modules[row + r][col + c] = False
+                    self.modules[row + r][col + c] = false_color
 
     def best_fit(self, start=None):
         """
@@ -139,9 +168,9 @@ class QRCode:
         mode_sizes = util.mode_sizes_for_version(start)
         buffer = util.BitBuffer()
         for data in self.data_list:
-            buffer.put(data.mode, 4)
-            buffer.put(len(data), mode_sizes[data.mode])
-            data.write(buffer)
+            buffer.put(data.mode, 4, None)
+            buffer.put(len(data), mode_sizes[data.mode], None)
+            data.write_to_buffer(buffer, None)
 
         needed_bits = len(buffer)
         self.version = bisect_left(util.BIT_LIMIT_TABLE[self.error_correction],
@@ -163,7 +192,7 @@ class QRCode:
         pattern = 0
 
         for i in range(8):
-            self.makeImpl(True, i)
+            self.makeImpl(True, i, use_colors=False)
 
             lost_point = util.lost_point(self.modules)
 
@@ -275,29 +304,37 @@ class QRCode:
                 image_factory = PilImage
 
         im = image_factory(
-            self.border, self.modules_count, self.box_size, **kwargs)
+            self.border, self.modules_count, self.box_size)
         for r in range(self.modules_count):
             for c in range(self.modules_count):
-                if self.modules[r][c]:
-                    im.drawrect(r, c)
+                im.drawrect(r, c, self.modules[r][c])
         return im
 
-    def setup_timing_pattern(self):
+    def setup_timing_pattern(self, use_colors=True):
+        false_color, true_color = self.get_false_and_true_colors('timing', use_colors=use_colors)
+
         for r in range(8, self.modules_count - 8):
             if self.modules[r][6] is not None:
                 continue
-            self.modules[r][6] = (r % 2 == 0)
+            if not (r % 2):
+                self.modules[r][6] = true_color
+            else:
+                self.modules[r][6] = false_color
 
         for c in range(8, self.modules_count - 8):
             if self.modules[6][c] is not None:
                 continue
-            self.modules[6][c] = (c % 2 == 0)
+            if not (c % 2):
+                self.modules[6][c] = true_color
+            else:
+                self.modules[6][c] = false_color
 
-    def setup_position_adjust_pattern(self):
+    def setup_position_adjust_pattern(self, use_colors):
+
+        false_color, true_color = self.get_false_and_true_colors('prob', use_colors=use_colors)
         pos = util.pattern_position(self.version)
 
         for i in range(len(pos)):
-
             for j in range(len(pos)):
 
                 row = pos[i]
@@ -307,34 +344,33 @@ class QRCode:
                     continue
 
                 for r in range(-2, 3):
-
                     for c in range(-2, 3):
-
-                        if (r == -2 or r == 2 or c == -2 or c == 2 or
-                                (r == 0 and c == 0)):
-                            self.modules[row + r][col + c] = True
+                        if (r == -2 or r == 2 or c == -2 or c == 2 or (r == 0 and c == 0)):
+                            self.modules[row + r][col + c] = true_color
                         else:
-                            self.modules[row + r][col + c] = False
+                            self.modules[row + r][col + c] = false_color
 
     def setup_type_number(self, test):
         bits = util.BCH_type_number(self.version)
 
         for i in range(18):
-            mod = (not test and ((bits >> i) & 1) == 1)
+            mod = self.control_colors[bool(not test and ((bits >> i) & 1) == 1)]
             self.modules[i // 3][i % 3 + self.modules_count - 8 - 3] = mod
 
         for i in range(18):
-            mod = (not test and ((bits >> i) & 1) == 1)
+            mod = self.control_colors[bool(not test and ((bits >> i) & 1) == 1)]
             self.modules[i % 3 + self.modules_count - 8 - 3][i // 3] = mod
 
-    def setup_type_info(self, test, mask_pattern):
+    def setup_type_info(self, test, mask_pattern, use_colors=True):
+        false_color, true_color = self.get_false_and_true_colors(True, use_colors=use_colors)
+        colors = {False:false_color, True:true_color}
         data = (self.error_correction << 3) | mask_pattern
         bits = util.BCH_type_info(data)
 
         # vertical
         for i in range(15):
 
-            mod = (not test and ((bits >> i) & 1) == 1)
+            mod = colors[bool(not test and ((bits >> i) & 1) == 1)]
 
             if i < 6:
                 self.modules[i][8] = mod
@@ -346,7 +382,7 @@ class QRCode:
         # horizontal
         for i in range(15):
 
-            mod = (not test and ((bits >> i) & 1) == 1)
+            mod = colors[bool((not test and ((bits >> i) & 1) == 1))]
 
             if i < 8:
                 self.modules[8][self.modules_count - i - 1] = mod
@@ -356,17 +392,14 @@ class QRCode:
                 self.modules[8][15 - i - 1] = mod
 
         # fixed module
-        self.modules[self.modules_count - 8][8] = (not test)
+        self.modules[self.modules_count - 8][8] = colors[bool(not test)]
 
-    def map_data(self, data, mask_pattern):
+    def map_data(self, data, mask_pattern, use_colors=True):
         inc = -1
         row = self.modules_count - 1
-        bitIndex = 7
-        byteIndex = 0
+        bit_index = 0
 
         mask_func = util.mask_func(mask_pattern)
-
-        data_len = len(data)
 
         for col in six.moves.xrange(self.modules_count - 1, 0, -2):
 
@@ -375,33 +408,33 @@ class QRCode:
 
             col_range = (col, col-1)
 
-            while True:
-
+            while row >= 0 and self.modules_count > row:
                 for c in col_range:
-
                     if self.modules[row][c] is None:
-
-                        dark = False
-
-                        if byteIndex < data_len:
-                            dark = (((data[byteIndex] >> bitIndex) & 1) == 1)
+                        if bit_index < len(data):
+                            bit = data[bit_index]
+                            value = bit[0]
+                            color = bit[1]
+                        else:
+                            value = False
+                            color = self.control_colors[True]
 
                         if mask_func(row, c):
-                            dark = not dark
+                            value = not value
 
-                        self.modules[row][c] = dark
-                        bitIndex -= 1
+                        if use_colors:
+                            if value:
+                                self.modules[row][c] = color
+                            else:
+                                self.modules[row][c] = self.control_colors[False]
+                        else:
+                            self.modules[row][c] = value
 
-                        if bitIndex == -1:
-                            byteIndex += 1
-                            bitIndex = 7
+                        bit_index += 1
 
                 row += inc
-
-                if row < 0 or self.modules_count <= row:
-                    row -= inc
-                    inc = -inc
-                    break
+            row -= inc
+            inc = -inc
 
     def get_matrix(self):
         """

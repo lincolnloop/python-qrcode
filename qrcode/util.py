@@ -1,8 +1,5 @@
 import re
-import bisect
 import reedsolo
-from StringIO import StringIO
-from itertools import izip_longest
 
 import six
 from six.moves import xrange
@@ -347,6 +344,7 @@ def optimal_data_chunks(data, minimum=4, error_correction=0):
     data_chunks.append(QRData(chunk, last_mode))
     return data_chunks
 
+
 def _optimal_split(data, pattern):
     while data:
         match = re.search(pattern, data)
@@ -413,21 +411,28 @@ class QRData:
     def __len__(self):
         return len(self.data)
 
-    def write(self, buffer):
+    def _getColor(self, index, colors):
+        if None == colors:
+            return None
+        return colors[index]
+
+    def write_to_buffer(self, buffer, colors=None):
         if self.mode == MODE_NUMBER:
             for i in xrange(0, len(self.data), 3):
                 chars = self.data[i:i + 3]
                 bit_length = NUMBER_LENGTH[len(chars)]
-                buffer.put(int(chars), bit_length)
+                color = self._getColor(i, colors)
+                buffer.put(int(chars), bit_length, color)
         elif self.mode == MODE_ALPHA_NUM:
             for i in xrange(0, len(self.data), 2):
                 chars = self.data[i:i + 2]
+                color = self._getColor(i, colors)
                 if len(chars) > 1:
                     buffer.put(
                         ALPHA_NUM.find(chars[0]) * 45 +
-                        ALPHA_NUM.find(chars[1]), 11)
+                        ALPHA_NUM.find(chars[1]), 11, color)
                 else:
-                    buffer.put(ALPHA_NUM.find(chars), 6)
+                    buffer.put(ALPHA_NUM.find(chars), 6, color)
         else:
             if six.PY3:
                 # Iterating a bytestring in Python 3 returns an integer,
@@ -435,19 +440,23 @@ class QRData:
                 data = self.data
             else:
                 data = [ord(c) for c in self.data]
-            for c in data:
-                buffer.put(c, 8)
+            for i, c in enumerate(data):
+                color = self._getColor(i, colors)
+                buffer.put(c, 8, color)
 
     def __repr__(self):
         return repr(self.data)
 
-def create_data(version, error_correction, data_list):
+def create_data(version, error_correction, data_list, colors, control_colors=None, copy_colors_to_ec=False):
+    if None == control_colors:
+        control_colors = defaultdict(lambda :True)
 
-    buffer = BitBuffer()
+    bit_buf = BitBuffer()
     for data in data_list:
-        buffer.put(data.mode, 4)
-        buffer.put(len(data), length_in_bits(data.mode, version))
-        data.write(buffer)
+        bit_buf.put(data.mode, 4, control_colors.get(True))
+        bit_buf.put(len(data), length_in_bits(data.mode, version), control_colors.get(True))
+        data.write_to_buffer(bit_buf, colors[:len(data)])
+        colors = colors[len(data):]
 
     # Calculate the maximum number of bits for the given version.
     rs_blocks = base.rs_blocks(version, error_correction)
@@ -455,54 +464,67 @@ def create_data(version, error_correction, data_list):
     for block in rs_blocks:
         bit_limit += block.data_count * 8
 
-    if len(buffer) > bit_limit:
+    if len(bit_buf) > bit_limit:
         raise exceptions.DataOverflowError(
             "Code length overflow. Data size (%s) > size available (%s)" %
-            (len(buffer), bit_limit))
+            (len(bit_buf), bit_limit))
 
     # Terminate the bits (add up to four 0s).
-    for i in range(min(bit_limit - len(buffer), 4)):
-        buffer.put_bit(False)
+    for i in range(min(bit_limit - len(bit_buf), 4)):
+        bit_buf.put_bit(False, control_colors[True])
 
     # Delimit the string into 8-bit words, padding with 0s if necessary.
-    delimit = len(buffer) % 8
+    delimit = len(bit_buf) % 8
     if delimit:
-        buffer.put(0, 8 - delimit)
+        bit_buf.put(0, 8 - delimit, control_colors['padding'])
 
-    # Add special alternating padding bitstrings until buffer is full.
-    bytes_to_fill = (bit_limit - len(buffer)) // 8
+    # Add special alternating padding bitstrings until bit_buf is full.
+    bytes_to_fill = (bit_limit - len(bit_buf)) // 8
     for i in range(bytes_to_fill):
         if i % 2 == 0:
-            buffer.put(PAD0, 8)
+            bit_buf.put(PAD0, 8, control_colors['padding'])
         else:
-            buffer.put(PAD1, 8)
+            bit_buf.put(PAD1, 8, control_colors['padding'])
 
-    data_and_error_correction = generate_error_correction(buffer, rs_blocks)
+    data_and_error_correction = generate_error_correction(bit_buf, rs_blocks, control_colors, copy_colors_to_ec)
     encoded_data = combain_data_and_error_correction(data_and_error_correction)
     return encoded_data
 
-def generate_error_correction(buffer, rs_blocks):
-    data = StringIO(bytearray(buffer.buffer))
+def generate_error_correction(buffer, rs_blocks, control_colors, copy_colors_to_ec):
+    data = buffer.make_bytes()
     result = []
+    pos = 0
     for rs_block in rs_blocks:
-        chunk = data.read(rs_block.data_count)
-        if len(chunk) != rs_block.data_count:
+        end_pos = pos + rs_block.data_count
+        bytes_chunk = data[pos:end_pos]
+        bits_chunk = buffer[pos * 8:end_pos * 8]
+        pos = end_pos
+        if len(bytes_chunk) != rs_block.data_count:
             raise Exception("Out of data")
-        num_of_ec_bytes = rs_block.total_count - rs_block.data_count
-        result.append((bytearray(chunk), reedsolo.RSCodec(num_of_ec_bytes).encode(bytearray(chunk))[-num_of_ec_bytes:]))
+        ec_byte_count = rs_block.total_count - rs_block.data_count
+        ec_bytes = reedsolo.RSCodec(ec_byte_count).encode(bytes_chunk)[-ec_byte_count:]
+        if len(ec_bytes) != ec_byte_count:
+            raise Exception("Not enough EC bytes")
+        ec_bits = BitBuffer(ec_bytes, [control_colors["ec"]] * (ec_byte_count * 8))
+        if copy_colors_to_ec:
+            step = float(ec_byte_count) / float(rs_block.data_count)
+            for bit_index in range(rs_block.data_count * 8):
+                ec_bits.set_color(int(step * bit_index), bits_chunk.get_color(int(bit_index)))
+        result.append((bits_chunk, ec_bits))
     return result
 
 def combain_data_and_error_correction(data_and_error_correction):
-    result = []
-
-    data_bytes = [x[0] for x in data_and_error_correction]
-    ec_bytes = [x[1] for x in data_and_error_correction]
-    for data in [data_bytes, ec_bytes]:
-        for chunk in izip_longest(*data):
-            for c in list(chunk):
-                if None != c:
-                    result.append(c)
-
+    result = BitBuffer()
+    data_bits = [x[0] for x in data_and_error_correction]
+    ec_bits = [x[1] for x in data_and_error_correction]
+    for data in [data_bits, ec_bits]:
+        max_length = max([len(x) for x in data])
+        for bit_index in xrange(0, max_length, 8):
+            for chunk in data:
+                if bit_index >= len(chunk):
+                    continue
+                for bit_in_byte in xrange(8):
+                    result.put_bit_with_color(chunk.get_bit(bit_index + bit_in_byte))
     return result
 
 def add_edge(graph, source, char_index, char, mode_sizes):
