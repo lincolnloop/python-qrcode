@@ -1,5 +1,8 @@
 import re
 import bisect
+import reedsolo
+from StringIO import StringIO
+from itertools import izip_longest
 
 import six
 from six.moves import xrange
@@ -438,7 +441,6 @@ class QRData:
 
 
 class BitBuffer:
-
     def __init__(self):
         self.buffer = []
         self.length = 0
@@ -464,68 +466,6 @@ class BitBuffer:
         if bit:
             self.buffer[buf_index] |= (0x80 >> (self.length % 8))
         self.length += 1
-
-
-def create_bytes(buffer, rs_blocks):
-    offset = 0
-
-    maxDcCount = 0
-    maxEcCount = 0
-
-    dcdata = [0] * len(rs_blocks)
-    ecdata = [0] * len(rs_blocks)
-
-    for r in range(len(rs_blocks)):
-
-        dcCount = rs_blocks[r].data_count
-        ecCount = rs_blocks[r].total_count - dcCount
-
-        maxDcCount = max(maxDcCount, dcCount)
-        maxEcCount = max(maxEcCount, ecCount)
-
-        dcdata[r] = [0] * dcCount
-
-        for i in range(len(dcdata[r])):
-            dcdata[r][i] = 0xff & buffer.buffer[i + offset]
-        offset += dcCount
-
-        # Get error correction polynomial.
-        rsPoly = base.Polynomial([1], 0)
-        for i in range(ecCount):
-            rsPoly = rsPoly * base.Polynomial([1, base.gexp(i)], 0)
-
-        rawPoly = base.Polynomial(dcdata[r], len(rsPoly) - 1)
-
-        modPoly = rawPoly % rsPoly
-        ecdata[r] = [0] * (len(rsPoly) - 1)
-        for i in range(len(ecdata[r])):
-            modIndex = i + len(modPoly) - len(ecdata[r])
-            if (modIndex >= 0):
-                ecdata[r][i] = modPoly[modIndex]
-            else:
-                ecdata[r][i] = 0
-
-    totalCodeCount = 0
-    for rs_block in rs_blocks:
-        totalCodeCount += rs_block.total_count
-
-    data = [None] * totalCodeCount
-    index = 0
-
-    for i in range(maxDcCount):
-        for r in range(len(rs_blocks)):
-            if i < len(dcdata[r]):
-                data[index] = dcdata[r][i]
-                index += 1
-
-    for i in range(maxEcCount):
-        for r in range(len(rs_blocks)):
-            if i < len(ecdata[r]):
-                data[index] = ecdata[r][i]
-                index += 1
-
-    return data
-
 
 def create_data(version, error_correction, data_list):
 
@@ -553,8 +493,7 @@ def create_data(version, error_correction, data_list):
     # Delimit the string into 8-bit words, padding with 0s if necessary.
     delimit = len(buffer) % 8
     if delimit:
-        for i in range(8 - delimit):
-            buffer.put_bit(False)
+        buffer.put(0, 8 - delimit)
 
     # Add special alternating padding bitstrings until buffer is full.
     bytes_to_fill = (bit_limit - len(buffer)) // 8
@@ -564,7 +503,33 @@ def create_data(version, error_correction, data_list):
         else:
             buffer.put(PAD1, 8)
 
-    return create_bytes(buffer, rs_blocks)
+    data_and_error_correction = generate_error_correction(buffer, rs_blocks)
+    encoded_data = combain_data_and_error_correction(data_and_error_correction)
+    return encoded_data
+
+def generate_error_correction(buffer, rs_blocks):
+    data = StringIO(bytearray(buffer.buffer))
+    result = []
+    for rs_block in rs_blocks:
+        chunk = data.read(rs_block.data_count)
+        if len(chunk) != rs_block.data_count:
+            raise Exception("Out of data")
+        num_of_ec_bytes = rs_block.total_count - rs_block.data_count
+        result.append((bytearray(chunk), reedsolo.RSCodec(num_of_ec_bytes).encode(bytearray(chunk))[-num_of_ec_bytes:]))
+    return result
+
+def combain_data_and_error_correction(data_and_error_correction):
+    result = []
+
+    data_bytes = [x[0] for x in data_and_error_correction]
+    ec_bytes = [x[1] for x in data_and_error_correction]
+    for data in [data_bytes, ec_bytes]:
+        for chunk in izip_longest(*data):
+            for c in list(chunk):
+                if None != c:
+                    result.append(c)
+
+    return result
 
 def add_edge(graph, source, char_index, char, mode_sizes):
     targets = set()
