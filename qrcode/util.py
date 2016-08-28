@@ -10,6 +10,8 @@ from six.moves import xrange
 from collections import defaultdict
 from qrcode import base, exceptions
 
+from .bitbuffer import BitBuffer
+
 # QR encoding modes.
 MODE_NUMBER = 1 << 0
 MODE_ALPHA_NUM = 1 << 1
@@ -438,34 +440,6 @@ class QRData:
 
     def __repr__(self):
         return repr(self.data)
-
-
-class BitBuffer:
-    def __init__(self):
-        self.buffer = []
-        self.length = 0
-
-    def __repr__(self):
-        return ".".join([str(n) for n in self.buffer])
-
-    def get(self, index):
-        buf_index = index // 8
-        return ((self.buffer[buf_index] >> (7 - index % 8)) & 1) == 1
-
-    def put(self, num, length):
-        for i in range(length):
-            self.put_bit(((num >> (length - i - 1)) & 1) == 1)
-
-    def __len__(self):
-        return self.length
-
-    def put_bit(self, bit):
-        buf_index = self.length // 8
-        if len(self.buffer) <= buf_index:
-            self.buffer.append(0)
-        if bit:
-            self.buffer[buf_index] |= (0x80 >> (self.length % 8))
-        self.length += 1
 
 def create_data(version, error_correction, data_list):
 
