@@ -22,11 +22,15 @@ alphanumeric, or Kanji symbols)
 Usage
 =====
 
-From the command line, use the installed ``qr`` script::
+From the command line, use the installed ``qr`` script:
+
+.. code-block:: sh
 
     qr "Some text" > test.png
 
-Or in Python, use the ``make`` shortcut function::
+Or in Python, use the ``make`` shortcut function:
+
+.. code-block:: python
 
     import qrcode
     img = qrcode.make('Some data here')
@@ -34,7 +38,9 @@ Or in Python, use the ``make`` shortcut function::
 Advanced Usage
 --------------
 
-For more control, use the ``QRCode`` class. For example::
+For more control, use the ``QRCode`` class. For example:
+
+.. code-block:: python
 
     import qrcode
     qr = qrcode.QRCode(
@@ -85,20 +91,24 @@ usage.
 SVG
 ---
 
-On Python 2.6 must install lxml since the older xml.etree.ElementTree version
-can not be used to create SVG images.
+On Python 2.6 you must install ``lxml`` since the older
+``xml.etree.ElementTree`` version can not be used to create SVG images.
 
 You can create the entire SVG or an SVG fragment. When building an entire SVG
 image, you can use the factory that combines as a path (recommended, and
 default for the script) or a factory that creates a simple set of rectangles.
 
-From your command line::
+From your command line:
+
+.. code-block:: sh
 
     qr --factory=svg-path "Some text" > test.svg
     qr --factory=svg "Some text" > test.svg
     qr --factory=svg-fragment "Some text" > test.svg
 
-Or in Python::
+Or in Python:
+
+.. code-block:: python
 
     import qrcode
     import qrcode.image.svg
@@ -116,7 +126,9 @@ Or in Python::
     img = qrcode.make('Some data here', image_factory=factory)
 
 Two other related factories are available that work the same, but also fill the
-background of the SVG with white::
+background of the SVG with white:
+
+.. code-block:: python
 
     qrcode.image.svg.SvgFillImage
     qrcode.image.svg.SvgPathFillImage
@@ -125,16 +137,22 @@ background of the SVG with white::
 Pure Python PNG
 ---------------
 
-Install the following two packages::
+Install the following two packages:
+
+.. code-block:: sh
 
     pip install git+git://github.com/ojii/pymaging.git#egg=pymaging
     pip install git+git://github.com/ojii/pymaging-png.git#egg=pymaging-png
 
-From your command line::
+From your command line:
+
+.. code-block:: sh
 
     qr --factory=pymaging "Some text" > test.png
 
-Or in Python::
+Or in Python:
+
+.. code-block:: python
 
     import qrcode
     from qrcode.image.pure import PymagingImage
