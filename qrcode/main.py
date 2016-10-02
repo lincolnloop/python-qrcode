@@ -27,12 +27,13 @@ def _check_box_size(size):
 class QRCode:
     def __init__(self, version=None,
                  error_correction=constants.ERROR_CORRECT_M,
-                 box_size=10, border=4,
+                 box_size=50, border=1,
                  image_factory=None,
                  false_color=(255,255,255),
                  true_color=(0,0,0),
                  extended_colors=None,
-                 copy_colors_to_ec=False):
+                 copy_colors_to_ec=False,
+                 image_factory_modifiers=None):
         _check_box_size(box_size)
         self.version = version and int(version)
         self.error_correction = int(error_correction)
@@ -43,6 +44,9 @@ class QRCode:
         self.image_factory = image_factory
         if image_factory is not None:
             assert issubclass(image_factory, BaseImage)
+        if None == image_factory_modifiers:
+            image_factory_modifiers = {}
+        self.image_factory_modifiers = image_factory_modifiers
         self.clear()
         self.control_colors = defaultdict(lambda :true_color)
         self.control_colors[False] = false_color
@@ -304,7 +308,7 @@ class QRCode:
                 image_factory = PilImage
 
         im = image_factory(
-            self.border, self.modules_count, self.box_size)
+            self.border, self.modules_count, self.box_size, **self.image_factory_modifiers)
         for r in range(self.modules_count):
             for c in range(self.modules_count):
                 im.drawrect(r, c, self.modules[r][c])

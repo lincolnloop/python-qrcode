@@ -8,25 +8,46 @@ except ImportError:  # pragma: no cover
     import Image
     import ImageDraw
 
-import qrcode.image.base
+from qrcode.image.base import BaseImage
 
 
-class PilImage(qrcode.image.base.BaseImage):
+class PilImage(BaseImage):
     """
     PIL image builder, default format is PNG.
     """
     kind = "PNG"
+
+    def __init__(self, *args, **kwargs):
+        super(PilImage, self).__init__(*args, **kwargs)
+        if 'shape' in kwargs:
+            shape = kwargs['shape'].lower()
+            if shape == 'rect':
+                self.shape = self._drawrect
+            elif shape == 'circle':
+                self.shape = self._drawcircle
+            else:
+                raise Exception("Invalid draw shape %s" % shape)
+        else:
+            self.shape = self._drawrect
 
     def new_image(self, back_color=(255,255,255)):
         img = Image.new("RGB", (self.pixel_size, self.pixel_size), back_color)
         self._idr = ImageDraw.Draw(img)
         return img
 
+    def _drawrect(self, box, color):
+        self._idr.rectangle(box, fill=color)
+
+    def _drawcircle(self, box, color):
+        box = [(box[0][0] - 2, box[0][1] - 2), (box[1][0] + 2, box[1][1] + 2)]
+        if (color != (255,255,255)):
+            self._idr.ellipse(box, fill=color)
+
     def drawrect(self, row, col, color=None):
         if None == color:
             color = (0,0,0)
         box = self.pixel_box(row, col)
-        self._idr.rectangle(box, fill=color)
+        self.shape(box, color)
 
     def save(self, stream, format=None, **kwargs):
         if format is None:
