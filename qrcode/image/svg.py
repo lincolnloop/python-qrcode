@@ -5,10 +5,10 @@ try:
     import lxml.etree as ET
 except ImportError:
     import xml.etree.ElementTree as ET
-import qrcode.image.base
+from qrcode.image.base import BaseImage
 
 
-class SvgFragmentImage(qrcode.image.base.BaseImage):
+class SvgFragmentImage(BaseImage):
     """
     SVG image builder
 
@@ -25,8 +25,8 @@ class SvgFragmentImage(qrcode.image.base.BaseImage):
         # Save the unit size, for example the default box_size of 10 is '1mm'.
         self.unit_size = self.units(self.box_size)
 
-    def drawrect(self, row, col):
-        self._img.append(self._rect(row, col))
+    def drawrect(self, row, col, color):
+        self._img.append(self._rect(row, col, color))
 
     def units(self, pixels, text=True):
         """
@@ -52,13 +52,16 @@ class SvgFragmentImage(qrcode.image.base.BaseImage):
             tag, width=dimension, height=dimension, version=version,
             **kwargs)
 
-    def _rect(self, row, col, tag=None):
+    def _rect(self, row, col, color, tag=None):
         if tag is None:
             tag = ET.QName(self._SVG_namespace, "rect")
         x, y = self.pixel_box(row, col)[0]
+        if None == color:
+            color = (255, 255, 255)
         return ET.Element(
             tag, x=self.units(x), y=self.units(y),
-            width=self.unit_size, height=self.unit_size)
+            width=self.unit_size, height=self.unit_size,
+            fill="#%02x%02x%02x" % color)
 
     def _write(self, stream):
         ET.ElementTree(self._img).write(stream, xml_declaration=False)
@@ -82,8 +85,8 @@ class SvgImage(SvgFragmentImage):
                     height='100%'))
         return svg
 
-    def _rect(self, row, col):
-        return super(SvgImage, self)._rect(row, col, tag="rect")
+    def _rect(self, row, col, color):
+        return super(SvgImage, self)._rect(row, col, color, tag="rect")
 
     def _write(self, stream):
         ET.ElementTree(self._img).write(stream, encoding="UTF-8",

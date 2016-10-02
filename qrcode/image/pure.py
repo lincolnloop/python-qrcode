@@ -29,7 +29,8 @@ class PymagingImage(qrcode.image.base.BaseImage):
     def new_image(self, **kwargs):
         return Image.new(RGB, self.pixel_size, self.pixel_size, White)
 
-    def drawrect(self, row, col):
+    def drawrect(self, row, col, color=None):
+        # TODO: Support color
         (x, y), (x2, y2) = self.pixel_box(row, col)
         for r in range(self.box_size):
             line_y = y + r

@@ -41,9 +41,7 @@ class QRCode:
         # Spec says border should be at least four boxes wide, but allow for
         # any (e.g. for producing printable QR codes).
         self.border = int(border)
-        self.image_factory = image_factory
-        if image_factory is not None:
-            assert issubclass(image_factory, BaseImage)
+        self.set_image_factory(image_factory)
         if None == image_factory_modifiers:
             image_factory_modifiers = {}
         self.image_factory_modifiers = image_factory_modifiers
@@ -55,6 +53,23 @@ class QRCode:
         if extended_colors:
             self.control_colors.update(extended_colors)
         self.copy_colors_to_ec = copy_colors_to_ec
+
+    def set_image_factory(self, image_factory):
+        if isinstance(image_factory, str):
+            image_factory = image_factory.lower()
+            if image_factory == 'pil':
+                from qrcode.image.pil import PilImage
+                image_factory = PilImage
+            elif image_factory == 'svg':
+                from qrcode.image.svg import SvgImage
+                image_factory = SvgImage
+        elif image_factory is None:
+            # Use PIL by default
+            from qrcode.image.pil import PilImage
+            image_factory = PilImage
+        else:
+            assert issubclass(image_factory, BaseImage)
+        self.image_factory = image_factory
 
     def clear(self):
         """
@@ -288,7 +303,7 @@ class QRCode:
             out.write('\n')
         out.flush()
 
-    def make_image(self, image_factory=None, **kwargs):
+    def make_image(self, **kwargs):
         """
         Make an image from the QR Code data.
 
@@ -298,16 +313,7 @@ class QRCode:
         if self.data_cache is None:
             self.make()
 
-        if image_factory is not None:
-            assert issubclass(image_factory, BaseImage)
-        else:
-            image_factory = self.image_factory
-            if image_factory is None:
-                # Use PIL by default
-                from qrcode.image.pil import PilImage
-                image_factory = PilImage
-
-        im = image_factory(
+        im = self.image_factory(
             self.border, self.modules_count, self.box_size, **self.image_factory_modifiers)
         for r in range(self.modules_count):
             for c in range(self.modules_count):
