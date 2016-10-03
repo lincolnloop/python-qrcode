@@ -451,10 +451,11 @@ def create_data(version, error_correction, data_list, colors, control_colors=Non
     if None == control_colors:
         control_colors = defaultdict(lambda :True)
 
+    last_color = colors[-1]
     bit_buf = BitBuffer()
     for data in data_list:
-        bit_buf.put(data.mode, 4, control_colors.get(True))
-        bit_buf.put(len(data), length_in_bits(data.mode, version), control_colors.get(True))
+        bit_buf.put(data.mode, 4, colors[0])
+        bit_buf.put(len(data), length_in_bits(data.mode, version), colors[0])
         data.write_to_buffer(bit_buf, colors[:len(data)])
         colors = colors[len(data):]
 
@@ -471,7 +472,7 @@ def create_data(version, error_correction, data_list, colors, control_colors=Non
 
     # Terminate the bits (add up to four 0s).
     for i in range(min(bit_limit - len(bit_buf), 4)):
-        bit_buf.put_bit(False, control_colors[True])
+        bit_buf.put_bit(False, last_color)
 
     # Delimit the string into 8-bit words, padding with 0s if necessary.
     delimit = len(bit_buf) % 8

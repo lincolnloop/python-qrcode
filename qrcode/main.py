@@ -27,7 +27,7 @@ def _check_box_size(size):
 class QRCode:
     def __init__(self, version=None,
                  error_correction=constants.ERROR_CORRECT_M,
-                 box_size=50, border=1,
+                 box_size=10, border=1,
                  image_factory=None,
                  false_color=(255,255,255),
                  true_color=(0,0,0),
@@ -47,6 +47,7 @@ class QRCode:
         self.image_factory_modifiers = image_factory_modifiers
         self.clear()
         self.control_colors = defaultdict(lambda :true_color)
+        self.control_colors[True] = true_color
         self.control_colors[False] = false_color
         self.control_colors[0] = false_color
         self.control_colors[None] = false_color
@@ -63,6 +64,14 @@ class QRCode:
             elif image_factory == 'svg':
                 from qrcode.image.svg import SvgImage
                 image_factory = SvgImage
+            elif image_factory == 'tty':
+                from qrcode.image.tty import TTYImage
+                image_factory = TTYImage
+            elif image_factory == 'ascii':
+                from qrcode.image.ascii import ASCIIImage
+                image_factory = ASCIIImage
+            else:
+                raise Exception("Unknown Image factory %s" % image_factory)
         elif image_factory is None:
             # Use PIL by default
             from qrcode.image.pil import PilImage
@@ -132,7 +141,7 @@ class QRCode:
         self.setup_type_info(test, mask_pattern, use_colors=use_colors)
 
         if self.version >= 7:
-            self.setup_type_number(test)
+            self.setup_type_number(test, use_colors=use_colors)
 
         if self.data_cache is None:
             self.data_cache = util.create_data(
@@ -154,7 +163,6 @@ class QRCode:
         return (false_color, true_color)
 
     def setup_position_probe_pattern(self, row, col, use_colors=True):
-
         false_color, true_color = self.get_false_and_true_colors('prob', use_colors=use_colors)
 
         for r in range(-1, 8):
@@ -221,88 +229,6 @@ class QRCode:
 
         return pattern
 
-    def print_tty(self, out=None):
-        """
-        Output the QR Code only using TTY colors.
-
-        If the data has not been compiled yet, make it first.
-        """
-        if out is None:
-            import sys
-            out = sys.stdout
-
-        if not out.isatty():
-            raise OSError("Not a tty")
-
-        if self.data_cache is None:
-            self.make()
-
-        modcount = self.modules_count
-        out.write("\x1b[1;47m" + (" " * (modcount * 2 + 4)) + "\x1b[0m\n")
-        for r in range(modcount):
-            out.write("\x1b[1;47m  \x1b[40m")
-            for c in range(modcount):
-                if self.modules[r][c]:
-                    out.write("  ")
-                else:
-                    out.write("\x1b[1;47m  \x1b[40m")
-            out.write("\x1b[1;47m  \x1b[0m\n")
-        out.write("\x1b[1;47m" + (" " * (modcount * 2 + 4)) + "\x1b[0m\n")
-        out.flush()
-
-    def print_ascii(self, out=None, tty=False, invert=False):
-        """
-        Output the QR Code using ASCII characters.
-
-        :param tty: use fixed TTY color codes (forces invert=True)
-        :param invert: invert the ASCII characters (solid <-> transparent)
-        """
-        if out is None:
-            import sys
-            if sys.version_info < (2, 7):
-                # On Python versions 2.6 and earlier, stdout tries to encode
-                # strings using ASCII rather than stdout.encoding, so use this
-                # workaround.
-                import codecs
-                out = codecs.getwriter(sys.stdout.encoding)(sys.stdout)
-            else:
-                out = sys.stdout
-
-        if tty and not out.isatty():
-            raise OSError("Not a tty")
-
-        if self.data_cache is None:
-            self.make()
-
-        modcount = self.modules_count
-        codes = [six.int2byte(code).decode('cp437')
-                 for code in (255, 223, 220, 219)]
-        if tty:
-            invert = True
-        if invert:
-            codes.reverse()
-
-        def get_module(x, y):
-            if (invert and self.border and
-                    max(x, y) >= modcount+self.border):
-                return 1
-            if min(x, y) < 0 or max(x, y) >= modcount:
-                return 0
-            return self.modules[x][y]
-
-        for r in range(-self.border, modcount+self.border, 2):
-            if tty:
-                if not invert or r < modcount+self.border-1:
-                    out.write('\x1b[48;5;232m')   # Background black
-                out.write('\x1b[38;5;255m')   # Foreground white
-            for c in range(-self.border, modcount+self.border):
-                pos = get_module(r, c) + (get_module(r+1, c) << 1)
-                out.write(codes[pos])
-            if tty:
-                out.write('\x1b[0m')
-            out.write('\n')
-        out.flush()
-
     def make_image(self, **kwargs):
         """
         Make an image from the QR Code data.
@@ -340,7 +266,6 @@ class QRCode:
                 self.modules[6][c] = false_color
 
     def setup_position_adjust_pattern(self, use_colors):
-
         false_color, true_color = self.get_false_and_true_colors('prob', use_colors=use_colors)
         pos = util.pattern_position(self.version)
 
@@ -360,19 +285,21 @@ class QRCode:
                         else:
                             self.modules[row + r][col + c] = false_color
 
-    def setup_type_number(self, test):
+    def setup_type_number(self, test, use_colors=True):
+        false_color, true_color = self.get_false_and_true_colors('type', use_colors=use_colors)
+        colors = {False:false_color, True:true_color}
         bits = util.BCH_type_number(self.version)
 
         for i in range(18):
-            mod = self.control_colors[bool(not test and ((bits >> i) & 1) == 1)]
+            mod = colors[bool(not test and ((bits >> i) & 1) == 1)]
             self.modules[i // 3][i % 3 + self.modules_count - 8 - 3] = mod
 
         for i in range(18):
-            mod = self.control_colors[bool(not test and ((bits >> i) & 1) == 1)]
+            mod = colors[bool(not test and ((bits >> i) & 1) == 1)]
             self.modules[i % 3 + self.modules_count - 8 - 3][i // 3] = mod
 
     def setup_type_info(self, test, mask_pattern, use_colors=True):
-        false_color, true_color = self.get_false_and_true_colors(True, use_colors=use_colors)
+        false_color, true_color = self.get_false_and_true_colors('type', use_colors=use_colors)
         colors = {False:false_color, True:true_color}
         data = (self.error_correction << 3) | mask_pattern
         bits = util.BCH_type_info(data)
@@ -408,6 +335,7 @@ class QRCode:
         inc = -1
         row = self.modules_count - 1
         bit_index = 0
+        false_color, true_color = self.get_false_and_true_colors('padding', use_colors)
 
         mask_func = util.mask_func(mask_pattern)
 
@@ -427,7 +355,7 @@ class QRCode:
                             color = bit[1]
                         else:
                             value = False
-                            color = self.control_colors[True]
+                            color = true_color
 
                         if mask_func(row, c):
                             value = not value
@@ -436,7 +364,7 @@ class QRCode:
                             if value:
                                 self.modules[row][c] = color
                             else:
-                                self.modules[row][c] = self.control_colors[False]
+                                self.modules[row][c] = false_color
                         else:
                             self.modules[row][c] = value
 
