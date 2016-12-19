@@ -189,51 +189,38 @@ def _lost_point_level1(modules, modules_count):
     lost_point = 0
 
     modules_range = xrange(modules_count)
-    row_range_first = (0, 1)
-    row_range_last = (-1, 0)
-    row_range_standard = (-1, 0, 1)
-
-    col_range_first = ((0, 1), (1,))
-    col_range_last = ((-1, 0), (-1,))
-    col_range_standard = ((-1, 0, 1), (-1, 1))
+    container = [0] * (modules_count + 1)
 
     for row in modules_range:
-
-        if row == 0:
-            row_range = row_range_first
-        elif row == modules_count-1:
-            row_range = row_range_last
-        else:
-            row_range = row_range_standard
-
+        previous_color = modules[row][0]
+        length = 0
         for col in modules_range:
-
-            sameCount = 0
-            dark = modules[row][col]
-
-            if col == 0:
-                col_range = col_range_first
-            elif col == modules_count-1:
-                col_range = col_range_last
+            if modules[row][col] == previous_color:
+                length += 1
             else:
-                col_range = col_range_standard
+                if length >= 5:
+                    container[length] += 1
+                length = 1
+                previous_color = modules[row][col]
+        if length >= 5:
+            container[length] += 1
 
-            for r in row_range:
+    for col in modules_range:
+        previous_color = modules[0][col]
+        length = 0
+        for row in modules_range:
+            if modules[row][col] == previous_color:
+                length += 1
+            else:
+                if length >= 5:
+                    container[length] += 1
+                length = 1
+                previous_color = modules[row][col]
+        if length >= 5:
+            container[length] += 1
 
-                row_offset = row + r
-
-                if r != 0:
-                    col_idx = 0
-                else:
-                    col_idx = 1
-
-                for c in col_range[col_idx]:
-
-                    if dark == modules[row_offset][col + c]:
-                        sameCount += 1
-
-            if sameCount > 5:
-                lost_point += (3 + sameCount - 5)
+    lost_point += sum(container[each_length] * (each_length-2)
+        for each_length in xrange(5,modules_count + 1))
 
     return lost_point
 
