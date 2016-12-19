@@ -221,8 +221,8 @@ def _lost_point_level1(modules, modules_count):
         if length >= 5:
             container[length] += 1
 
-    lost_point += sum(container[each_length] * (each_length-2)
-        for each_length in xrange(5,modules_count + 1))
+    lost_point += sum(container[each_length] * (each_length - 2)
+        for each_length in xrange(5, modules_count + 1))
 
     return lost_point
 
@@ -231,21 +231,24 @@ def _lost_point_level2(modules, modules_count):
     lost_point = 0
 
     modules_range = xrange(modules_count - 1)
-
     for row in modules_range:
         this_row = modules[row]
-        next_row = modules[row+1]
-        for col in modules_range:
-            count = 0
-            if this_row[col]:
-                count += 1
-            if next_row[col]:
-                count += 1
-            if this_row[col + 1]:
-                count += 1
-            if next_row[col + 1]:
-                count += 1
-            if count == 0 or count == 4:
+        next_row = modules[row + 1]
+        # use iter() and next() to skip next four-block. e.g.
+        # d a f   if top-right a != b botton-right,
+        # c b e   then both abcd and abef won't lost any point.
+        modules_range_iter = iter(modules_range)
+        for col in modules_range_iter:
+            top_right = this_row[col + 1]
+            if top_right != next_row[col + 1]:
+                # reduce 33.3% of runtime via next().
+                # None: raise nothing if there is no next item.
+                next(modules_range_iter, None)
+            elif top_right != this_row[col]:
+                continue
+            elif top_right != next_row[col]:
+                continue
+            else:
                 lost_point += 3
 
     return lost_point
