@@ -255,31 +255,77 @@ def _lost_point_level2(modules, modules_count):
 
 
 def _lost_point_level3(modules, modules_count):
-    modules_range_short = xrange(modules_count-6)
-
+    # 1 : 1 : 3 : 1 : 1 ratio (dark:light:dark:light:dark) pattern in
+    # row/column, preceded or followed by light area 4 modules wide. From ISOIEC.
+    # pattern1:     10111010000
+    # pattern2: 00001011101
+    modules_range = xrange(modules_count)
+    modules_range_short = xrange(modules_count-10)
     lost_point = 0
-    for row in xrange(modules_count):
+
+    for row in modules_range:
         this_row = modules[row]
-        for col in modules_range_short:
-            if (this_row[col]
-                    and not this_row[col + 1]
-                    and this_row[col + 2]
-                    and this_row[col + 3]
+        modules_range_short_iter = iter(modules_range_short)
+        col = 0
+        for col in modules_range_short_iter:
+            if (
+                        not this_row[col + 1]
                     and this_row[col + 4]
                     and not this_row[col + 5]
-                    and this_row[col + 6]):
+                    and this_row[col + 6]
+                    and not this_row[col + 9]
+                and (
+                        this_row[col + 0]
+                    and this_row[col + 2]
+                    and this_row[col + 3]
+                    and not this_row[col + 7]
+                    and not this_row[col + 8]
+                    and not this_row[col + 10]
+                or
+                        not this_row[col + 0]
+                    and not this_row[col + 2]
+                    and not this_row[col + 3]
+                    and this_row[col + 7]
+                    and this_row[col + 8]
+                    and this_row[col + 10]
+                    )
+                ):
                 lost_point += 40
+# horspool algorithm.
+# if this_row[col + 10] == True,  pattern1 shift 4, pattern2 shift 2. So min=2.
+# if this_row[col + 10] == False, pattern1 shift 1, pattern2 shift 1. So min=1.
+            if this_row[col + 10]:
+                next(modules_range_short_iter, None)
 
-    for col in xrange(modules_count):
-        for row in modules_range_short:
-            if (modules[row][col]
-                    and not modules[row + 1][col]
-                    and modules[row + 2][col]
-                    and modules[row + 3][col]
+    for col in modules_range:
+        modules_range_short_iter = iter(modules_range_short)
+        row = 0
+        for row in modules_range_short_iter:
+            if (
+                        not modules[row + 1][col]
                     and modules[row + 4][col]
                     and not modules[row + 5][col]
-                    and modules[row + 6][col]):
+                    and modules[row + 6][col]
+                    and not modules[row + 9][col]
+                and (
+                        modules[row + 0][col]
+                    and modules[row + 2][col]
+                    and modules[row + 3][col]
+                    and not modules[row + 7][col]
+                    and not modules[row + 8][col]
+                    and not modules[row + 10][col]
+                or
+                        not modules[row + 0][col]
+                    and not modules[row + 2][col]
+                    and not modules[row + 3][col]
+                    and modules[row + 7][col]
+                    and modules[row + 8][col]
+                    and modules[row + 10][col]
+                    )
+                ):
                 lost_point += 40
+            if modules[row + 10][col]:
+                next(modules_range_short_iter, None)
 
     return lost_point
 
