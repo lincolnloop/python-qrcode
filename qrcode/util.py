@@ -4,7 +4,7 @@ import math
 import six
 from six.moves import xrange
 
-from qrcode import base, exceptions
+from qrcode import base, exceptions, LUT
 
 # QR encoding modes.
 MODE_NUMBER = 1 << 0
@@ -511,9 +511,12 @@ def create_bytes(buffer, rs_blocks):
         offset += dcCount
 
         # Get error correction polynomial.
-        rsPoly = base.Polynomial([1], 0)
-        for i in range(ecCount):
-            rsPoly = rsPoly * base.Polynomial([1, base.gexp(i)], 0)
+        if ecCount in LUT.rsPoly_LUT:
+            rsPoly = base.Polynomial(LUT.rsPoly_LUT[ecCount], 0)
+        else:
+            rsPoly = base.Polynomial([1], 0)
+            for i in range(ecCount):
+                rsPoly = rsPoly * base.Polynomial([1, base.gexp(i)], 0)
 
         rawPoly = base.Polynomial(dcdata[r], len(rsPoly) - 1)
 
