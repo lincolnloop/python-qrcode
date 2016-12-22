@@ -207,7 +207,6 @@ def _lost_point_level1(modules, modules_count):
             container[length] += 1
 
     for col in modules_range:
-        #this_col = [this_row[col] for this_row in modules] Slow, commented out.
         previous_color = modules[0][col]
         length = 0
         for row in modules_range:

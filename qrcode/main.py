@@ -24,12 +24,12 @@ def _check_box_size(size):
 
 
 def _check_mask_pattern(mask_pattern):
-    if mask_pattern == None:
+    if mask_pattern is None:
         return
     if not isinstance(mask_pattern, int):
         raise TypeError(
             "Invalid mask pattern (was %s, expected int)" % type(mask_pattern))
-    if mask_pattern not in range(8):
+    if mask_pattern < 0 or mask_pattern > 7:
         raise ValueError(
             "Mask pattern should be in range(8) (got %s)" % mask_pattern)
 
@@ -89,7 +89,7 @@ class QRCode:
         """
         if fit or (self.version is None):
             self.best_fit(start=self.version)
-        if self.mask_pattern == None:
+        if self.mask_pattern is None:
             self.makeImpl(False, self.best_mask_pattern())
         else:
             self.makeImpl(False, self.mask_pattern)
