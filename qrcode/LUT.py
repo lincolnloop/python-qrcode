@@ -1,5 +1,9 @@
+# Store all kinds of lookup table.
+
+
 # # generate rsPoly lookup table.
-# import base
+
+# from qrcode import base
 
 # def create_bytes(rs_blocks):
 #     for r in range(len(rs_blocks)):
@@ -18,7 +22,7 @@
 #         rsPoly_LUT[ecCount]=rsPoly.num
 # print(rsPoly_LUT)
 
-# Result. Useage: input: ecCount, output: Polynomial.num
+# Result. Usage: input: ecCount, output: Polynomial.num
 # e.g. rsPoly = base.Polynomial(LUT.rsPoly_LUT[ecCount], 0)
 rsPoly_LUT = {
     7:  [1, 127, 122, 154, 164, 11, 68, 117],
