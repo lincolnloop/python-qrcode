@@ -38,8 +38,8 @@ class QRCode:
     def __init__(self, version=None,
                  error_correction=constants.ERROR_CORRECT_M,
                  box_size=10, border=4,
-                 mask_pattern=None,
-                 image_factory=None):
+                 image_factory=None,
+                 mask_pattern=None):
         _check_box_size(box_size)
         self.version = version and int(version)
         self.error_correction = int(error_correction)
