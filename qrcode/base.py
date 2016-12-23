@@ -294,7 +294,7 @@ class Polynomial:
         else:
             offset += 1
 
-        self.num = num[offset:]+[0]*shift
+        self.num = num[offset:] + [0] * shift
 
     def __getitem__(self, index):
         return self.num[index]
