@@ -18,8 +18,8 @@ class PilImage(qrcode.image.base.BaseImage):
     kind = "PNG"
 
     def new_image(self, **kwargs):
-        back_color = kwargs.get("fill_color", "white")
-        fill_color = kwargs.get("back_color", "black")
+        back_color = kwargs.get("back_color", "white")
+        fill_color = kwargs.get("fill_color", "black")
 
         if fill_color.lower() != "black" or back_color.lower() != "white":
             if back_color.lower() == "transparent":
