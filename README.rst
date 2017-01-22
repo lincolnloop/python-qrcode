@@ -46,12 +46,15 @@ For more control, use the ``QRCode`` class. For example::
     qr.add_data('Some data')
     qr.make(fit=True)
 
-    img = qr.make_image()
+    img = qr.make_image(fill_color="black", back_color="white")
 
 The ``version`` parameter is an integer from 1 to 40 that controls the size of
 the QR Code (the smallest, version 1, is a 21x21 matrix).
 Set to ``None`` and use the ``fit`` parameter when making the code to determine
 this automatically.
+
+``fill_color`` and ``back_color`` can change the background and the painting
+color of the QR, when using the default image factory.
 
 The ``error_correction`` parameter controls the error correction used for the
 QR Code. The following four constants are made available on the ``qrcode``
