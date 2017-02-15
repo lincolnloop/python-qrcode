@@ -246,7 +246,7 @@ class QRCode:
                 out.write('\x1b[38;5;255m')   # Foreground white
             for c in range(-self.border, modcount+self.border):
                 pos = get_module(r, c) + (get_module(r+1, c) << 1)
-                out.write(codes[pos])
+                out.write(codes[pos].encode('utf-8'))
             if tty:
                 out.write('\x1b[0m')
             out.write('\n')
