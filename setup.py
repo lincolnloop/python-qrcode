@@ -26,9 +26,9 @@ else:
     dependencies = ['six']
 
 setup(
-    name='qrcode',
+    name='qrcode-cryptogun',
     version='5.3.post',
-    url='https://github.com/lincolnloop/python-qrcode',
+    url='https://github.com/cryptogun/python-qrcode-cryptogun',
     description='QR Code image generator',
     license='BSD',
     long_description=long_description(),
