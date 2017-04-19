@@ -33,6 +33,9 @@ error_correction = {
 def main(args=sys.argv[1:]):
     parser = optparse.OptionParser(usage=__doc__.strip())
     parser.add_option(
+        "-a","--ascii", action="store_true", dest="force_ascii", default=False,
+        help="Force ASCII output.")
+    parser.add_option(
         "--factory", help="Full python path to the image factory class to "
         "create the image with. You can use the following shortcuts to the "
         "built-in image factory classes: {0}.".format(
@@ -73,7 +76,8 @@ def main(args=sys.argv[1:]):
     else:
         qr.add_data(data, optimize=opts.optimize)
 
-    if image_factory is None and os.isatty(sys.stdout.fileno()):
+    if ( image_factory is None and os.isatty(sys.stdout.fileno()) ) or opts.force_ascii:
+        qr.force_ascii = opts.force_ascii
         qr.print_ascii(tty=True)
         return
 
