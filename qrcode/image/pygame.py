@@ -25,6 +25,9 @@ class PygameSurface(qrcode.image.base.BaseImage):
     def save(self, stream, kind=None, **kwargs):
         if kind is None:
             kind = kwargs.pop("kind", self.kind)
+
+        if kind.lower() not in ('bmp', 'jpg', 'jpeg', 'png', 'tga'):
+            raise ValueError('Unsupported file kind {0}'.format(kind))
         tmpfd, tmpname = tempfile.mkstemp(suffix='.'+kind)
         pygame.image.save(self._img, tmpname)
         tmpfp = os.fdopen(tmpfd)
