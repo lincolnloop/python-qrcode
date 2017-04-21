@@ -11,6 +11,12 @@ try:
 except ImportError:  # pragma: no cover
     pymaging_png = None
 
+try:
+    import qrcode.image.pygame
+    import pygame
+except ImportError:  # pragma: no cover
+    pygame = None
+
 import qrcode
 from qrcode.image.base import BaseImage
 from qrcode.exceptions import DataOverflowError
@@ -161,6 +167,23 @@ class QRCodeTests(unittest.TestCase):
         qr = qrcode.QRCode()
         qr.add_data(UNICODE_TEXT)
         img = qr.make_image(image_factory=qrcode.image.pure.PymagingImage)
+        self.assertRaises(ValueError, img.save, six.BytesIO(), kind='FISH')
+
+    @unittest.skipIf(not pygame, "Requires pygame")
+    def test_render_pygame_png(self):
+        qr = qrcode.QRCode()
+        qr.add_data(UNICODE_TEXT)
+        img = qr.make_image(image_factory=qrcode.image.pygame.PygameSurface)
+        with warnings.catch_warnings():
+            if six.PY3:
+                warnings.simplefilter('ignore', DeprecationWarning)
+            img.save(six.BytesIO())
+
+    @unittest.skipIf(not pygame, "Requires pygame")
+    def test_render_pygame_bad_kind(self):
+        qr = qrcode.QRCode()
+        qr.add_data(UNICODE_TEXT)
+        img = qr.make_image(image_factory=qrcode.image.pygame.PygameSurface)
         self.assertRaises(ValueError, img.save, six.BytesIO(), kind='FISH')
 
     def test_optimize(self):
