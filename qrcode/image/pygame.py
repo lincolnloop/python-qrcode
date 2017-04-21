@@ -34,3 +34,6 @@ class PygameSurface(qrcode.image.base.BaseImage):
         stream.write(tmpfp.read())
         tmpfp.close()
         os.remove(tmpname)
+
+    def __getattr__(self, name):
+        return getattr(self._img, name)
