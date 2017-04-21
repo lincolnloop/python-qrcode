@@ -8,6 +8,8 @@ import qrcode.image.base
 
 class PygameSurface(qrcode.image.base.BaseImage):
 
+    kind = 'PNG'
+
     def new_image(self, **kwargs):
         back_color = pygame.Color(kwargs.get("back_color", "white"))
         fill_color = pygame.Color(kwargs.get("fill_color", "black"))
