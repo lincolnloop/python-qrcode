@@ -16,6 +16,7 @@ if sys.platform.startswith(('win', 'cygwin')):
 
 default_factories = {
     'pil': 'qrcode.image.pil.PilImage',
+    'pygame': 'qrcode.image.pygame.PygameSurface',
     'pymaging': 'qrcode.image.pure.PymagingImage',
     'svg': 'qrcode.image.svg.SvgImage',
     'svg-fragment': 'qrcode.image.svg.SvgFragmentImage',

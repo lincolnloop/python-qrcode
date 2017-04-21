@@ -79,7 +79,7 @@ Other image factories
 =====================
 
 You can encode as SVG, or use a new pure Python image processor to encode to
-PNG images.
+PNG images, or use Pygame to create a QRCode as a Surface.
 
 The Python examples below use the ``make`` shortcut. The same ``image_factory``
 keyword argument is a valid option for the ``QRCode`` class for more advanced
@@ -142,3 +142,22 @@ Or in Python::
     import qrcode
     from qrcode.image.pure import PymagingImage
     img = qrcode.make('Some data here', image_factory=PymagingImage)
+
+PyGame
+------
+
+Pygame supports BMP, JPG/JPEG, PNG, and TGA.
+
+Install the pygame package::
+
+    pip install pygame
+
+From your command line::
+
+    qr --factory=pygame "Some text" > test.png
+
+Or in Python::
+
+    import qrcode
+    from qrcode.image.pygame import PygameSurface
+    surface = qrcode.make('Some data here', image_factory=PygameSurface)
