@@ -22,9 +22,9 @@ class PygameSurface(qrcode.image.base.BaseImage):
         rect = pygame.Rect(self.pixel_box(row, col)[0], (self.box_size,self.box_size))
         self._img.fill(color=self.fill_color, rect=rect)
 
-    def save(self, stream, format=None, **kwargs):
-        if format is None:
-            format = kwargs.pop("kind", self.kind)
+    def save(self, stream, kind=None, **kwargs):
+        if kind is None:
+            kind = kwargs.pop("kind", self.kind)
         tmpfd, tmpname = tempfile.mkstemp(suffix='.'+kind)
         pygame.image.save(self._img, tmpname)
         tmpfp = os.fdopen(tmpfd)
