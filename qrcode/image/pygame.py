@@ -26,7 +26,7 @@ class PygameSurface(qrcode.image.base.BaseImage):
         if format is None:
             format = kwargs.pop("kind", self.kind)
         tmpfd, tmpname = tempfile.mkstemp(suffix='.'+kind)
-        pygame.image_save(self._img, tmpname)
+        pygame.image.save(self._img, tmpname)
         tmpfp = os.fdopen(tmpfd)
         stream.write(tmpfp.read())
         tmpfp.close()
