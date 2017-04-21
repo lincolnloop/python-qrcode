@@ -1,3 +1,11 @@
+from __future__ import absolute_import
+import os
+import tempfile
+
+import pygame
+import qrcode.image.base
+
+
 class PygameSurface(qrcode.image.base.BaseImage):
 
     def new_image(self, **kwargs):
