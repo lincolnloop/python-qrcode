@@ -160,4 +160,7 @@ Or in Python::
 
     import qrcode
     from qrcode.image.pygame import PygameSurface
-    surface = qrcode.make('Some data here', image_factory=PygameSurface)
+    # this returns something that acts like a Surface
+    img = qrcode.make('Some data here', image_factory=PygameSurface)
+    # this fetches the underlying Surface
+    surface = img.get_image()
