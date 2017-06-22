@@ -46,6 +46,8 @@ def main(args=sys.argv[1:]):
         choices=sorted(error_correction.keys()), default='M',
         help="The error correction level to use. Choices are L (7%), "
         "M (15%, default), Q (25%), and H (30%).")
+    parser.add_option(
+        "--ascii", help="Print as ascii even if stdout is piped.", action="store_true")
     opts, args = parser.parse_args(args)
 
     qr = qrcode.QRCode(
@@ -73,8 +75,8 @@ def main(args=sys.argv[1:]):
     else:
         qr.add_data(data, optimize=opts.optimize)
 
-    if image_factory is None and os.isatty(sys.stdout.fileno()):
-        qr.print_ascii(tty=True)
+    if image_factory is None and (os.isatty(sys.stdout.fileno()) or opts.ascii):
+        qr.print_ascii(tty=not opts.ascii, invert=True)
         return
 
     img = qr.make_image(image_factory=image_factory)
