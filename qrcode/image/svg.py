@@ -141,6 +141,7 @@ class SvgPathImage(SvgImage):
         )
 
     def _write(self, stream):
+        self._img = self.new_image()
         self._img.append(self.make_path())
         super(SvgPathImage, self)._write(stream)
 
