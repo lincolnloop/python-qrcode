@@ -278,6 +278,35 @@ class QRCode:
                 if self.modules[r][c]:
                     im.drawrect(r, c)
         return im
+    
+    def make_unicode(self):
+        """
+        Returns the QR Code as a string, using UNICODE characters:
+        ' ' U+20 SPACE
+        '▀' U+2580 UPPER HALF BLOCK
+        '▄' U+2584 LOWER HALF BLOCK
+        '█' U+2588 FULL BLOCK
+        '\n' U+0A NEW LINE
+        """
+        out = []
+        if self.data_cache is None:
+            self.make()
+
+        modcount = self.modules_count
+        codes = ('\u0020', '\u2580', '\u2584', '\u2588')
+
+        def get_module(r, c):
+            if r >= modcount:
+                return 0
+            return self.modules[r][c]
+
+        _col_range = range(modcount)
+        for r in range(0, modcount, 2):
+            for c in _col_range:
+                out.append(codes[(get_module(r+1, c) << 1) | get_module(r, c)])
+            out.append('\n')
+        
+        return ''.join(out[:-1])
 
     def setup_timing_pattern(self):
         for r in range(8, self.modules_count - 8):
