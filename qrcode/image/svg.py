@@ -40,6 +40,9 @@ class SvgFragmentImage(qrcode.image.base.BaseImage):
     def save(self, stream, kind=None):
         self.check_kind(kind=kind)
         self._write(stream)
+        
+    def to_string(self):
+        return ET.tostring(self._img)
 
     def new_image(self, **kwargs):
         return self._svg()
