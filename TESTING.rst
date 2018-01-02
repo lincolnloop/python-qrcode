@@ -8,7 +8,7 @@ First, install tox into your virtualenv::
 To run all the qrcode tests, you'll need to install the older Python
 interpreters. Here's how you'll do it on a modern Ubuntu distribution::
 
-    sudo add-apt-repository ppa:fkrull/deadsnakes
+    sudo add-apt-repository ppa:deadsnakes/ppa
     sudo apt-get update
     sudo apt-get install python2.4-dev python2.6-dev
 
