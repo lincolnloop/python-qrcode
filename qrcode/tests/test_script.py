@@ -47,6 +47,9 @@ class ScriptTest(unittest.TestCase):
         mock_stdin.buffer.read.return_value = 'testtext'
         mock_stdin.read.side_effect = bad_read
         with mock.patch('sys.stdin', mock_stdin):
+            # sys.stdin.read() will raise an error...
+            self.assertRaises(UnicodeDecodeError, sys.stdin.read)
+            # ... but it won't be used now.
             main([])
         mock_print_ascii.assert_called_with(tty=True)
 
