@@ -19,12 +19,6 @@ def long_description():
     return '\n\n'.join(content)
 
 
-# Colorama is needed for proper terminal support on MS platforms
-if sys.platform.startswith(('win', 'cygwin')):
-    dependencies = ['six', 'colorama']
-else:
-    dependencies = ['six']
-
 setup(
     name='qrcode',
     version='5.3.post',
@@ -41,7 +35,11 @@ setup(
             'qr = qrcode.console_scripts:main',
         ],
     },
-    install_requires=dependencies,
+    install_requires=['six'],
+    extra_requires={
+        ':sys_platform==win32': ['colorama'],
+        ':sys_platform==cygwin': ['colorama']
+    },
     data_files=[('share/man/man1', ['doc/qr.1'])],
     include_package_data=True,
     classifiers=[
