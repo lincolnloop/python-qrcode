@@ -2,8 +2,14 @@
 Change log
 ==========
 
-Version 5.3
-===========
+6.0 (unreleased)
+================
+
+- Nothing changed yet.
+
+
+5.3 (18 May 2016)
+=================
 
 * Fix incomplete block table for QR version 15. Thanks Rodrigo Queiro for the
   report and Jacob Welsh for the investigation and fix.
@@ -13,8 +19,8 @@ Version 5.3
 * Make ``BaseImage.get_image()`` actually work.
 
 
-Version 5.2
-===========
+5.2 (25 Jan 2016)
+=================
 
 * Add ``--error-correction`` option to qr script.
 
@@ -29,20 +35,20 @@ Version 5.2
 
 * Fix terminal output to display correctly on MS command line.
 
-Version 5.2.1
--------------
+5.2.1
+-----
 
 * Small fix to terminal output in Python 3 (and fix tests)
 
-Version 5.2.2
--------------
+5.2.2
+-----
 
 * Revert some terminal changes from 5.2 that broke Python 3's real life tty
   code generation and introduce a better way from Jacob Welsh.
 
 
-Version 5.1
-===========
+5.1 (22 Oct 2014)
+=================
 
 * Make ``qr`` script work in Windows. Thanks Ionel Cristian Mărieș
 
@@ -54,8 +60,8 @@ Version 5.1
 * Much better test coverage (now only officially supporting Python 2.6+)
 
 
-Version 5.0
-===========
+5.0 (17 Jun 2014)
+=================
 
 * Speed optimizations.
 
@@ -69,14 +75,14 @@ Version 5.0
 * Introduce a ``print_ascii`` method and use it as the default for the ``qr``
   script rather than ``print_tty``.
 
-Version 5.0.1
--------------
+5.0.1
+-----
 
 * Update version numbers correctly.
 
 
-Version 4.0
-===========
+4.0 (4 Sep 2013)
+================
 
 * Made qrcode work on Python 2.4 - Thanks tcely.
   Note: officially, qrcode only supports 2.5+.
@@ -92,32 +98,32 @@ Version 4.0
 
 * Added some extra simple SVG factories that fill the background white.
 
-Version 4.0.1
--------------
+4.0.1
+-----
 
 * Fix the pymaging backend not able to save the image to a buffer. Thanks ilj!
 
-Version 4.0.2
--------------
+4.0.2
+-----
 
 * Fix incorrect regex causing a comma to be considered part of the alphanumeric
   set.
 
 * Switch to using setuptools for setup.py.
 
-Version 4.0.3
--------------
+4.0.3
+-----
 
 * Fix bad QR code generation due to the regex comma fix in version 4.0.2.
 
-Version 4.0.4
--------------
+4.0.4
+-----
 
 * Bad version number for previous hotfix release.
 
 
-Version 3.1
-===========
+3.1 (12 Aug 2013)
+=================
 
 * Important fixes for incorrect matches of the alpha-numeric encoding mode.
   Previously, the pattern would match if a single line was alpha-numeric only
@@ -127,8 +133,8 @@ Version 3.1
 * Optimized chunking -- if the parts of the data stream can be encoded more
   efficiently, the data will be split into chunks of the most efficient modes.
 
-Version 3.1.1
--------------
+3.1.1
+-----
 
 * Update change log to contain version 3.1 changes. :P
 
@@ -136,8 +142,8 @@ Version 3.1.1
   optimization setting.
 
 
-Version 3.0
-===========
+3.0 (25 Jun 2013)
+=================
 
 * Python 3 support.
 
@@ -151,14 +157,14 @@ Version 3.0
   Python platforms.
 
 
-Version 2.7
-===========
+2.7 (5 Mar 2013)
+================
 
 * Fix incorrect termination padding.
 
 
-Version 2.6
-===========
+2.6 (2 Apr 2013)
+================
 
 * Fix the first four columns incorrectly shifted by one. Thanks to Josep
   Gómez-Suay for the report and fix.
@@ -167,52 +173,52 @@ Version 2.6
   terminated. Thanks to zhjie231 for the report.
 
 
-Version 2.5
-===========
+2.5 (12 Mar 2013)
+=================
 
 * The PilImage wrapper is more transparent - you can use any methods or
   attributes available to the underlying PIL Image instance.
 
 * Fixed the first column of the QR Code coming up empty! Thanks to BecoKo.
 
-Version 2.5.1
--------------
+2.5.1
+-----
 
 * Fix installation error on Windows.
 
 
-Version 2.4
-===========
+2.4 (23 Apr 2012)
+=================
 
 * Use a pluggable backend system for generating images, thanks to Branko Čibej!
   Comes with PIL and SVG backends built in.
 
-Version 2.4.1
--------------
+2.4.1
+-----
 
 * Fix a packaging issue
 
-Version 2.4.2
--------------
+2.4.2
+-----
 
 * Added a ``show`` method to the PIL image wrapper so the ``run_example``
   function actually works.
 
 
-Version 2.3
-===========
+2.3 (29 Jan 2012)
+=================
 
 * When adding data, auto-select the more efficient encoding methods for numbers
   and alphanumeric data (KANJI still not supported).
 
-Version 2.3.1
--------------
+2.3.1
+-----
 
 * Encode unicode to utf-8 bytestrings when adding data to a QRCode.
 
 
-Version 2.2
-===========
+2.2 (18 Jan 2012)
+=================
 
 * Fixed tty output to work on both white and black backgrounds.
 
@@ -220,8 +226,8 @@ Version 2.2
   create the border of the QR code
 
 
-Version 2.1
-===========
+2.1 (17 Jan 2012)
+=================
 
 * Added a ``qr`` script which can be used to output a qr code to the tty using
   background colors, or to a file via a pipe.
