@@ -168,12 +168,26 @@ class QRCodeTests(unittest.TestCase):
         text = 'A1abc12345def1HELLOa'
         qr.add_data(text, optimize=4)
         qr.make()
-        self.assertEqual(len(qr.data_list), 5)
-        self.assertEqual(qr.data_list[0].mode, MODE_8BIT_BYTE)
-        self.assertEqual(qr.data_list[1].mode, MODE_NUMBER)
-        self.assertEqual(qr.data_list[2].mode, MODE_8BIT_BYTE)
-        self.assertEqual(qr.data_list[3].mode, MODE_ALPHA_NUM)
-        self.assertEqual(qr.data_list[4].mode, MODE_8BIT_BYTE)
+        self.assertEqual(
+            [d.mode for d in qr.data_list],
+            [
+                MODE_8BIT_BYTE, MODE_NUMBER, MODE_8BIT_BYTE, MODE_ALPHA_NUM,
+                MODE_8BIT_BYTE
+            ]
+        )
+        self.assertEqual(qr.version, 2)
+
+    def test_optimize_short(self):
+        qr = qrcode.QRCode()
+        text = 'A1abc1234567def1HELLOa'
+        qr.add_data(text, optimize=7)
+        print(qr.data_list)
+        qr.make()
+        self.assertEqual(len(qr.data_list), 3)
+        self.assertEqual(
+            [d.mode for d in qr.data_list],
+            [MODE_8BIT_BYTE, MODE_NUMBER, MODE_8BIT_BYTE]
+        )
         self.assertEqual(qr.version, 2)
 
     def test_optimize_size(self):

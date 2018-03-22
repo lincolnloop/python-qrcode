@@ -62,7 +62,8 @@ class QRCode:
             self.data_list.append(data)
         else:
             if optimize:
-                self.data_list.extend(util.optimal_data_chunks(data))
+                self.data_list.extend(
+                    util.optimal_data_chunks(data, minimum=optimize))
             else:
                 self.data_list.append(util.QRData(data))
         self.data_cache = None
