@@ -23,12 +23,23 @@ def _check_box_size(size):
             "Invalid box size (was %s, expected larger than 0)" % size)
 
 
+def _check_mask_pattern(mask_pattern):
+    if mask_pattern is None:
+        return
+    if not isinstance(mask_pattern, int):
+        raise TypeError(
+            "Invalid mask pattern (was %s, expected int)" % type(mask_pattern))
+    if mask_pattern < 0 or mask_pattern > 7:
+        raise ValueError(
+            "Mask pattern should be in range(8) (got %s)" % mask_pattern)
+
 class QRCode:
 
     def __init__(self, version=None,
                  error_correction=constants.ERROR_CORRECT_M,
                  box_size=10, border=4,
-                 image_factory=None):
+                 image_factory=None,
+                 mask_pattern=None):
         _check_box_size(box_size)
         self.version = version and int(version)
         self.error_correction = int(error_correction)
@@ -36,6 +47,8 @@ class QRCode:
         # Spec says border should be at least four boxes wide, but allow for
         # any (e.g. for producing printable QR codes).
         self.border = int(border)
+        _check_mask_pattern(mask_pattern)
+        self.mask_pattern = mask_pattern
         self.image_factory = image_factory
         if image_factory is not None:
             assert issubclass(image_factory, BaseImage)
@@ -77,7 +90,10 @@ class QRCode:
         """
         if fit or (self.version is None):
             self.best_fit(start=self.version)
-        self.makeImpl(False, self.best_mask_pattern())
+        if self.mask_pattern is None:
+            self.makeImpl(False, self.best_mask_pattern())
+        else:
+            self.makeImpl(False, self.mask_pattern)
 
     def makeImpl(self, test, mask_pattern):
         _check_version(self.version)
