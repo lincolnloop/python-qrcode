@@ -7,6 +7,9 @@ Change log
 
 - Fix optimize length being ignored in ``QRCode.add_data``.
 
+- Better calculation of the best mask pattern and related optimizations. Big
+  thanks to cryptogun!
+
 
 5.3 (18 May 2016)
 =================
