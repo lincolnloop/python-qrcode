@@ -2,8 +2,8 @@
 Change log
 ==========
 
-6.0 (unreleased)
-================
+6.0 (23 March 2018)
+===================
 
 - Fix optimize length being ignored in ``QRCode.add_data``.
 
