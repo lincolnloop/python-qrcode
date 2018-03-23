@@ -181,7 +181,6 @@ class QRCodeTests(unittest.TestCase):
         qr = qrcode.QRCode()
         text = 'A1abc1234567def1HELLOa'
         qr.add_data(text, optimize=7)
-        print(qr.data_list)
         qr.make()
         self.assertEqual(len(qr.data_list), 3)
         self.assertEqual(

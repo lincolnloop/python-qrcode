@@ -30,8 +30,12 @@ error_correction = {
 }
 
 
-def main(args=sys.argv[1:]):
-    parser = optparse.OptionParser(usage=__doc__.strip())
+def main(args=None):
+    if args is None:
+        args = sys.argv[1:]
+    from pkg_resources import get_distribution
+    version = get_distribution('qrcode').version
+    parser = optparse.OptionParser(usage=__doc__.strip(), version=version)
     parser.add_option(
         "--factory", help="Full python path to the image factory class to "
         "create the image with. You can use the following shortcuts to the "

@@ -5,7 +5,6 @@ qrcode versions.
 import os
 import re
 import datetime
-import pkg_resources
 
 
 def update_manpage(data):
@@ -13,6 +12,7 @@ def update_manpage(data):
     Update the version in the manpage document.
     """
     if data['name'] != 'qrcode':
+        print('no qrcode')
         return
 
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -27,15 +27,14 @@ def update_manpage(data):
         parts = re.split(r'"([^"]*)"', line)
         if len(parts) < 5:
             continue
-        pkg = pkg_resources.get_distribution('qrcode')
-        version = pkg.parsed_version.base_version
-        if parts[3] == version:
-            break
-        # Update version
-        parts[3] = pkg.parsed_version.base_version
-        # Update date
-        parts[1] = datetime.datetime.now().strftime('%-d %b %Y')
-        lines[i] = '"'.join(parts)
+        changed = parts[3] != data['new_version']
+        if changed:
+            # Update version
+            parts[3] = data['new_version']
+            # Update date
+            parts[1] = datetime.datetime.now().strftime('%-d %b %Y')
+            lines[i] = '"'.join(parts)
+        break
 
     if changed:
         with open(filename, 'w') as f:
