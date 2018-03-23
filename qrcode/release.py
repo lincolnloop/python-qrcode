@@ -12,7 +12,6 @@ def update_manpage(data):
     Update the version in the manpage document.
     """
     if data['name'] != 'qrcode':
-        print('no qrcode')
         return
 
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
