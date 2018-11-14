@@ -216,12 +216,13 @@ class QRCode:
         out.write("\x1b[1;47m" + (" " * (modcount * 2 + 4)) + "\x1b[0m\n")
         out.flush()
 
-    def print_ascii(self, out=None, tty=False, invert=False):
+    def print_ascii(self, out=None, tty=False, invert=False, string_only=False):
         """
         Output the QR Code using ASCII characters.
 
         :param tty: use fixed TTY color codes (forces invert=True)
         :param invert: invert the ASCII characters (solid <-> transparent)
+        :param string_only: return a string containing the ascii instead of printing
         """
         if out is None:
             import sys
@@ -233,6 +234,10 @@ class QRCode:
                 out = codecs.getwriter(sys.stdout.encoding)(sys.stdout)
             else:
                 out = sys.stdout
+
+        if string_only:
+            output_string = ""
+
 
         if tty and not out.isatty():
             raise OSError("Not a tty")
@@ -259,15 +264,32 @@ class QRCode:
         for r in range(-self.border, modcount+self.border, 2):
             if tty:
                 if not invert or r < modcount+self.border-1:
-                    out.write('\x1b[48;5;232m')   # Background black
+                    if string_only:
+                        output_string += '\x1b[48;5;232m'
+                    else:
+                        out.write('\x1b[48;5;232m')   # Background black
                 out.write('\x1b[38;5;255m')   # Foreground white
             for c in range(-self.border, modcount+self.border):
                 pos = get_module(r, c) + (get_module(r+1, c) << 1)
-                out.write(codes[pos])
+                if string_only:
+                    output_string += codes[pos]
+                else:
+                    out.write(codes[pos])
             if tty:
-                out.write('\x1b[0m')
-            out.write('\n')
-        out.flush()
+                if string_only:
+                    output_string += '\x1b[0m'
+                else:
+                    out.write('\x1b[0m')
+
+            if string_only:
+                output_string += '\n'
+            else:
+                out.write('\n')
+
+        if not string_only:
+            out.flush()
+        else:
+            return output_string
 
     def make_image(self, image_factory=None, **kwargs):
         """
