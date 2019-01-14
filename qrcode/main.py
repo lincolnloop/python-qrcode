@@ -33,6 +33,7 @@ def _check_mask_pattern(mask_pattern):
         raise ValueError(
             "Mask pattern should be in range(8) (got %s)" % mask_pattern)
 
+
 class QRCode:
 
     def __init__(self, version=None,

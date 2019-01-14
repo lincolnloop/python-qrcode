@@ -189,6 +189,13 @@ class QRCodeTests(unittest.TestCase):
         )
         self.assertEqual(qr.version, 2)
 
+    def test_optimize_longer_than_data(self):
+        qr = qrcode.QRCode()
+        text = 'ABCDEFGHIJK'
+        qr.add_data(text, optimize=12)
+        self.assertEqual(len(qr.data_list), 1)
+        self.assertEqual(qr.data_list[0].mode, MODE_ALPHA_NUM)
+
     def test_optimize_size(self):
         text = 'A1abc12345123451234512345def1HELLOHELLOHELLOHELLOa' * 5
 

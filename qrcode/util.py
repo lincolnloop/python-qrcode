@@ -33,7 +33,7 @@ MODE_SIZE_LARGE = {
 }
 
 ALPHA_NUM = six.b('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:')
-RE_ALPHA_NUM = re.compile(six.b('^[') + re.escape(ALPHA_NUM) + six.b(']*\Z'))
+RE_ALPHA_NUM = re.compile(six.b('^[') + re.escape(ALPHA_NUM) + six.b(r']*\Z'))
 
 # The number of bits for numeric delimited data lengths.
 NUMBER_LENGTH = {3: 10, 2: 7, 1: 4}
@@ -344,12 +344,17 @@ def optimal_data_chunks(data, minimum=4):
     :param minimum: The minimum number of bytes in a row to split as a chunk.
     """
     data = to_bytestring(data)
-    re_repeat = (
-        six.b('{') + six.text_type(minimum).encode('ascii') + six.b(',}'))
-    num_pattern = re.compile(six.b('\d') + re_repeat)
+    num_pattern = six.b(r'\d')
+    alpha_pattern = six.b('[') + re.escape(ALPHA_NUM) + six.b(']')
+    if len(data) <= minimum:
+        num_pattern = re.compile(six.b('^') + num_pattern + six.b('+$'))
+        alpha_pattern = re.compile(six.b('^') + alpha_pattern + six.b('+$'))
+    else:
+        re_repeat = (
+            six.b('{') + six.text_type(minimum).encode('ascii') + six.b(',}'))
+        num_pattern = re.compile(num_pattern + re_repeat)
+        alpha_pattern = re.compile(alpha_pattern + re_repeat)
     num_bits = _optimal_split(data, num_pattern)
-    alpha_pattern = re.compile(
-        six.b('[') + re.escape(ALPHA_NUM) + six.b(']') + re_repeat)
     for is_num, chunk in num_bits:
         if is_num:
             yield QRData(chunk, mode=MODE_NUMBER, check_data=False)
