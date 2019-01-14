@@ -2,8 +2,8 @@
 Change log
 ==========
 
-6.1 (unreleased)
-================
+6.1 (14 January 2019)
+=====================
 
 - Fix short chunks of data not being optimized to the correct mode.
 
