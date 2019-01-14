@@ -2,6 +2,12 @@
 Change log
 ==========
 
+6.2 (unreleased)
+================
+
+- Nothing changed yet.
+
+
 6.1 (14 January 2019)
 =====================
 
