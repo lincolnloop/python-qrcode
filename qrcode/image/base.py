@@ -12,13 +12,13 @@ class BaseImage(object):
         self.pixel_size = (self.width + self.border*2) * self.box_size
         self._img = self.new_image(**kwargs)
 
-    def drawrect(self, row, col):
+    def drawrect(self, row, col):  # pragma: no cover
         """
         Draw a single rectangle of the QR code.
         """
         raise NotImplementedError("BaseImage.drawrect")
 
-    def save(self, stream, kind=None):
+    def save(self, stream, kind=None):  # pragma: no cover
         """
         Save the image file.
         """
@@ -37,7 +37,7 @@ class BaseImage(object):
         """
         Build the image class. Subclasses should return the class created.
         """
-        return None
+        raise NotImplementedError("BaseImage.new_image")
 
     def get_image(self, **kwargs):
         """

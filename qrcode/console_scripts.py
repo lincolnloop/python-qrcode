@@ -10,7 +10,7 @@ import optparse
 import os
 import qrcode
 # The next block is added to get the terminal to display properly on MS platforms
-if sys.platform.startswith(('win', 'cygwin')):
+if sys.platform.startswith(('win', 'cygwin')):  # pragma: no cover
     import colorama
     colorama.init()
 
