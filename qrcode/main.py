@@ -291,11 +291,33 @@ class QRCode:
 
         im = image_factory(
             self.border, self.modules_count, self.box_size, **kwargs)
-        for r in range(self.modules_count):
-            for c in range(self.modules_count):
-                if self.modules[r][c]:
-                    im.drawrect(r, c)
+
+        if im.needs_context:
+            for r in range(self.modules_count):
+                for c in range(self.modules_count):
+                    im.drawrect_context(r, c, self.modules[r][c], self.get_module_context(r,c))
+        else:
+            for r in range(self.modules_count):
+                for c in range(self.modules_count):
+                    if self.modules[r][c]:
+                        im.drawrect(r,c)
+        if im.needs_processing:
+            im.process()
+
         return im
+
+    # return true if and only if (row, col) is in the module
+    def is_constrained(self, row, col):
+        return row >= 0 and row < len(self.modules) and col >= 0 and col < len(self.modules[row])
+
+    def get_module_context(self, row, col):
+        context = []
+
+        for r in range(row-1,row + 2):
+            for c in range(col - 1, col + 2):
+                if not (r == row and c == col):
+                    context.append(self.is_constrained(r,c) and self.modules[r][c])
+        return context
 
     def setup_timing_pattern(self):
         for r in range(8, self.modules_count - 8):

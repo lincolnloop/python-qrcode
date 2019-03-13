@@ -4,7 +4,9 @@ class BaseImage(object):
     """
     kind = None
     allowed_kinds = None
-
+    needs_context = False
+    needs_processing = False
+    
     def __init__(self, border, width, box_size, *args, **kwargs):
         self.border = border
         self.width = width
@@ -17,6 +19,18 @@ class BaseImage(object):
         Draw a single rectangle of the QR code.
         """
         raise NotImplementedError("BaseImage.drawrect")
+
+    def drawrect_context(self, row, col, active, context):
+        """
+        Draw a single rectangle of the QR code given the surrounding context
+        """
+        raise NotImplementedError("BaseImage.drawrect_context")
+
+    def process(self):
+        """
+        Processes QR code after completion
+        """
+        raise NotImplementedError("BaseImage.drawimage")
 
     def save(self, stream, kind=None):
         """

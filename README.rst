@@ -81,6 +81,48 @@ is.
 The ``border`` parameter controls how many boxes thick the border should be
 (the default is 4, which is the minimum according to the specs).
 
+Styling
+-------
+To use apply styles to the QRCode, use the StyledPilImage image factory. 
+This takes an optional module drawer to control the shape of the QR Code, an 
+optional color mask to change the colors of the QR Code, and an optional image 
+to embed in the center.
+
+These QR Codes are not guaranteed to work with all readers, so do some 
+experimentation and set the error correction to high (especially if embedding an 
+image).
+
+Example to draw the QR code with rounded corners:
+
+.. code:: python
+
+    import qrcode
+    qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
+    qr.add_data('Some data')
+
+    img = qr.make_image(image_factory=StyledPilImage(), module_drawer=RoundedModuleDrawer())
+
+Example to draw the QR code with a radial gradiant:
+.. code:: python
+
+    import qrcode
+    qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
+    qr.add_data('Some data')
+
+    img = qr.make_image(image_factory=StyledPilImage(), color_mask=RadialGradiantColorMask())
+
+Example to draw the QR code with an embedded image:
+
+.. code:: python
+
+    import qrcode
+    qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
+    qr.add_data('Some data')
+
+    img = qr.make_image(image_factory=StyledPilImage(), image_path="/path/to/image.png")
+
+
+
 Other image factories
 =====================
 
