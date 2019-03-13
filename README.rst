@@ -102,7 +102,10 @@ Example to draw the QR code with rounded corners:
 
     img = qr.make_image(image_factory=StyledPilImage(), module_drawer=RoundedModuleDrawer())
 
+Other module_drawers are shown in doc/module_drawers.png.
+
 Example to draw the QR code with a radial gradiant:
+
 .. code:: python
 
     import qrcode
@@ -110,6 +113,8 @@ Example to draw the QR code with a radial gradiant:
     qr.add_data('Some data')
 
     img = qr.make_image(image_factory=StyledPilImage(), color_mask=RadialGradiantColorMask())
+
+Other color masks are shown in doc/color_masks.png.
 
 Example to draw the QR code with an embedded image:
 
