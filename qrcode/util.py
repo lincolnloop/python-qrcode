@@ -165,11 +165,15 @@ def length_in_bits(mode, version):
             MODE_NUMBER, MODE_ALPHA_NUM, MODE_8BIT_BYTE, MODE_KANJI):
         raise TypeError("Invalid mode (%s)" % mode)  # pragma: no cover
 
-    if version < 1 or version > 40:  # pragma: no cover
-        raise ValueError(
-            "Invalid version (was %s, expected 1 to 40)" % version)
+    check_version(version)
 
     return mode_sizes_for_version(version)[mode]
+
+
+def check_version(version):
+    if version < 1 or version > 40:
+        raise ValueError(
+            "Invalid version (was %s, expected 1 to 40)" % version)
 
 
 def lost_point(modules):
@@ -402,7 +406,7 @@ def optimal_mode(data):
     return MODE_8BIT_BYTE
 
 
-class QRData:
+class QRData(object):
     """
     Data held in a QR compatible format.
 
@@ -462,7 +466,7 @@ class QRData:
         return repr(self.data)
 
 
-class BitBuffer:
+class BitBuffer(object):
 
     def __init__(self):
         self.buffer = []

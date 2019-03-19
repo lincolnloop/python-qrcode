@@ -11,12 +11,6 @@ def make(data=None, **kwargs):
     return qr.make_image()
 
 
-def _check_version(version):
-    if version < 1 or version > 40:
-        raise ValueError(
-            "Invalid version (was %s, expected 1 to 40)" % version)
-
-
 def _check_box_size(size):
     if int(size) <= 0:
         raise ValueError(
@@ -34,7 +28,7 @@ def _check_mask_pattern(mask_pattern):
             "Mask pattern should be in range(8) (got %s)" % mask_pattern)
 
 
-class QRCode:
+class QRCode(object):
 
     def __init__(self, version=None,
                  error_correction=constants.ERROR_CORRECT_M,
@@ -97,7 +91,7 @@ class QRCode:
             self.makeImpl(False, self.mask_pattern)
 
     def makeImpl(self, test, mask_pattern):
-        _check_version(self.version)
+        util.check_version(self.version)
         self.modules_count = self.version * 4 + 17
         self.modules = [None] * self.modules_count
 
@@ -147,7 +141,7 @@ class QRCode:
         """
         if start is None:
             start = 1
-        _check_version(start)
+        util.check_version(start)
 
         # Corresponds to the code in util.create_data, except we don't yet know
         # version, so optimistically assume start and check later

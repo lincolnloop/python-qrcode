@@ -1,7 +1,6 @@
 import warnings
 import six
 import sys
-import qrcode
 import qrcode.util
 import qrcode.image.svg
 
@@ -105,21 +104,54 @@ class QRCodeTests(unittest.TestCase):
         qr.add_data(UNICODE_TEXT)
         img = qr.make_image()
         img.save(six.BytesIO())
+        from qrcode.image.pil import Image as pil_Image
+        self.assertIsInstance(img.get_image(), pil_Image.Image)
+
+    def test_render_pil_with_transparent_background(self):
+        qr = qrcode.QRCode()
+        qr.add_data(UNICODE_TEXT)
+        img = qr.make_image(back_color='TransParent')
+        img.save(six.BytesIO())
+
+    def test_render_pil_with_red_background(self):
+        qr = qrcode.QRCode()
+        qr.add_data(UNICODE_TEXT)
+        img = qr.make_image(back_color='red')
+        img.save(six.BytesIO())
+
+    def test_render_with_pattern(self):
+        qr = qrcode.QRCode(mask_pattern=3)
+        qr.add_data(UNICODE_TEXT)
+        img = qr.make_image()
+        img.save(six.BytesIO())
+
+    def test_make_image_with_wrong_pattern(self):
+        with self.assertRaises(TypeError):
+            qrcode.QRCode(mask_pattern='string pattern')
+
+        with self.assertRaises(ValueError):
+            qrcode.QRCode(mask_pattern=-1)
+
+        with self.assertRaises(ValueError):
+            qrcode.QRCode(mask_pattern=42)
 
     def test_qrcode_bad_factory(self):
-        self.assertRaises(
-            TypeError, qrcode.QRCode, image_factory='not_BaseImage')
-        self.assertRaises(
-            AssertionError, qrcode.QRCode, image_factory=dict)
+        with self.assertRaises(TypeError):
+           qrcode.QRCode(image_factory='not_BaseImage')
+
+        with self.assertRaises(AssertionError):
+            qrcode.QRCode(image_factory=dict)
 
     def test_qrcode_factory(self):
 
         class MockFactory(BaseImage):
             drawrect = mock.Mock()
+            new_image = mock.Mock()
 
         qr = qrcode.QRCode(image_factory=MockFactory)
         qr.add_data(UNICODE_TEXT)
         qr.make_image()
+        self.assertTrue(MockFactory.new_image.called)
         self.assertTrue(MockFactory.drawrect.called)
 
     def test_render_svg(self):
@@ -151,6 +183,8 @@ class QRCodeTests(unittest.TestCase):
         qr = qrcode.QRCode()
         qr.add_data(UNICODE_TEXT)
         img = qr.make_image(image_factory=qrcode.image.pure.PymagingImage)
+        from pymaging import Image as pymaging_Image
+        self.assertIsInstance(img.get_image(), pymaging_Image)
         with warnings.catch_warnings():
             if six.PY3:
                 warnings.simplefilter('ignore', DeprecationWarning)
@@ -161,7 +195,8 @@ class QRCodeTests(unittest.TestCase):
         qr = qrcode.QRCode()
         qr.add_data(UNICODE_TEXT)
         img = qr.make_image(image_factory=qrcode.image.pure.PymagingImage)
-        self.assertRaises(ValueError, img.save, six.BytesIO(), kind='FISH')
+        with self.assertRaises(ValueError):
+            img.save(six.BytesIO(), kind='FISH')
 
     def test_optimize(self):
         qr = qrcode.QRCode()
