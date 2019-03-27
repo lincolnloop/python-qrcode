@@ -1,8 +1,10 @@
-import warnings
-import six
 import sys
-import qrcode.util
+import warnings
+
+import six
+
 import qrcode.image.svg
+import qrcode.util
 
 try:
     import qrcode.image.pure
@@ -117,6 +119,12 @@ class QRCodeTests(unittest.TestCase):
         qr = qrcode.QRCode()
         qr.add_data(UNICODE_TEXT)
         img = qr.make_image(back_color='red')
+        img.save(six.BytesIO())
+
+    def test_render_pil_with_circles(self):
+        qr = qrcode.QRCode()
+        qr.add_data(UNICODE_TEXT)
+        img = qr.make_image(style='circles')
         img.save(six.BytesIO())
 
     def test_render_with_pattern(self):

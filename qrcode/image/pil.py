@@ -42,6 +42,10 @@ class PilImage(qrcode.image.base.BaseImage):
         box = self.pixel_box(row, col)
         self._idr.rectangle(box, fill=self.fill_color)
 
+    def drawcirc(self, row, col):
+        box = self.pixel_box(row, col)
+        self._idr.ellipse((box[0][0], box[0][1], box[1][0] - 1, box[1][1] - 1), fill=self.fill_color)
+
     def save(self, stream, format=None, **kwargs):
         kind = kwargs.pop("kind", self.kind)
         if format is None:

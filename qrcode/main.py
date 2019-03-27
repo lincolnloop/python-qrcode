@@ -1,8 +1,9 @@
-from qrcode import constants, exceptions, util
-from qrcode.image.base import BaseImage
+from bisect import bisect_left
 
 import six
-from bisect import bisect_left
+
+from qrcode import constants, exceptions, util
+from qrcode.image.base import BaseImage
 
 
 def make(data=None, **kwargs):
@@ -34,7 +35,8 @@ class QRCode(object):
                  error_correction=constants.ERROR_CORRECT_M,
                  box_size=10, border=4,
                  image_factory=None,
-                 mask_pattern=None):
+                 mask_pattern=None,
+                 style=None):
         _check_box_size(box_size)
         self.version = version and int(version)
         self.error_correction = int(error_correction)
@@ -44,6 +46,7 @@ class QRCode(object):
         self.border = int(border)
         _check_mask_pattern(mask_pattern)
         self.mask_pattern = mask_pattern
+        self.style = style
         self.image_factory = image_factory
         if image_factory is not None:
             assert issubclass(image_factory, BaseImage)
@@ -285,10 +288,16 @@ class QRCode(object):
 
         im = image_factory(
             self.border, self.modules_count, self.box_size, **kwargs)
-        for r in range(self.modules_count):
-            for c in range(self.modules_count):
-                if self.modules[r][c]:
-                    im.drawrect(r, c)
+        if self.style is "circles":
+            for r in range(self.modules_count):
+                for c in range(self.modules_count):
+                    if self.modules[r][c]:
+                        im.drawcirc(r, c)
+        else:
+            for r in range(self.modules_count):
+                for c in range(self.modules_count):
+                    if self.modules[r][c]:
+                        im.drawrect(r, c)
         return im
 
     def setup_timing_pattern(self):

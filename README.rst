@@ -48,6 +48,7 @@ For more control, use the ``QRCode`` class. For example:
         error_correction=qrcode.constants.ERROR_CORRECT_L,
         box_size=10,
         border=4,
+        style="circle",
     )
     qr.add_data('Some data')
     qr.make(fit=True)
@@ -80,6 +81,10 @@ is.
 
 The ``border`` parameter controls how many boxes thick the border should be
 (the default is 4, which is the minimum according to the specs).
+
+The ``style`` parameter when set to ``circles`` change squares in the QR
+to be printed as circles.
+
 
 Other image factories
 =====================
