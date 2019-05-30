@@ -1,4 +1,6 @@
 import sys
+import os
+from tempfile import mkdtemp
 try:
     import unittest2 as unittest
 except ImportError:
@@ -16,7 +18,12 @@ def bad_read():
 
 
 class ScriptTest(unittest.TestCase):
-
+    def setUp(self):
+        self.tmpdir = mkdtemp()
+        
+    def tearDown(self):
+        os.rmdir(self.tmpdir)
+        
     @mock.patch('os.isatty', lambda *args: True)
     @mock.patch('qrcode.main.QRCode.print_ascii')
     def test_isatty(self, mock_print_ascii):
@@ -65,3 +72,9 @@ class ScriptTest(unittest.TestCase):
     @mock.patch('sys.stderr')
     def test_bad_factory(self, mock_stderr):
         self.assertRaises(SystemExit, main, 'testtext --factory fish'.split())
+
+    def test_output(self):
+        tmpfile = os.path.join(self.tmpdir, "test.png")
+        main(['testtext', '--output', tmpfile])
+        os.remove(tmpfile)
+        
