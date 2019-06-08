@@ -135,8 +135,8 @@ Pure Python PNG
 
 Install the following two packages::
 
-    pip install git+git://github.com/ojii/pymaging.git#egg=pymaging
-    pip install git+git://github.com/ojii/pymaging-png.git#egg=pymaging-png
+    pip install -e git+git://github.com/ojii/pymaging.git#egg=pymaging
+    pip install -e git+git://github.com/ojii/pymaging-png.git#egg=pymaging-png
 
 From your command line::
 
