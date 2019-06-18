@@ -42,6 +42,17 @@ class PilImage(qrcode.image.base.BaseImage):
         box = self.pixel_box(row, col)
         self._idr.rectangle(box, fill=self.fill_color)
 
+    def drawdiamond(self, row, col):
+        """Draws a diamond instead of square in the qrcode
+        
+        Arguments:
+            row {index} -- [Row index]
+            col {index} -- [Collum index]
+        """
+        x = (col+self.border) * self.box_size
+        y = (row+self.border) * self.box_size
+        self._idr.polygon([x-5, y, x, y+5, x+5, y, x, y-5], fill=self.fill_color)
+
     def save(self, stream, format=None, **kwargs):
         kind = kwargs.pop("kind", self.kind)
         if format is None:
