@@ -42,16 +42,45 @@ class PilImage(qrcode.image.base.BaseImage):
         box = self.pixel_box(row, col)
         self._idr.rectangle(box, fill=self.fill_color)
 
-    def drawdiamond(self, row, col):
+    def drawdiamond(self, row, col, version):
         """Draws a diamond instead of square in the qrcode
         
         Arguments:
             row {index} -- [Row index]
             col {index} -- [Collum index]
         """
+        def _isPositionIndicator(version, row, col):
+            """checks if the coordinate is the so called position indicator, these have to be a solid line
+
+            Arguments:
+                version {int} -- version number
+                row {int} -- row
+                col {int} -- collum
+        
+            Returns:
+                bool -- wether its a position indicator
+            """
+            size = 21 + version*4
+            if row <= 6: 
+                if col < 7:
+                    return True
+            if row >= (size - 11):
+                if col < 7: 
+                    return True
+            if row < 7:
+                if col > (size - 12):
+                    return True
+
+
         x = (col+self.border) * self.box_size
         y = (row+self.border) * self.box_size
-        self._idr.polygon([x-5, y, x, y+5, x+5, y, x, y-5], fill=self.fill_color)
+        diamondSize = int(self.box_size/3) 
+        boxSize = int(self.box_size/2)
+        if _isPositionIndicator(version, row, col):
+            self._idr.rectangle((x-boxSize, y-boxSize, x+boxSize, y+boxSize), fill=self.fill_color)
+
+        else:
+            self._idr.polygon([x-diamondSize, y, x, y+diamondSize, x+diamondSize, y, x, y-diamondSize], fill=self.fill_color)
 
     def save(self, stream, format=None, **kwargs):
         kind = kwargs.pop("kind", self.kind)

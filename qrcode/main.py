@@ -16,6 +16,15 @@ def _check_box_size(size):
         raise ValueError(
             "Invalid box size (was %s, expected larger than 0)" % size)
 
+def _check_shape_name(name):
+    if name == "square":
+        return 
+    if name == "diamond":
+        return
+    else:
+        raise ValueError(
+            "Shape should be either square or diamond (got %s)" % name
+        ) 
 
 def _check_mask_pattern(mask_pattern):
     if mask_pattern is None:
@@ -34,7 +43,8 @@ class QRCode(object):
                  error_correction=constants.ERROR_CORRECT_M,
                  box_size=10, border=4,
                  image_factory=None,
-                 mask_pattern=None):
+                 mask_pattern=None,
+                shape="square"):
         _check_box_size(box_size)
         self.version = version and int(version)
         self.error_correction = int(error_correction)
@@ -47,6 +57,8 @@ class QRCode(object):
         self.image_factory = image_factory
         if image_factory is not None:
             assert issubclass(image_factory, BaseImage)
+        _check_shape_name(shape)
+        self.shape = shape
         self.clear()
 
     def clear(self):
@@ -288,7 +300,11 @@ class QRCode(object):
         for r in range(self.modules_count):
             for c in range(self.modules_count):
                 if self.modules[r][c]:
-                    im.drawrect(r, c)
+                    if self.shape == "square":
+                        im.drawrect(r, c, self.version)
+                    if self.shape == "diamond":
+                        im.drawdiamond(r, c, self.version)
+
         return im
 
     def setup_timing_pattern(self):
