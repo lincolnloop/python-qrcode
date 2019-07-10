@@ -300,8 +300,11 @@ class QRCode(object):
         for r in range(self.modules_count):
             for c in range(self.modules_count):
                 if self.modules[r][c]:
+                    print(self)
+                    if self.shape == None:
+                        self.shape == "square"
                     if self.shape == "square":
-                        im.drawrect(r, c, self.version)
+                        im.drawrect(r, c)
                     if self.shape == "diamond":
                         im.drawdiamond(r, c, self.version)
 
