@@ -3,6 +3,7 @@ import six
 import sys
 import qrcode.util
 import qrcode.image.svg
+import qrcode.image.pdf
 
 try:
     import qrcode.image.pure
@@ -176,6 +177,12 @@ class QRCodeTests(unittest.TestCase):
         qr = qrcode.QRCode()
         qr.add_data(UNICODE_TEXT)
         img = qr.make_image(image_factory=SvgImageWhite)
+        img.save(six.BytesIO())
+
+    def test_render_pdf(self):
+        qr = qrcode.QRCode()
+        qr.add_data(UNICODE_TEXT)
+        img = qr.make_image(image_factory=qrcode.image.pdf.PdfImage)
         img.save(six.BytesIO())
 
     @unittest.skipIf(not pymaging_png, "Requires pymaging with PNG support")
