@@ -48,7 +48,7 @@ For more control, use the ``QRCode`` class. For example:
         error_correction=qrcode.constants.ERROR_CORRECT_L,
         box_size=10,
         border=4,
-        style="circle",
+        style="circles",
     )
     qr.add_data('Some data')
     qr.make(fit=True)
