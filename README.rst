@@ -9,6 +9,10 @@ run::
 
     pip install qrcode[pil]
 
+Or::
+
+    pip install qrcode Pillow
+
 .. _pillow: https://pypi.python.org/pypi/Pillow
 
 
