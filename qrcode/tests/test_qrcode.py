@@ -135,6 +135,18 @@ class QRCodeTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             qrcode.QRCode(mask_pattern=42)
 
+    def test_mask_pattern_setter(self):
+        qr = qrcode.QRCode()
+
+        with self.assertRaises(TypeError):
+            qr.mask_pattern = "string pattern"
+
+        with self.assertRaises(ValueError):
+            qr.mask_pattern = -1
+
+        with self.assertRaises(ValueError):
+            qr.mask_pattern = 8
+
     def test_qrcode_bad_factory(self):
         with self.assertRaises(TypeError):
            qrcode.QRCode(image_factory='not_BaseImage')
