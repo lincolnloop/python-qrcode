@@ -42,12 +42,20 @@ class QRCode(object):
         # Spec says border should be at least four boxes wide, but allow for
         # any (e.g. for producing printable QR codes).
         self.border = int(border)
-        _check_mask_pattern(mask_pattern)
         self.mask_pattern = mask_pattern
         self.image_factory = image_factory
         if image_factory is not None:
             assert issubclass(image_factory, BaseImage)
         self.clear()
+
+    @property
+    def mask_pattern(self):
+        return self._mask_pattern
+
+    @mask_pattern.setter
+    def mask_pattern(self, pattern):
+        _check_mask_pattern(pattern)
+        self._mask_pattern = pattern
 
     def clear(self):
         """
