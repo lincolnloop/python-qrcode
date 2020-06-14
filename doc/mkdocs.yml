@@ -1,0 +1,11 @@
+site_name: Python QR Code
+site_description: Python QR Code image generator In the Command line and Python code
+theme:
+  name: material
+  palette:
+    scheme: slate
+    primary: black
+    accent: lime
+  font:
+    text: Ubuntu
+    code: Ubutnu Code

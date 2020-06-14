@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "python-qrcode"
+version = "0.1.0"
+description = ""
+authors = ["Evan Baird <mrcartoonster@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+[tool.poetry.dev-dependencies]
+mkdocs = "^1.1.2"
+pyperclip = "^1.8.0"
+tox = "^3.15.2"
+pymdown-extensions = "^7.1"
+mkdocs-material = "^5.2.3"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
