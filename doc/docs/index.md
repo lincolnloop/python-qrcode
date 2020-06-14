@@ -11,8 +11,9 @@ For a standard install (which will include
 [pillow](https://pypi.python.org/pypi/Pillow) for generating images),
 run:
 
-    pip install qrcode[pil]
-
+```bash
+$ pip install qrcode[pil]
+```
 What is a QR Code?
 ==================
 

@@ -5,7 +5,7 @@ theme:
   palette:
     scheme: slate
     primary: blue
-    accent: lime
+    accent: indigo
   font:
     text: Ubuntu
     code: Ubutnu Code
