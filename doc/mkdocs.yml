@@ -4,8 +4,18 @@ theme:
   name: material
   palette:
     scheme: slate
-    primary: black
+    primary: blue
     accent: lime
   font:
     text: Ubuntu
     code: Ubutnu Code
+  icon:
+    repo: fontawesome/brands/github-alt
+  logo: images/favicon.png
+  favicon: images/favicon.png
+repo_name: lincolnloop/python-qrcode
+repo_url: https://github.com/lincolnloop/python-qrcode
+markdown_extensions:
+  - toc:
+      permalink: true
+  - codehilite: 
