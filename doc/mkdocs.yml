@@ -3,19 +3,32 @@ site_description: Python QR Code image generator In the Command line and Python 
 theme:
   name: material
   palette:
-    scheme: slate
     primary: blue
     accent: indigo
   font:
     text: Ubuntu
     code: Ubutnu Code
   icon:
-    repo: fontawesome/brands/github-alt
+    repo: fontawesome/brands/github
   logo: images/favicon.png
   favicon: images/favicon.png
+nav:
+  - 'index.md'
+  - 'usage.md'
+  - 'advanced_usage.md'
+  - 'other_image_factories.md'
+  - 'API.md'
 repo_name: lincolnloop/python-qrcode
 repo_url: https://github.com/lincolnloop/python-qrcode
 markdown_extensions:
   - toc:
       permalink: true
-  - codehilite: 
+  - codehilite:
+      guess_lang: false
+  - mkautodoc
+extra_css:
+  - css/custom.css
+extra:
+  social:
+    - icon: fontawesome/brands/twitter-square
+      link: https://twitter.com/lincolnloop

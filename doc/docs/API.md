@@ -1,0 +1,3 @@
+::: qrcode.QRCode
+    :docstring:
+    :members:
