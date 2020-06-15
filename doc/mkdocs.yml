@@ -30,5 +30,5 @@ extra_css:
   - css/custom.css
 extra:
   social:
-    - icon: fontawesome/brands/twitter-square
+    - icon: fontawesome/brands/twitter
       link: https://twitter.com/lincolnloop
