@@ -1,6 +1,6 @@
-=============================
-Pure python QR Code generator
-=============================
+=============================================
+Python QR Code generator(Easy implementation)
+=============================================
 
 Generate QR codes.
 
