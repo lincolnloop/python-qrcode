@@ -160,7 +160,7 @@ def mode_sizes_for_version(version):
 def length_in_bits(mode, version):
     if mode not in (
             MODE_NUMBER, MODE_ALPHA_NUM, MODE_8BIT_BYTE, MODE_KANJI):
-        raise TypeError("Invalid mode (%s)" % mode)  # pragma: no cover
+        raise TypeError(f"Invalid mode ({mode})")  # pragma: no cover
 
     check_version(version)
 
@@ -170,7 +170,7 @@ def length_in_bits(mode, version):
 def check_version(version):
     if version < 1 or version > 40:
         raise ValueError(
-            "Invalid version (was %s, expected 1 to 40)" % version)
+            f"Invalid version (was {version}, expected 1 to 40)")
 
 
 def lost_point(modules):
@@ -423,11 +423,10 @@ class QRData:
         else:
             self.mode = mode
             if mode not in (MODE_NUMBER, MODE_ALPHA_NUM, MODE_8BIT_BYTE):
-                raise TypeError("Invalid mode (%s)" % mode)  # pragma: no cover
+                raise TypeError(f"Invalid mode ({mode})")  # pragma: no cover
             if check_data and mode < optimal_mode(data):  # pragma: no cover
                 raise ValueError(
-                    "Provided data can not be represented in mode "
-                    "{}".format(mode))
+                    f"Provided data can not be represented in mode {mode}")
 
         self.data = data
 

@@ -274,7 +274,7 @@ RS_BLOCK_TABLE = [
 
 def glog(n):
     if n < 1:  # pragma: no cover
-        raise ValueError("glog(%s)" % n)
+        raise ValueError(f"glog({n})")
     return LOG_TABLE[n]
 
 
@@ -286,7 +286,7 @@ class Polynomial:
 
     def __init__(self, num, shift):
         if not num:  # pragma: no cover
-            raise Exception("{}/{}".format(len(num), shift))
+            raise Exception(f"{len(num)}/{shift}")
 
         for offset in range(len(num)):
             if num[offset] != 0:

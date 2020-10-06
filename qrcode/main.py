@@ -14,7 +14,7 @@ def make(data=None, **kwargs):
 def _check_box_size(size):
     if int(size) <= 0:
         raise ValueError(
-            "Invalid box size (was %s, expected larger than 0)" % size)
+            f"Invalid box size (was {size}, expected larger than 0)")
 
 
 def _check_mask_pattern(mask_pattern):
@@ -22,10 +22,10 @@ def _check_mask_pattern(mask_pattern):
         return
     if not isinstance(mask_pattern, int):
         raise TypeError(
-            "Invalid mask pattern (was %s, expected int)" % type(mask_pattern))
+            f"Invalid mask pattern (was {type(mask_pattern)}, expected int)")
     if mask_pattern < 0 or mask_pattern > 7:
         raise ValueError(
-            "Mask pattern should be in range(8) (got %s)" % mask_pattern)
+            f"Mask pattern should be in range(8) (got {mask_pattern})")
 
 
 class QRCode:

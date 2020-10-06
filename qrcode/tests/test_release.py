@@ -6,7 +6,7 @@ from unittest import mock
 
 from qrcode.release import update_manpage
 
-OPEN = '{}.open'.format(builtins.__name__)
+OPEN = f'{builtins.__name__}.open'
 DATA = 'test\n.TH "date" "version" "description"\nthis'
 
 
