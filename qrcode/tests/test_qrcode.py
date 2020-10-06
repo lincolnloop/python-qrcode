@@ -1,5 +1,5 @@
 import warnings
-import six
+import io
 import sys
 import qrcode.util
 import qrcode.image.svg
@@ -95,7 +95,7 @@ class QRCodeTests(unittest.TestCase):
         qr = qrcode.QRCode()
         qr.add_data(UNICODE_TEXT)
         img = qr.make_image()
-        img.save(six.BytesIO())
+        img.save(io.BytesIO())
         from qrcode.image.pil import Image as pil_Image
         self.assertIsInstance(img.get_image(), pil_Image.Image)
 
@@ -103,19 +103,19 @@ class QRCodeTests(unittest.TestCase):
         qr = qrcode.QRCode()
         qr.add_data(UNICODE_TEXT)
         img = qr.make_image(back_color='TransParent')
-        img.save(six.BytesIO())
+        img.save(io.BytesIO())
 
     def test_render_pil_with_red_background(self):
         qr = qrcode.QRCode()
         qr.add_data(UNICODE_TEXT)
         img = qr.make_image(back_color='red')
-        img.save(six.BytesIO())
+        img.save(io.BytesIO())
 
     def test_render_with_pattern(self):
         qr = qrcode.QRCode(mask_pattern=3)
         qr.add_data(UNICODE_TEXT)
         img = qr.make_image()
-        img.save(six.BytesIO())
+        img.save(io.BytesIO())
 
     def test_make_image_with_wrong_pattern(self):
         with self.assertRaises(TypeError):
@@ -162,25 +162,25 @@ class QRCodeTests(unittest.TestCase):
         qr = qrcode.QRCode()
         qr.add_data(UNICODE_TEXT)
         img = qr.make_image(image_factory=qrcode.image.svg.SvgImage)
-        img.save(six.BytesIO())
+        img.save(io.BytesIO())
 
     def test_render_svg_path(self):
         qr = qrcode.QRCode()
         qr.add_data(UNICODE_TEXT)
         img = qr.make_image(image_factory=qrcode.image.svg.SvgPathImage)
-        img.save(six.BytesIO())
+        img.save(io.BytesIO())
 
     def test_render_svg_fragment(self):
         qr = qrcode.QRCode()
         qr.add_data(UNICODE_TEXT)
         img = qr.make_image(image_factory=qrcode.image.svg.SvgFragmentImage)
-        img.save(six.BytesIO())
+        img.save(io.BytesIO())
 
     def test_render_svg_with_background(self):
         qr = qrcode.QRCode()
         qr.add_data(UNICODE_TEXT)
         img = qr.make_image(image_factory=SvgImageWhite)
-        img.save(six.BytesIO())
+        img.save(io.BytesIO())
 
     @unittest.skipIf(not pymaging_png, "Requires pymaging with PNG support")
     def test_render_pymaging_png(self):
@@ -191,7 +191,7 @@ class QRCodeTests(unittest.TestCase):
         self.assertIsInstance(img.get_image(), pymaging_Image)
         with warnings.catch_warnings():
             warnings.simplefilter('ignore', DeprecationWarning)
-            img.save(six.BytesIO())
+            img.save(io.BytesIO())
 
     @unittest.skipIf(not pymaging_png, "Requires pymaging")
     def test_render_pymaging_png_bad_kind(self):
@@ -199,7 +199,7 @@ class QRCodeTests(unittest.TestCase):
         qr.add_data(UNICODE_TEXT)
         img = qr.make_image(image_factory=qrcode.image.pure.PymagingImage)
         with self.assertRaises(ValueError):
-            img.save(six.BytesIO(), kind='FISH')
+            img.save(io.BytesIO(), kind='FISH')
 
     def test_optimize(self):
         qr = qrcode.QRCode()
@@ -264,14 +264,14 @@ class QRCodeTests(unittest.TestCase):
 
     def test_print_ascii(self):
         qr = qrcode.QRCode(border=0)
-        f = six.StringIO()
+        f = io.StringIO()
         qr.print_ascii(out=f)
         printed = f.getvalue()
         f.close()
         expected = '\u2588\u2580\u2580\u2580\u2580\u2580\u2588'
         self.assertEqual(printed[:len(expected)], expected)
 
-        f = six.StringIO()
+        f = io.StringIO()
         f.isatty = lambda: True
         qr.print_ascii(out=f, tty=True)
         printed = f.getvalue()
@@ -290,7 +290,7 @@ class QRCodeTests(unittest.TestCase):
 
     def test_print_tty(self):
         qr = qrcode.QRCode()
-        f = six.StringIO()
+        f = io.StringIO()
         f.isatty = lambda: True
         qr.print_tty(out=f)
         printed = f.getvalue()

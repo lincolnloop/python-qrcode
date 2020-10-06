@@ -1,13 +1,13 @@
 import sys
 import re
+import builtins
 import datetime
 import unittest
 from unittest import mock
 
-import six
 from qrcode.release import update_manpage
 
-OPEN = '{}.open'.format(six.moves.builtins.__name__)
+OPEN = '{}.open'.format(builtins.__name__)
 DATA = 'test\n.TH "date" "version" "description"\nthis'
 
 

@@ -1,9 +1,6 @@
 import re
 import math
 
-import six
-from six.moves import xrange
-
 from qrcode import base, exceptions, LUT
 
 # QR encoding modes.
@@ -96,8 +93,8 @@ PAD1 = 0x11
 _data_count = lambda block: block.data_count
 BIT_LIMIT_TABLE = [
     [0] + [8*sum(map(_data_count, base.rs_blocks(version, error_correction)))
-           for version in xrange(1, 41)]
-    for error_correction in xrange(4)
+           for version in range(1, 41)]
+    for error_correction in range(4)
 ]
 
 
@@ -192,7 +189,7 @@ def lost_point(modules):
 def _lost_point_level1(modules, modules_count):
     lost_point = 0
 
-    modules_range = xrange(modules_count)
+    modules_range = range(modules_count)
     container = [0] * (modules_count + 1)
 
     for row in modules_range:
@@ -225,7 +222,7 @@ def _lost_point_level1(modules, modules_count):
             container[length] += 1
 
     lost_point += sum(container[each_length] * (each_length - 2)
-        for each_length in xrange(5, modules_count + 1))
+        for each_length in range(5, modules_count + 1))
 
     return lost_point
 
@@ -233,7 +230,7 @@ def _lost_point_level1(modules, modules_count):
 def _lost_point_level2(modules, modules_count):
     lost_point = 0
 
-    modules_range = xrange(modules_count - 1)
+    modules_range = range(modules_count - 1)
     for row in modules_range:
         this_row = modules[row]
         next_row = modules[row + 1]
@@ -262,8 +259,8 @@ def _lost_point_level3(modules, modules_count):
     # row/column, preceded or followed by light area 4 modules wide. From ISOIEC.
     # pattern1:     10111010000
     # pattern2: 00001011101
-    modules_range = xrange(modules_count)
-    modules_range_short = xrange(modules_count-10)
+    modules_range = range(modules_count)
+    modules_range_short = range(modules_count-10)
     lost_point = 0
 
     for row in modules_range:
@@ -439,12 +436,12 @@ class QRData:
 
     def write(self, buffer):
         if self.mode == MODE_NUMBER:
-            for i in xrange(0, len(self.data), 3):
+            for i in range(0, len(self.data), 3):
                 chars = self.data[i:i + 3]
                 bit_length = NUMBER_LENGTH[len(chars)]
                 buffer.put(int(chars), bit_length)
         elif self.mode == MODE_ALPHA_NUM:
-            for i in xrange(0, len(self.data), 2):
+            for i in range(0, len(self.data), 2):
                 chars = self.data[i:i + 2]
                 if len(chars) > 1:
                     buffer.put(
