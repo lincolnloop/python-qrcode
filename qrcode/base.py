@@ -282,11 +282,11 @@ def gexp(n):
     return EXP_TABLE[n % 255]
 
 
-class Polynomial(object):
+class Polynomial:
 
     def __init__(self, num, shift):
         if not num:  # pragma: no cover
-            raise Exception("%s/%s" % (len(num), shift))
+            raise Exception("{}/{}".format(len(num), shift))
 
         for offset in range(len(num)):
             if num[offset] != 0:
@@ -331,7 +331,7 @@ class Polynomial(object):
         return Polynomial(num, 0) % other
 
 
-class RSBlock(object):
+class RSBlock:
 
     def __init__(self, total_count, data_count):
         self.total_count = total_count

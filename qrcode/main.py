@@ -29,7 +29,7 @@ def _check_mask_pattern(mask_pattern):
             "Mask pattern should be in range(8) (got %s)" % mask_pattern)
 
 
-class QRCode(object):
+class QRCode:
 
     def __init__(self, version=None,
                  error_correction=constants.ERROR_CORRECT_M,
@@ -237,7 +237,7 @@ class QRCode(object):
             self.make()
 
         modcount = self.modules_count
-        codes = [six.int2byte(code).decode('cp437')
+        codes = [bytes((code,)).decode('cp437')
                  for code in (255, 223, 220, 219)]
         if tty:
             invert = True

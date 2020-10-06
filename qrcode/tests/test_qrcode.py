@@ -19,7 +19,7 @@ from qrcode.util import (
     QRData, MODE_NUMBER, MODE_ALPHA_NUM, MODE_8BIT_BYTE)
 from qrcode.tests.svg import SvgImageWhite
 
-UNICODE_TEXT = u'\u03b1\u03b2\u03b3'
+UNICODE_TEXT = '\u03b1\u03b2\u03b3'
 
 
 class QRCodeTests(unittest.TestCase):
@@ -80,7 +80,7 @@ class QRCodeTests(unittest.TestCase):
 
     def test_mode_8bit(self):
         qr = qrcode.QRCode()
-        qr.add_data(u'abcABC' + UNICODE_TEXT, optimize=0)
+        qr.add_data('abcABC' + UNICODE_TEXT, optimize=0)
         qr.make()
         self.assertEqual(qr.version, 1)
         self.assertEqual(qr.data_list[0].mode, MODE_8BIT_BYTE)
@@ -190,8 +190,7 @@ class QRCodeTests(unittest.TestCase):
         from pymaging import Image as pymaging_Image
         self.assertIsInstance(img.get_image(), pymaging_Image)
         with warnings.catch_warnings():
-            if six.PY3:
-                warnings.simplefilter('ignore', DeprecationWarning)
+            warnings.simplefilter('ignore', DeprecationWarning)
             img.save(six.BytesIO())
 
     @unittest.skipIf(not pymaging_png, "Requires pymaging")
@@ -269,7 +268,7 @@ class QRCodeTests(unittest.TestCase):
         qr.print_ascii(out=f)
         printed = f.getvalue()
         f.close()
-        expected = u'\u2588\u2580\u2580\u2580\u2580\u2580\u2588'
+        expected = '\u2588\u2580\u2580\u2580\u2580\u2580\u2588'
         self.assertEqual(printed[:len(expected)], expected)
 
         f = six.StringIO()
@@ -278,8 +277,8 @@ class QRCodeTests(unittest.TestCase):
         printed = f.getvalue()
         f.close()
         expected = (
-            u'\x1b[48;5;232m\x1b[38;5;255m' +
-            u'\xa0\u2584\u2584\u2584\u2584\u2584\xa0')
+            '\x1b[48;5;232m\x1b[38;5;255m' +
+            '\xa0\u2584\u2584\u2584\u2584\u2584\xa0')
         self.assertEqual(printed[:len(expected)], expected)
 
     def test_print_tty_stdout(self):

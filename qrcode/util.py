@@ -32,8 +32,8 @@ MODE_SIZE_LARGE = {
     MODE_KANJI: 12,
 }
 
-ALPHA_NUM = six.b('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:')
-RE_ALPHA_NUM = re.compile(six.b('^[') + re.escape(ALPHA_NUM) + six.b(r']*\Z'))
+ALPHA_NUM = b'0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:'
+RE_ALPHA_NUM = re.compile(b'^[' + re.escape(ALPHA_NUM) + br']*\Z')
 
 # The number of bits for numeric delimited data lengths.
 NUMBER_LENGTH = {3: 10, 2: 7, 1: 4}
@@ -348,14 +348,14 @@ def optimal_data_chunks(data, minimum=4):
     :param minimum: The minimum number of bytes in a row to split as a chunk.
     """
     data = to_bytestring(data)
-    num_pattern = six.b(r'\d')
-    alpha_pattern = six.b('[') + re.escape(ALPHA_NUM) + six.b(']')
+    num_pattern = br'\d'
+    alpha_pattern = b'[' + re.escape(ALPHA_NUM) + b']'
     if len(data) <= minimum:
-        num_pattern = re.compile(six.b('^') + num_pattern + six.b('+$'))
-        alpha_pattern = re.compile(six.b('^') + alpha_pattern + six.b('+$'))
+        num_pattern = re.compile(b'^' + num_pattern + b'+$')
+        alpha_pattern = re.compile(b'^' + alpha_pattern + b'+$')
     else:
         re_repeat = (
-            six.b('{') + six.text_type(minimum).encode('ascii') + six.b(',}'))
+            b'{' + str(minimum).encode('ascii') + b',}')
         num_pattern = re.compile(num_pattern + re_repeat)
         alpha_pattern = re.compile(alpha_pattern + re_repeat)
     num_bits = _optimal_split(data, num_pattern)
@@ -390,8 +390,8 @@ def to_bytestring(data):
     Convert data to a (utf-8 encoded) byte-string if it isn't a byte-string
     already.
     """
-    if not isinstance(data, six.binary_type):
-        data = six.text_type(data).encode('utf-8')
+    if not isinstance(data, bytes):
+        data = str(data).encode('utf-8')
     return data
 
 
@@ -406,7 +406,7 @@ def optimal_mode(data):
     return MODE_8BIT_BYTE
 
 
-class QRData(object):
+class QRData:
     """
     Data held in a QR compatible format.
 
@@ -430,7 +430,7 @@ class QRData(object):
             if check_data and mode < optimal_mode(data):  # pragma: no cover
                 raise ValueError(
                     "Provided data can not be represented in mode "
-                    "{0}".format(mode))
+                    "{}".format(mode))
 
         self.data = data
 
@@ -453,12 +453,9 @@ class QRData(object):
                 else:
                     buffer.put(ALPHA_NUM.find(chars), 6)
         else:
-            if six.PY3:
-                # Iterating a bytestring in Python 3 returns an integer,
-                # no need to ord().
-                data = self.data
-            else:
-                data = [ord(c) for c in self.data]
+            # Iterating a bytestring in Python 3 returns an integer,
+            # no need to ord().
+            data = self.data
             for c in data:
                 buffer.put(c, 8)
 
@@ -466,7 +463,7 @@ class QRData(object):
         return repr(self.data)
 
 
-class BitBuffer(object):
+class BitBuffer:
 
     def __init__(self):
         self.buffer = []
