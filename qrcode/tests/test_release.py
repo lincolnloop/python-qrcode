@@ -1,4 +1,3 @@
-import sys
 import re
 import builtins
 import datetime
@@ -11,9 +10,6 @@ OPEN = '{}.open'.format(builtins.__name__)
 DATA = 'test\n.TH "date" "version" "description"\nthis'
 
 
-@unittest.skipIf(
-    sys.version_info[0] == 3 and sys.version_info[1] < 6,
-    "mock_file not working on Python 3 when less than 3.6")
 class UpdateManpageTests(unittest.TestCase):
 
     @mock.patch(OPEN, new_callable=mock.mock_open, read_data='.TH invalid')
