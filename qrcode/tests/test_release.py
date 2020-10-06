@@ -2,10 +2,7 @@ import sys
 import re
 import datetime
 import unittest
-try:
-    from unittest import mock
-except ImportError:
-    import mock
+from unittest import mock
 
 import six
 from qrcode.release import update_manpage

@@ -1,6 +1,4 @@
 from decimal import Decimal
-# On Python 2.6 must install lxml since the older xml.etree.ElementTree
-# version can not be used to create SVG images.
 try:
     import lxml.etree as ET
 except ImportError:

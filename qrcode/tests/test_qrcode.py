@@ -3,6 +3,8 @@ import six
 import sys
 import qrcode.util
 import qrcode.image.svg
+import unittest
+from unittest import mock
 
 try:
     import qrcode.image.pure
@@ -16,16 +18,6 @@ from qrcode.exceptions import DataOverflowError
 from qrcode.util import (
     QRData, MODE_NUMBER, MODE_ALPHA_NUM, MODE_8BIT_BYTE)
 from qrcode.tests.svg import SvgImageWhite
-
-try:
-    import unittest2 as unittest
-except ImportError:
-    import unittest
-
-try:
-    from unittest import mock
-except ImportError:
-    import mock
 
 UNICODE_TEXT = u'\u03b1\u03b2\u03b3'
 

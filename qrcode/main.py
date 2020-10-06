@@ -1,6 +1,7 @@
 from qrcode import constants, exceptions, util
 from qrcode.image.base import BaseImage
 
+import sys
 import six
 from bisect import bisect_left
 
@@ -227,15 +228,7 @@ class QRCode(object):
         :param invert: invert the ASCII characters (solid <-> transparent)
         """
         if out is None:
-            import sys
-            if sys.version_info < (2, 7):
-                # On Python versions 2.6 and earlier, stdout tries to encode
-                # strings using ASCII rather than stdout.encoding, so use this
-                # workaround.
-                import codecs
-                out = codecs.getwriter(sys.stdout.encoding)(sys.stdout)
-            else:
-                out = sys.stdout
+            out = sys.stdout
 
         if tty and not out.isatty():
             raise OSError("Not a tty")
