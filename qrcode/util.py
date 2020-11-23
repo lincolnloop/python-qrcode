@@ -450,10 +450,7 @@ class QRData:
                 else:
                     buffer.put(ALPHA_NUM.find(chars), 6)
         else:
-            # Iterating a bytestring in Python 3 returns an integer,
-            # no need to ord().
-            data = self.data
-            for c in data:
+            for c in self.data:
                 buffer.put(c, 8)
 
     def __repr__(self):
