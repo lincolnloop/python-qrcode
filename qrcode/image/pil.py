@@ -1,5 +1,3 @@
-# Needed on case-insensitive filesystems
-
 # Try to import PIL in either of the two ways it can be installed.
 try:
     from PIL import Image, ImageDraw
