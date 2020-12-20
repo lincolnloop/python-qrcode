@@ -67,6 +67,8 @@ def main(args=None):
 
     if args:
         data = args[0]
+        if sys.version_info[0] >= 3:
+            data = data.encode(errors="surrogateescape")
     else:
         # Use sys.stdin.buffer if available (Python 3) avoiding
         # UnicodeDecodeErrors.
