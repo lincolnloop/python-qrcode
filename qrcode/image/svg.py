@@ -1,6 +1,4 @@
 from decimal import Decimal
-# On Python 2.6 must install lxml since the older xml.etree.ElementTree
-# version can not be used to create SVG images.
 try:
     import lxml.etree as ET
 except ImportError:
@@ -21,7 +19,7 @@ class SvgFragmentImage(qrcode.image.base.BaseImage):
 
     def __init__(self, *args, **kwargs):
         ET.register_namespace("svg", self._SVG_namespace)
-        super(SvgFragmentImage, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         # Save the unit size, for example the default box_size of 10 is '1mm'.
         self.unit_size = self.units(self.box_size)
 
@@ -73,7 +71,7 @@ class SvgImage(SvgFragmentImage):
     background = None
 
     def _svg(self, tag='svg', **kwargs):
-        svg = super(SvgImage, self)._svg(tag=tag, **kwargs)
+        svg = super()._svg(tag=tag, **kwargs)
         svg.set("xmlns", self._SVG_namespace)
         if self.background:
             svg.append(
@@ -83,7 +81,7 @@ class SvgImage(SvgFragmentImage):
         return svg
 
     def _rect(self, row, col):
-        return super(SvgImage, self)._rect(row, col, tag="rect")
+        return super()._rect(row, col, tag="rect")
 
     def _write(self, stream):
         ET.ElementTree(self._img).write(stream, encoding="UTF-8",
@@ -100,13 +98,13 @@ class SvgPathImage(SvgImage):
 
     def __init__(self, *args, **kwargs):
         self._points = set()
-        super(SvgPathImage, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def _svg(self, viewBox=None, **kwargs):
         if viewBox is None:
             dimension = self.units(self.pixel_size, text=False)
-            viewBox = '0 0 %(d)s %(d)s' % {'d': dimension}
-        return super(SvgPathImage, self)._svg(viewBox=viewBox, **kwargs)
+            viewBox = '0 0 {d} {d}'.format(d=dimension)
+        return super()._svg(viewBox=viewBox, **kwargs)
 
     def drawrect(self, row, col):
         # (x, y)
@@ -142,7 +140,7 @@ class SvgPathImage(SvgImage):
 
     def _write(self, stream):
         self._img.append(self.make_path())
-        super(SvgPathImage, self)._write(stream)
+        super()._write(stream)
 
 
 class SvgFillImage(SvgImage):

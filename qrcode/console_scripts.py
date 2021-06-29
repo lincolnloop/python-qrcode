@@ -39,7 +39,7 @@ def main(args=None):
     parser.add_option(
         "--factory", help="Full python path to the image factory class to "
         "create the image with. You can use the following shortcuts to the "
-        "built-in image factory classes: {0}.".format(
+        "built-in image factory classes: {}.".format(
             ", ".join(sorted(default_factories.keys()))))
     parser.add_option(
         "--optimize", type=int, help="Optimize the data by looking for chunks "
