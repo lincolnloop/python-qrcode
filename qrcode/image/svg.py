@@ -39,6 +39,9 @@ class SvgFragmentImage(qrcode.image.base.BaseImage):
         self.check_kind(kind=kind)
         self._write(stream)
 
+    def tostring(self):
+        return ET.tostring(self._img)
+
     def new_image(self, **kwargs):
         return self._svg()
 
@@ -137,6 +140,10 @@ class SvgPathImage(SvgImage):
             d=' '.join(subpaths),
             id="qr-path"
         )
+
+    def tostring(self):
+        self._img.append(self.make_path())
+        return super(SvgPathImage, self).tostring()
 
     def _write(self, stream):
         self._img.append(self.make_path())
