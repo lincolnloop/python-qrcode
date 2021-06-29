@@ -176,6 +176,15 @@ class QRCodeTests(unittest.TestCase):
         img = qr.make_image(image_factory=qrcode.image.svg.SvgFragmentImage)
         img.save(io.BytesIO())
 
+    def test_svg_string(self):
+        qr = qrcode.QRCode()
+        qr.add_data(UNICODE_TEXT)
+        img = qr.make_image(image_factory=qrcode.image.svg.SvgFragmentImage)
+        file_like = io.BytesIO()
+        img.save(file_like)
+        file_like.seek(0)
+        assert file_like.read() in img.to_string()
+
     def test_render_svg_with_background(self):
         qr = qrcode.QRCode()
         qr.add_data(UNICODE_TEXT)
