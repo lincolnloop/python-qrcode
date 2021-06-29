@@ -2,6 +2,12 @@
 Change log
 ==========
 
+7.1 (unreleased)
+================
+
+- Nothing changed yet.
+
+
 7.0 (29 June 2021)
 ==================
 
