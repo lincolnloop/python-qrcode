@@ -51,6 +51,8 @@ def main(args=None):
         help="The error correction level to use. Choices are L (7%), "
         "M (15%, default), Q (25%), and H (30%).")
     parser.add_option(
+        "--ascii", help="Print as ascii even if stdout is piped.", action="store_true")
+    parser.add_option(
         "--output",
         help="The output file. If not specified, the image is sent to "
         "the standard output.")
@@ -88,8 +90,8 @@ def main(args=None):
         with open(opts.output, "wb") as out:
             img.save(out)
     else:
-        if image_factory is None and os.isatty(sys.stdout.fileno()):
-            qr.print_ascii(tty=True)
+        if image_factory is None and (os.isatty(sys.stdout.fileno()) or opts.ascii):
+            qr.print_ascii(tty=not opts.ascii, invert=True)
             return
 
         img = qr.make_image(image_factory=image_factory)
