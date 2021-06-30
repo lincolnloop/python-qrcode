@@ -2,10 +2,24 @@
 Change log
 ==========
 
-6.1 (unreleased)
+7.1 (unreleased)
 ================
 
 - Nothing changed yet.
+
+
+7.0 (29 June 2021)
+==================
+
+- Drop Python < 3.6 support.
+
+
+6.1 (14 January 2019)
+=====================
+
+- Fix short chunks of data not being optimized to the correct mode.
+
+- Tests fixed for Python 3
 
 
 6.0 (23 March 2018)

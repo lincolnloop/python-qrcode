@@ -1,9 +1,10 @@
 import warnings
-import six
+import io
 import sys
-import qrcode
 import qrcode.util
 import qrcode.image.svg
+import unittest
+from unittest import mock
 
 try:
     import qrcode.image.pure
@@ -18,17 +19,7 @@ from qrcode.util import (
     QRData, MODE_NUMBER, MODE_ALPHA_NUM, MODE_8BIT_BYTE)
 from qrcode.tests.svg import SvgImageWhite
 
-try:
-    import unittest2 as unittest
-except ImportError:
-    import unittest
-
-try:
-    from unittest import mock
-except ImportError:
-    import mock
-
-UNICODE_TEXT = u'\u03b1\u03b2\u03b3'
+UNICODE_TEXT = '\u03b1\u03b2\u03b3'
 
 
 class QRCodeTests(unittest.TestCase):
@@ -89,7 +80,7 @@ class QRCodeTests(unittest.TestCase):
 
     def test_mode_8bit(self):
         qr = qrcode.QRCode()
-        qr.add_data(u'abcABC' + UNICODE_TEXT, optimize=0)
+        qr.add_data('abcABC' + UNICODE_TEXT, optimize=0)
         qr.make()
         self.assertEqual(qr.version, 1)
         self.assertEqual(qr.data_list[0].mode, MODE_8BIT_BYTE)
@@ -104,64 +95,126 @@ class QRCodeTests(unittest.TestCase):
         qr = qrcode.QRCode()
         qr.add_data(UNICODE_TEXT)
         img = qr.make_image()
-        img.save(six.BytesIO())
+        img.save(io.BytesIO())
+        from qrcode.image.pil import Image as pil_Image
+        self.assertIsInstance(img.get_image(), pil_Image.Image)
+
+    def test_render_pil_with_transparent_background(self):
+        qr = qrcode.QRCode()
+        qr.add_data(UNICODE_TEXT)
+        img = qr.make_image(back_color='TransParent')
+        img.save(io.BytesIO())
+
+    def test_render_pil_with_red_background(self):
+        qr = qrcode.QRCode()
+        qr.add_data(UNICODE_TEXT)
+        img = qr.make_image(back_color='red')
+        img.save(io.BytesIO())
+
+    def test_render_pil_with_rgb_color_tuples(self):
+        qr = qrcode.QRCode()
+        qr.add_data(UNICODE_TEXT)
+        img = qr.make_image(back_color=(255, 195, 235), fill_color=(55, 95, 35))
+        img.save(io.BytesIO())
+
+    def test_render_with_pattern(self):
+        qr = qrcode.QRCode(mask_pattern=3)
+        qr.add_data(UNICODE_TEXT)
+        img = qr.make_image()
+        img.save(io.BytesIO())
+
+    def test_make_image_with_wrong_pattern(self):
+        with self.assertRaises(TypeError):
+            qrcode.QRCode(mask_pattern='string pattern')
+
+        with self.assertRaises(ValueError):
+            qrcode.QRCode(mask_pattern=-1)
+
+        with self.assertRaises(ValueError):
+            qrcode.QRCode(mask_pattern=42)
+
+    def test_mask_pattern_setter(self):
+        qr = qrcode.QRCode()
+
+        with self.assertRaises(TypeError):
+            qr.mask_pattern = "string pattern"
+
+        with self.assertRaises(ValueError):
+            qr.mask_pattern = -1
+
+        with self.assertRaises(ValueError):
+            qr.mask_pattern = 8
 
     def test_qrcode_bad_factory(self):
-        self.assertRaises(
-            TypeError, qrcode.QRCode, image_factory='not_BaseImage')
-        self.assertRaises(
-            AssertionError, qrcode.QRCode, image_factory=dict)
+        with self.assertRaises(TypeError):
+           qrcode.QRCode(image_factory='not_BaseImage')
+
+        with self.assertRaises(AssertionError):
+            qrcode.QRCode(image_factory=dict)
 
     def test_qrcode_factory(self):
 
         class MockFactory(BaseImage):
             drawrect = mock.Mock()
+            new_image = mock.Mock()
 
         qr = qrcode.QRCode(image_factory=MockFactory)
         qr.add_data(UNICODE_TEXT)
         qr.make_image()
+        self.assertTrue(MockFactory.new_image.called)
         self.assertTrue(MockFactory.drawrect.called)
 
     def test_render_svg(self):
         qr = qrcode.QRCode()
         qr.add_data(UNICODE_TEXT)
         img = qr.make_image(image_factory=qrcode.image.svg.SvgImage)
-        img.save(six.BytesIO())
+        img.save(io.BytesIO())
 
     def test_render_svg_path(self):
         qr = qrcode.QRCode()
         qr.add_data(UNICODE_TEXT)
         img = qr.make_image(image_factory=qrcode.image.svg.SvgPathImage)
-        img.save(six.BytesIO())
+        img.save(io.BytesIO())
 
     def test_render_svg_fragment(self):
         qr = qrcode.QRCode()
         qr.add_data(UNICODE_TEXT)
         img = qr.make_image(image_factory=qrcode.image.svg.SvgFragmentImage)
-        img.save(six.BytesIO())
+        img.save(io.BytesIO())
+
+    def test_svg_string(self):
+        qr = qrcode.QRCode()
+        qr.add_data(UNICODE_TEXT)
+        img = qr.make_image(image_factory=qrcode.image.svg.SvgFragmentImage)
+        file_like = io.BytesIO()
+        img.save(file_like)
+        file_like.seek(0)
+        assert file_like.read() in img.to_string()
 
     def test_render_svg_with_background(self):
         qr = qrcode.QRCode()
         qr.add_data(UNICODE_TEXT)
         img = qr.make_image(image_factory=SvgImageWhite)
-        img.save(six.BytesIO())
+        img.save(io.BytesIO())
 
     @unittest.skipIf(not pymaging_png, "Requires pymaging with PNG support")
     def test_render_pymaging_png(self):
         qr = qrcode.QRCode()
         qr.add_data(UNICODE_TEXT)
         img = qr.make_image(image_factory=qrcode.image.pure.PymagingImage)
+        from pymaging import Image as pymaging_Image
+        self.assertIsInstance(img.get_image(), pymaging_Image)
         with warnings.catch_warnings():
-            if six.PY3:
-                warnings.simplefilter('ignore', DeprecationWarning)
-            img.save(six.BytesIO())
+            warnings.simplefilter('ignore', DeprecationWarning)
+            img.save(io.BytesIO())
 
     @unittest.skipIf(not pymaging_png, "Requires pymaging")
     def test_render_pymaging_png_bad_kind(self):
         qr = qrcode.QRCode()
         qr.add_data(UNICODE_TEXT)
         img = qr.make_image(image_factory=qrcode.image.pure.PymagingImage)
-        self.assertRaises(ValueError, img.save, six.BytesIO(), kind='FISH')
+        with self.assertRaises(ValueError):
+            img.save(io.BytesIO(), kind='FISH')
 
     def test_optimize(self):
         qr = qrcode.QRCode()
@@ -188,6 +241,13 @@ class QRCodeTests(unittest.TestCase):
             [MODE_8BIT_BYTE, MODE_NUMBER, MODE_8BIT_BYTE]
         )
         self.assertEqual(qr.version, 2)
+
+    def test_optimize_longer_than_data(self):
+        qr = qrcode.QRCode()
+        text = 'ABCDEFGHIJK'
+        qr.add_data(text, optimize=12)
+        self.assertEqual(len(qr.data_list), 1)
+        self.assertEqual(qr.data_list[0].mode, MODE_ALPHA_NUM)
 
     def test_optimize_size(self):
         text = 'A1abc12345123451234512345def1HELLOHELLOHELLOHELLOa' * 5
@@ -219,21 +279,21 @@ class QRCodeTests(unittest.TestCase):
 
     def test_print_ascii(self):
         qr = qrcode.QRCode(border=0)
-        f = six.StringIO()
+        f = io.StringIO()
         qr.print_ascii(out=f)
         printed = f.getvalue()
         f.close()
-        expected = u'\u2588\u2580\u2580\u2580\u2580\u2580\u2588'
+        expected = '\u2588\u2580\u2580\u2580\u2580\u2580\u2588'
         self.assertEqual(printed[:len(expected)], expected)
 
-        f = six.StringIO()
+        f = io.StringIO()
         f.isatty = lambda: True
         qr.print_ascii(out=f, tty=True)
         printed = f.getvalue()
         f.close()
         expected = (
-            u'\x1b[48;5;232m\x1b[38;5;255m' +
-            u'\xa0\u2584\u2584\u2584\u2584\u2584\xa0')
+            '\x1b[48;5;232m\x1b[38;5;255m' +
+            '\xa0\u2584\u2584\u2584\u2584\u2584\xa0')
         self.assertEqual(printed[:len(expected)], expected)
 
     def test_print_tty_stdout(self):
@@ -245,7 +305,7 @@ class QRCodeTests(unittest.TestCase):
 
     def test_print_tty(self):
         qr = qrcode.QRCode()
-        f = six.StringIO()
+        f = io.StringIO()
         f.isatty = lambda: True
         qr.print_tty(out=f)
         printed = f.getvalue()

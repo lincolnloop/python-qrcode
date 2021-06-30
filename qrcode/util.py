@@ -1,9 +1,6 @@
 import re
 import math
 
-import six
-from six.moves import xrange
-
 from qrcode import base, exceptions, LUT
 
 # QR encoding modes.
@@ -32,8 +29,8 @@ MODE_SIZE_LARGE = {
     MODE_KANJI: 12,
 }
 
-ALPHA_NUM = six.b('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:')
-RE_ALPHA_NUM = re.compile(six.b('^[') + re.escape(ALPHA_NUM) + six.b(']*\Z'))
+ALPHA_NUM = b'0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:'
+RE_ALPHA_NUM = re.compile(b'^[' + re.escape(ALPHA_NUM) + br']*\Z')
 
 # The number of bits for numeric delimited data lengths.
 NUMBER_LENGTH = {3: 10, 2: 7, 1: 4}
@@ -96,8 +93,8 @@ PAD1 = 0x11
 _data_count = lambda block: block.data_count
 BIT_LIMIT_TABLE = [
     [0] + [8*sum(map(_data_count, base.rs_blocks(version, error_correction)))
-           for version in xrange(1, 41)]
-    for error_correction in xrange(4)
+           for version in range(1, 41)]
+    for error_correction in range(4)
 ]
 
 
@@ -163,13 +160,17 @@ def mode_sizes_for_version(version):
 def length_in_bits(mode, version):
     if mode not in (
             MODE_NUMBER, MODE_ALPHA_NUM, MODE_8BIT_BYTE, MODE_KANJI):
-        raise TypeError("Invalid mode (%s)" % mode)  # pragma: no cover
+        raise TypeError(f"Invalid mode ({mode})")  # pragma: no cover
 
-    if version < 1 or version > 40:  # pragma: no cover
-        raise ValueError(
-            "Invalid version (was %s, expected 1 to 40)" % version)
+    check_version(version)
 
     return mode_sizes_for_version(version)[mode]
+
+
+def check_version(version):
+    if version < 1 or version > 40:
+        raise ValueError(
+            f"Invalid version (was {version}, expected 1 to 40)")
 
 
 def lost_point(modules):
@@ -188,7 +189,7 @@ def lost_point(modules):
 def _lost_point_level1(modules, modules_count):
     lost_point = 0
 
-    modules_range = xrange(modules_count)
+    modules_range = range(modules_count)
     container = [0] * (modules_count + 1)
 
     for row in modules_range:
@@ -221,7 +222,7 @@ def _lost_point_level1(modules, modules_count):
             container[length] += 1
 
     lost_point += sum(container[each_length] * (each_length - 2)
-        for each_length in xrange(5, modules_count + 1))
+        for each_length in range(5, modules_count + 1))
 
     return lost_point
 
@@ -229,7 +230,7 @@ def _lost_point_level1(modules, modules_count):
 def _lost_point_level2(modules, modules_count):
     lost_point = 0
 
-    modules_range = xrange(modules_count - 1)
+    modules_range = range(modules_count - 1)
     for row in modules_range:
         this_row = modules[row]
         next_row = modules[row + 1]
@@ -258,8 +259,8 @@ def _lost_point_level3(modules, modules_count):
     # row/column, preceded or followed by light area 4 modules wide. From ISOIEC.
     # pattern1:     10111010000
     # pattern2: 00001011101
-    modules_range = xrange(modules_count)
-    modules_range_short = xrange(modules_count-10)
+    modules_range = range(modules_count)
+    modules_range_short = range(modules_count-10)
     lost_point = 0
 
     for row in modules_range:
@@ -344,12 +345,17 @@ def optimal_data_chunks(data, minimum=4):
     :param minimum: The minimum number of bytes in a row to split as a chunk.
     """
     data = to_bytestring(data)
-    re_repeat = (
-        six.b('{') + six.text_type(minimum).encode('ascii') + six.b(',}'))
-    num_pattern = re.compile(six.b('\d') + re_repeat)
+    num_pattern = br'\d'
+    alpha_pattern = b'[' + re.escape(ALPHA_NUM) + b']'
+    if len(data) <= minimum:
+        num_pattern = re.compile(b'^' + num_pattern + b'+$')
+        alpha_pattern = re.compile(b'^' + alpha_pattern + b'+$')
+    else:
+        re_repeat = (
+            b'{' + str(minimum).encode('ascii') + b',}')
+        num_pattern = re.compile(num_pattern + re_repeat)
+        alpha_pattern = re.compile(alpha_pattern + re_repeat)
     num_bits = _optimal_split(data, num_pattern)
-    alpha_pattern = re.compile(
-        six.b('[') + re.escape(ALPHA_NUM) + six.b(']') + re_repeat)
     for is_num, chunk in num_bits:
         if is_num:
             yield QRData(chunk, mode=MODE_NUMBER, check_data=False)
@@ -381,8 +387,8 @@ def to_bytestring(data):
     Convert data to a (utf-8 encoded) byte-string if it isn't a byte-string
     already.
     """
-    if not isinstance(data, six.binary_type):
-        data = six.text_type(data).encode('utf-8')
+    if not isinstance(data, bytes):
+        data = str(data).encode('utf-8')
     return data
 
 
@@ -417,11 +423,10 @@ class QRData:
         else:
             self.mode = mode
             if mode not in (MODE_NUMBER, MODE_ALPHA_NUM, MODE_8BIT_BYTE):
-                raise TypeError("Invalid mode (%s)" % mode)  # pragma: no cover
+                raise TypeError(f"Invalid mode ({mode})")  # pragma: no cover
             if check_data and mode < optimal_mode(data):  # pragma: no cover
                 raise ValueError(
-                    "Provided data can not be represented in mode "
-                    "{0}".format(mode))
+                    f"Provided data can not be represented in mode {mode}")
 
         self.data = data
 
@@ -430,12 +435,12 @@ class QRData:
 
     def write(self, buffer):
         if self.mode == MODE_NUMBER:
-            for i in xrange(0, len(self.data), 3):
+            for i in range(0, len(self.data), 3):
                 chars = self.data[i:i + 3]
                 bit_length = NUMBER_LENGTH[len(chars)]
                 buffer.put(int(chars), bit_length)
         elif self.mode == MODE_ALPHA_NUM:
-            for i in xrange(0, len(self.data), 2):
+            for i in range(0, len(self.data), 2):
                 chars = self.data[i:i + 2]
                 if len(chars) > 1:
                     buffer.put(
@@ -444,12 +449,9 @@ class QRData:
                 else:
                     buffer.put(ALPHA_NUM.find(chars), 6)
         else:
-            if six.PY3:
-                # Iterating a bytestring in Python 3 returns an integer,
-                # no need to ord().
-                data = self.data
-            else:
-                data = [ord(c) for c in self.data]
+            # Iterating a bytestring in Python 3 returns an integer,
+            # no need to ord().
+            data = self.data
             for c in data:
                 buffer.put(c, 8)
 

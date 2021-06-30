@@ -1,25 +1,10 @@
 Packaging quick reminder
 ========================
 
-Ensure version numbers in ``setup.py`` and ``doc/qr.1`` have been updated.
+Make sure maintainer dependencies are installed::
 
-1. Check twine and wheel are up to date::
+    pip install -e .[maintainer,dev]
 
-    pip install --upgrade twine wheel
+Run release commad and follow prompt instuctions::
 
-2. Delete contents of ``dist/``::
-
-    rm -r dist
-
-3. Package it up::
-
-    python setup.py sdist bdist_wheel
-
-4. Sign it::
-
-    gpg --detach-sign -a dist/*.gz
-    gpg --detach-sign -a dist/*.whl
-
-5. Upload it::
-
-    twine upload dist/*
+    fullrelease

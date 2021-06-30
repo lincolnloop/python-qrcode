@@ -1,5 +1,4 @@
 # Needed on case-insensitive filesystems
-from __future__ import absolute_import
 
 # Try to import PIL in either of the two ways it can be installed.
 try:
@@ -21,8 +20,18 @@ class PilImage(qrcode.image.base.BaseImage):
         back_color = kwargs.get("back_color", "white")
         fill_color = kwargs.get("fill_color", "black")
 
-        if fill_color.lower() != "black" or back_color.lower() != "white":
-            if back_color.lower() == "transparent":
+        try:
+            fill_color = fill_color.lower()
+        except AttributeError:
+            pass
+
+        try:
+            back_color = back_color.lower()
+        except AttributeError:
+            pass
+
+        if fill_color != "black" or back_color != "white":
+            if back_color == "transparent":
                 mode = "RGBA"
                 back_color = None
             else:
@@ -30,8 +39,8 @@ class PilImage(qrcode.image.base.BaseImage):
         else:
             mode = "1"
             # L mode (1 mode) color = (r*299 + g*587 + b*114)//1000
-            if fill_color.lower() == "black": fill_color = 0
-            if back_color.lower() == "white": back_color = 255
+            if fill_color == "black": fill_color = 0
+            if back_color == "white": back_color = 255
 
         img = Image.new(mode, (self.pixel_size, self.pixel_size), back_color)
         self.fill_color = fill_color
@@ -43,10 +52,9 @@ class PilImage(qrcode.image.base.BaseImage):
         self._idr.rectangle(box, fill=self.fill_color)
 
     def save(self, stream, format=None, **kwargs):
+        kind = kwargs.pop("kind", self.kind)
         if format is None:
-            format = kwargs.get("kind", self.kind)
-        if "kind" in kwargs:
-            del kwargs["kind"]
+            format = kind
         self._img.save(stream, format=format, **kwargs)
 
     def __getattr__(self, name):

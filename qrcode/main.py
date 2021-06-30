@@ -1,7 +1,7 @@
 from qrcode import constants, exceptions, util
 from qrcode.image.base import BaseImage
 
-import six
+import sys
 from bisect import bisect_left
 
 
@@ -11,16 +11,10 @@ def make(data=None, **kwargs):
     return qr.make_image()
 
 
-def _check_version(version):
-    if version < 1 or version > 40:
-        raise ValueError(
-            "Invalid version (was %s, expected 1 to 40)" % version)
-
-
 def _check_box_size(size):
     if int(size) <= 0:
         raise ValueError(
-            "Invalid box size (was %s, expected larger than 0)" % size)
+            f"Invalid box size (was {size}, expected larger than 0)")
 
 
 def _check_mask_pattern(mask_pattern):
@@ -28,10 +22,11 @@ def _check_mask_pattern(mask_pattern):
         return
     if not isinstance(mask_pattern, int):
         raise TypeError(
-            "Invalid mask pattern (was %s, expected int)" % type(mask_pattern))
+            f"Invalid mask pattern (was {type(mask_pattern)}, expected int)")
     if mask_pattern < 0 or mask_pattern > 7:
         raise ValueError(
-            "Mask pattern should be in range(8) (got %s)" % mask_pattern)
+            f"Mask pattern should be in range(8) (got {mask_pattern})")
+
 
 class QRCode:
 
@@ -47,12 +42,20 @@ class QRCode:
         # Spec says border should be at least four boxes wide, but allow for
         # any (e.g. for producing printable QR codes).
         self.border = int(border)
-        _check_mask_pattern(mask_pattern)
         self.mask_pattern = mask_pattern
         self.image_factory = image_factory
         if image_factory is not None:
             assert issubclass(image_factory, BaseImage)
         self.clear()
+
+    @property
+    def mask_pattern(self):
+        return self._mask_pattern
+
+    @mask_pattern.setter
+    def mask_pattern(self, pattern):
+        _check_mask_pattern(pattern)
+        self._mask_pattern = pattern
 
     def clear(self):
         """
@@ -96,7 +99,7 @@ class QRCode:
             self.makeImpl(False, self.mask_pattern)
 
     def makeImpl(self, test, mask_pattern):
-        _check_version(self.version)
+        util.check_version(self.version)
         self.modules_count = self.version * 4 + 17
         self.modules = [None] * self.modules_count
 
@@ -146,7 +149,7 @@ class QRCode:
         """
         if start is None:
             start = 1
-        _check_version(start)
+        util.check_version(start)
 
         # Corresponds to the code in util.create_data, except we don't yet know
         # version, so optimistically assume start and check later
@@ -224,15 +227,7 @@ class QRCode:
         :param invert: invert the ASCII characters (solid <-> transparent)
         """
         if out is None:
-            import sys
-            if sys.version_info < (2, 7):
-                # On Python versions 2.6 and earlier, stdout tries to encode
-                # strings using ASCII rather than stdout.encoding, so use this
-                # workaround.
-                import codecs
-                out = codecs.getwriter(sys.stdout.encoding)(sys.stdout)
-            else:
-                out = sys.stdout
+            out = sys.stdout
 
         if tty and not out.isatty():
             raise OSError("Not a tty")
@@ -241,7 +236,7 @@ class QRCode:
             self.make()
 
         modcount = self.modules_count
-        codes = [six.int2byte(code).decode('cp437')
+        codes = [bytes((code,)).decode('cp437')
                  for code in (255, 223, 220, 219)]
         if tty:
             invert = True
@@ -382,7 +377,7 @@ class QRCode:
 
         data_len = len(data)
 
-        for col in six.moves.xrange(self.modules_count - 1, 0, -2):
+        for col in range(self.modules_count - 1, 0, -2):
 
             if col <= 6:
                 col -= 1
