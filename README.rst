@@ -64,7 +64,7 @@ this automatically.
 color of the QR, when using the default image factory. Both parameters accept
 RGB color tuples.
 
-..code:: python
+.. code:: python
 
 
     img = qr.make_image(back_color=(255, 195, 235), fill_color=(55, 95, 35))
