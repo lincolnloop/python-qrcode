@@ -97,7 +97,8 @@ class SvgPathImage(SvgImage):
     between individual QR points).
     """
 
-    QR_PATH_STYLE = 'fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none'
+    QR_PATH_STYLE = {'fill': '#000000', 'fill-opacity': '1',
+                     'fill-rule': 'nonzero', 'stroke': 'none'}
 
     def __init__(self, *args, **kwargs):
         self._points = set()
@@ -136,9 +137,9 @@ class SvgPathImage(SvgImage):
 
         return ET.Element(
             ET.QName("path"),
-            style=self.QR_PATH_STYLE,
             d=' '.join(subpaths),
-            id="qr-path"
+            id="qr-path",
+            **self.QR_PATH_STYLE
         )
 
     def to_string(self):
