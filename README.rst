@@ -34,6 +34,7 @@ Or in Python, use the ``make`` shortcut function:
 
     import qrcode
     img = qrcode.make('Some data here')
+    img.save("some_file.png")
 
 Advanced Usage
 --------------
@@ -60,7 +61,13 @@ Set to ``None`` and use the ``fit`` parameter when making the code to determine
 this automatically.
 
 ``fill_color`` and ``back_color`` can change the background and the painting
-color of the QR, when using the default image factory.
+color of the QR, when using the default image factory. Both parameters accept
+RGB color tuples.
+
+..code:: python
+
+
+    img = qr.make_image(back_color=(255, 195, 235), fill_color=(55, 95, 35))
 
 The ``error_correction`` parameter controls the error correction used for the
 QR Code. The following four constants are made available on the ``qrcode``
@@ -135,8 +142,8 @@ Pure Python PNG
 
 Install the following two packages::
 
-    pip install git+git://github.com/ojii/pymaging.git#egg=pymaging
-    pip install git+git://github.com/ojii/pymaging-png.git#egg=pymaging-png
+    pip install -e git+git://github.com/ojii/pymaging.git#egg=pymaging
+    pip install -e git+git://github.com/ojii/pymaging-png.git#egg=pymaging-png
 
 From your command line::
 

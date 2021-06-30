@@ -1,6 +1,4 @@
 from decimal import Decimal
-# On Python 2.6 must install lxml since the older xml.etree.ElementTree
-# version can not be used to create SVG images.
 try:
     import lxml.etree as ET
 except ImportError:
@@ -21,7 +19,7 @@ class SvgFragmentImage(qrcode.image.base.BaseImage):
 
     def __init__(self, *args, **kwargs):
         ET.register_namespace("svg", self._SVG_namespace)
-        super(SvgFragmentImage, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         # Save the unit size, for example the default box_size of 10 is '1mm'.
         self.unit_size = self.units(self.box_size)
 
@@ -40,6 +38,9 @@ class SvgFragmentImage(qrcode.image.base.BaseImage):
     def save(self, stream, kind=None):
         self.check_kind(kind=kind)
         self._write(stream)
+
+    def to_string(self):
+        return ET.tostring(self._img)
 
     def new_image(self, **kwargs):
         return self._svg()
@@ -73,7 +74,7 @@ class SvgImage(SvgFragmentImage):
     background = None
 
     def _svg(self, tag='svg', **kwargs):
-        svg = super(SvgImage, self)._svg(tag=tag, **kwargs)
+        svg = super()._svg(tag=tag, **kwargs)
         svg.set("xmlns", self._SVG_namespace)
         if self.background:
             svg.append(
@@ -83,7 +84,7 @@ class SvgImage(SvgFragmentImage):
         return svg
 
     def _rect(self, row, col):
-        return super(SvgImage, self)._rect(row, col, tag="rect")
+        return super()._rect(row, col, tag="rect")
 
     def _write(self, stream):
         ET.ElementTree(self._img).write(stream, encoding="UTF-8",
@@ -96,17 +97,18 @@ class SvgPathImage(SvgImage):
     between individual QR points).
     """
 
-    QR_PATH_STYLE = 'fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none'
+    QR_PATH_STYLE = {'fill': '#000000', 'fill-opacity': '1',
+                     'fill-rule': 'nonzero', 'stroke': 'none'}
 
     def __init__(self, *args, **kwargs):
         self._points = set()
-        super(SvgPathImage, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def _svg(self, viewBox=None, **kwargs):
         if viewBox is None:
             dimension = self.units(self.pixel_size, text=False)
-            viewBox = '0 0 %(d)s %(d)s' % {'d': dimension}
-        return super(SvgPathImage, self)._svg(viewBox=viewBox, **kwargs)
+            viewBox = '0 0 {d} {d}'.format(d=dimension)
+        return super()._svg(viewBox=viewBox, **kwargs)
 
     def drawrect(self, row, col):
         # (x, y)
@@ -135,14 +137,19 @@ class SvgPathImage(SvgImage):
 
         return ET.Element(
             ET.QName("path"),
-            style=self.QR_PATH_STYLE,
             d=' '.join(subpaths),
-            id="qr-path"
+            id="qr-path",
+            **self.QR_PATH_STYLE
         )
+
+    def to_string(self):
+        img = self._img.__copy__()
+        img.append(self.make_path())
+        return ET.tostring(img)
 
     def _write(self, stream):
         self._img.append(self.make_path())
-        super(SvgPathImage, self)._write(stream)
+        super()._write(stream)
 
 
 class SvgFillImage(SvgImage):

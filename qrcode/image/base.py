@@ -1,6 +1,6 @@
 import abc
 
-class BaseImage(object):
+class BaseImage:
     """
     Base QRCode image output class.
     """
@@ -60,5 +60,5 @@ class BaseImage(object):
                 allowed = kind in self.allowed_kinds
         if not allowed:
             raise ValueError(
-                "Cannot set %s type to %s" % (type(self).__name__, kind))
+                f"Cannot set {type(self).__name__} type to {kind}")
         return kind

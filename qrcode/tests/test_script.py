@@ -1,14 +1,8 @@
-import sys
 import os
+import sys
+import unittest
 from tempfile import mkdtemp
-try:
-    import unittest2 as unittest
-except ImportError:
-    import unittest
-try:
-    from unittest import mock
-except ImportError:
-    import mock
+from unittest import mock
 
 from qrcode.console_scripts import main
 
@@ -46,7 +40,6 @@ class ScriptTest(unittest.TestCase):
         self.assertTrue(stdin_buffer.read.called)
         mock_print_ascii.assert_called_with(tty=True)
 
-    @unittest.skipIf(sys.version_info[0] < 3, 'Python 3')
     @mock.patch('os.isatty', lambda *args: True)
     @mock.patch('qrcode.main.QRCode.print_ascii')
     def test_stdin_py3_unicodedecodeerror(self, mock_print_ascii):
