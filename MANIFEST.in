@@ -1,1 +1,5 @@
-include LICENSE *.rst doc/qr.1
+include *.rst
+include LICENSE
+include signing-key.asc
+include tox.ini
+include doc/qr.1

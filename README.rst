@@ -2,10 +2,12 @@
 Pure python QR Code generator
 =============================
 
-This module uses image libraries, Python Imaging Library (PIL) by default, to
-generate QR Codes.
+Generate QR codes.
 
-It is recommended to use the pillow_ fork rather than PIL itself.
+For a standard install (which will include pillow_ for generating images),
+run::
+
+    pip install qrcode[pil]
 
 .. _pillow: https://pypi.python.org/pypi/Pillow
 
@@ -26,15 +28,22 @@ From the command line, use the installed ``qr`` script::
 
     qr "Some text" > test.png
 
-Or in Python, use the ``make`` shortcut function::
+Or in Python, use the ``make`` shortcut function:
+
+.. code:: python
 
     import qrcode
     img = qrcode.make('Some data here')
+    type(img)
+    qrcode.image.pil.PilImage
+    img.save("some_file.png")
 
 Advanced Usage
 --------------
 
-For more control, use the ``QRCode`` class. For example::
+For more control, use the ``QRCode`` class. For example:
+
+.. code:: python
 
     import qrcode
     qr = qrcode.QRCode(
@@ -54,7 +63,13 @@ Set to ``None`` and use the ``fit`` parameter when making the code to determine
 this automatically.
 
 ``fill_color`` and ``back_color`` can change the background and the painting
-color of the QR, when using the default image factory.
+color of the QR, when using the default image factory. Both parameters accept
+RGB color tuples.
+
+.. code:: python
+
+
+    img = qr.make_image(back_color=(255, 195, 235), fill_color=(55, 95, 35))
 
 The ``error_correction`` parameter controls the error correction used for the
 QR Code. The following four constants are made available on the ``qrcode``
@@ -88,9 +103,6 @@ usage.
 SVG
 ---
 
-On Python 2.6 must install lxml since the older xml.etree.ElementTree version
-can not be used to create SVG images.
-
 You can create the entire SVG or an SVG fragment. When building an entire SVG
 image, you can use the factory that combines as a path (recommended, and
 default for the script) or a factory that creates a simple set of rectangles.
@@ -101,7 +113,9 @@ From your command line::
     qr --factory=svg "Some text" > test.svg
     qr --factory=svg-fragment "Some text" > test.svg
 
-Or in Python::
+Or in Python:
+
+.. code:: python
 
     import qrcode
     import qrcode.image.svg
@@ -130,14 +144,16 @@ Pure Python PNG
 
 Install the following two packages::
 
-    pip install git+git://github.com/ojii/pymaging.git#egg=pymaging
-    pip install git+git://github.com/ojii/pymaging-png.git#egg=pymaging-png
+    pip install -e git+git://github.com/ojii/pymaging.git#egg=pymaging
+    pip install -e git+git://github.com/ojii/pymaging-png.git#egg=pymaging-png
 
 From your command line::
 
     qr --factory=pymaging "Some text" > test.png
 
-Or in Python::
+Or in Python:
+
+.. code:: python
 
     import qrcode
     from qrcode.image.pure import PymagingImage
