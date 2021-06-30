@@ -111,6 +111,12 @@ class QRCodeTests(unittest.TestCase):
         img = qr.make_image(back_color='red')
         img.save(io.BytesIO())
 
+    def test_render_pil_with_rgb_color_tuples(self):
+        qr = qrcode.QRCode()
+        qr.add_data(UNICODE_TEXT)
+        img = qr.make_image(back_color=(255, 195, 235), fill_color=(55, 95, 35))
+        img.save(io.BytesIO())
+
     def test_render_with_pattern(self):
         qr = qrcode.QRCode(mask_pattern=3)
         qr.add_data(UNICODE_TEXT)

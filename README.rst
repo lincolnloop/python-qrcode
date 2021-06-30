@@ -61,7 +61,13 @@ Set to ``None`` and use the ``fit`` parameter when making the code to determine
 this automatically.
 
 ``fill_color`` and ``back_color`` can change the background and the painting
-color of the QR, when using the default image factory.
+color of the QR, when using the default image factory. Both parameters accept
+RGB color tuples.
+
+..code:: python
+
+
+    img = qr.make_image(back_color=(255, 195, 235), fill_color=(55, 95, 35))
 
 The ``error_correction`` parameter controls the error correction used for the
 QR Code. The following four constants are made available on the ``qrcode``
