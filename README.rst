@@ -90,19 +90,16 @@ is.
 The ``border`` parameter controls how many boxes thick the border should be
 (the default is 4, which is the minimum according to the specs).
 
-Add data will append data to current QR. To add new data by truncating previous data in same object first use clear method:
+Note that the `add_data` method will append data to the current QR object. To add new data by replacing previous content in the same object, first use clear method:
+
 .. code:: python
-    import qrcode    
-    qr = qrcode.QRCode(
-        version=1,
-        error_correction=qrcode.constants.ERROR_CORRECT_L,
-        box_size=10,
-        border=4,
-    )
+    import qrcode
+    qr = qrcode.QRCode()
     qr.add_data('Some data')
-    qr.make(fit=True)
-    img = qr.make_image(fill_color="black", back_color="white")
+    img = qr.make_image()
     qr.clear()
+    qr.add_data('New data')
+    other_img = qr.make_image()
 
 Other image factories
 =====================
