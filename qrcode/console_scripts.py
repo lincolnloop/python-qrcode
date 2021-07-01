@@ -91,7 +91,7 @@ def main(args=None):
             img.save(out)
     else:
         if image_factory is None and (os.isatty(sys.stdout.fileno()) or opts.ascii):
-            qr.print_ascii(tty=not opts.ascii, invert=True)
+            qr.print_ascii(tty=not opts.ascii)
             return
 
         img = qr.make_image(image_factory=image_factory)
