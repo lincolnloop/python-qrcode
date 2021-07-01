@@ -34,8 +34,7 @@ Or in Python, use the ``make`` shortcut function:
 
     import qrcode
     img = qrcode.make('Some data here')
-    type(img)
-    qrcode.image.pil.PilImage
+    type(img)  # qrcode.image.pil.PilImage
     img.save("some_file.png")
 
 Advanced Usage
@@ -89,17 +88,6 @@ is.
 
 The ``border`` parameter controls how many boxes thick the border should be
 (the default is 4, which is the minimum according to the specs).
-
-Note that the `add_data` method will append data to the current QR object. To add new data by replacing previous content in the same object, first use clear method:
-
-.. code:: python
-    import qrcode
-    qr = qrcode.QRCode()
-    qr.add_data('Some data')
-    img = qr.make_image()
-    qr.clear()
-    qr.add_data('New data')
-    other_img = qr.make_image()
 
 Other image factories
 =====================
@@ -169,3 +157,32 @@ Or in Python:
     import qrcode
     from qrcode.image.pure import PymagingImage
     img = qrcode.make('Some data here', image_factory=PymagingImage)
+
+
+Examples
+========
+
+Get the text content from `print_ascii`
+
+.. code:: python
+
+    import io
+    import qrcode
+    qr = qrcode.QRCode()
+    qr.add_data("Some text")
+    f = io.StringIO()
+    qr.print_ascii(out=f)
+    f.seek(0)
+    print(f.read())
+
+The `add_data` method will append data to the current QR object. To add new data by replacing previous content in the same object, first use clear method:
+
+.. code:: python
+
+    import qrcode
+    qr = qrcode.QRCode()
+    qr.add_data('Some data')
+    img = qr.make_image()
+    qr.clear()
+    qr.add_data('New data')
+    other_img = qr.make_image()
