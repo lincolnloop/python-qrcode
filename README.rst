@@ -162,7 +162,7 @@ Or in Python:
 Examples
 ========
 
-Get the text content from `print_ascii`
+Get the text content from `print_ascii`:
 
 .. code:: python
 
@@ -186,3 +186,13 @@ The `add_data` method will append data to the current QR object. To add new data
     qr.clear()
     qr.add_data('New data')
     other_img = qr.make_image()
+
+Pipe ascii output to text file in command line:
+
+    qr --ascii "Some data" > "test.txt"
+    cat test.txt
+
+Alternative to piping output to file to avoid PoweShell issues:
+
+    # qr "Some data" > test.png
+    qr --output=test.png "Some data"
