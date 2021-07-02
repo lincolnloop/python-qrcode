@@ -38,6 +38,9 @@ class QRCodeTests(unittest.TestCase):
         qr = qrcode.QRCode(version=41)
         self.assertRaises(ValueError, qr.make, fit=False)
 
+    def test_invalid_border(self):
+        self.assertRaises(ValueError, qrcode.QRCode, border=-1)
+
     def test_overflow(self):
         qr = qrcode.QRCode(version=1)
         qr.add_data('abcdefghijklmno')
