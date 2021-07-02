@@ -1,7 +1,7 @@
 from qrcode import constants, exceptions, util
 from qrcode.image.base import BaseImage
 
-import six
+import sys
 from bisect import bisect_left
 
 # Cache modules generated just based on the QR Code version
@@ -16,7 +16,7 @@ def make(data=None, **kwargs):
 def _check_box_size(size):
     if int(size) <= 0:
         raise ValueError(
-            "Invalid box size (was %s, expected larger than 0)" % size)
+            f"Invalid box size (was {size}, expected larger than 0)")
 
 
 def _check_mask_pattern(mask_pattern):
@@ -24,15 +24,15 @@ def _check_mask_pattern(mask_pattern):
         return
     if not isinstance(mask_pattern, int):
         raise TypeError(
-            "Invalid mask pattern (was %s, expected int)" % type(mask_pattern))
+            f"Invalid mask pattern (was {type(mask_pattern)}, expected int)")
     if mask_pattern < 0 or mask_pattern > 7:
         raise ValueError(
-            "Mask pattern should be in range(8) (got %s)" % mask_pattern)
+            f"Mask pattern should be in range(8) (got {mask_pattern})")
 
 def copy2DArray(x):
     return [row[:] for row in x]
 
-class QRCode(object):
+class QRCode:
 
     def __init__(self, version=None,
                  error_correction=constants.ERROR_CORRECT_M,
@@ -239,15 +239,7 @@ class QRCode(object):
         :param invert: invert the ASCII characters (solid <-> transparent)
         """
         if out is None:
-            import sys
-            if sys.version_info < (2, 7):
-                # On Python versions 2.6 and earlier, stdout tries to encode
-                # strings using ASCII rather than stdout.encoding, so use this
-                # workaround.
-                import codecs
-                out = codecs.getwriter(sys.stdout.encoding)(sys.stdout)
-            else:
-                out = sys.stdout
+            out = sys.stdout
 
         if tty and not out.isatty():
             raise OSError("Not a tty")
@@ -256,7 +248,7 @@ class QRCode(object):
             self.make()
 
         modcount = self.modules_count
-        codes = [six.int2byte(code).decode('cp437')
+        codes = [bytes((code,)).decode('cp437')
                  for code in (255, 223, 220, 219)]
         if tty:
             invert = True
@@ -397,7 +389,7 @@ class QRCode(object):
 
         data_len = len(data)
 
-        for col in six.moves.xrange(self.modules_count - 1, 0, -2):
+        for col in range(self.modules_count - 1, 0, -2):
 
             if col <= 6:
                 col -= 1
@@ -434,7 +426,7 @@ class QRCode(object):
 
     def get_matrix(self):
         """
-        Return the QR Code as a multidimensonal array, including the border.
+        Return the QR Code as a multidimensional array, including the border.
 
         To return the array without a border, set ``self.border`` to 0 first.
         """
