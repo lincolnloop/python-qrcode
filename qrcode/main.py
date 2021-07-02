@@ -103,10 +103,9 @@ class QRCode:
             self.makeImpl(False, self.mask_pattern)
 
     def makeImpl(self, test, mask_pattern):
-        _check_version(self.version)
+        util.check_version(self.version)
         self.modules_count = self.version * 4 + 17
 
-        
         if self.version in precomputedQRBlanks:
             self.modules = copy2DArray(precomputedQRBlanks[self.version])
         else:
@@ -116,9 +115,6 @@ class QRCode:
 
                 self.modules[row] = [None] * self.modules_count
 
-                #for col in range(self.modules_count):
-                #    self.modules[row][col] = None   # (col + row) % 3
-
             self.setup_position_probe_pattern(0, 0)
             self.setup_position_probe_pattern(self.modules_count - 7, 0)
             self.setup_position_probe_pattern(0, self.modules_count - 7)
@@ -126,7 +122,7 @@ class QRCode:
             self.setup_timing_pattern()
 
             precomputedQRBlanks[self.version] = copy2DArray(self.modules)
-    
+
         self.setup_type_info(test, mask_pattern)
 
         if self.version >= 7:
