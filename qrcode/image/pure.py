@@ -24,7 +24,7 @@ class PymagingImage(qrcode.image.base.BaseImage):
         registry._populate()
         registry.register(PNG)
 
-        super(PymagingImage, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def new_image(self, **kwargs):
         return Image.new(RGB, self.pixel_size, self.pixel_size, White)
@@ -45,5 +45,5 @@ class PymagingImage(qrcode.image.base.BaseImage):
         """
         if transform is None:
             transform = lambda x: x.lower()
-        return super(PymagingImage, self).check_kind(
+        return super().check_kind(
             kind, transform=transform, **kwargs)

@@ -2,10 +2,32 @@
 Change log
 ==========
 
-6.2 (unreleased)
+7.2 (unreleased)
 ================
 
 - Nothing changed yet.
+
+
+7.1 (1 July 2021)
+=================
+
+- Add --ascii parameter to command line interface allowing to output ascii when stdout is piped
+
+- Add --output parameter to command line interface to specify output file
+
+- Accept RGB tuples in fill_color and back_color
+
+- Add to_string method to SVG images
+
+- Replace inline styles with SVG attributes to avoid CSP issues
+
+- Add Python3.10 to supported versions
+
+
+7.0 (29 June 2021)
+==================
+
+- Drop Python < 3.6 support.
 
 
 6.1 (14 January 2019)

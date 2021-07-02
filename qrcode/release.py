@@ -16,7 +16,7 @@ def update_manpage(data):
 
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     filename = os.path.join(base_dir, 'doc', 'qr.1')
-    with open(filename, 'r') as f:
+    with open(filename) as f:
         lines = f.readlines()
 
     changed = False

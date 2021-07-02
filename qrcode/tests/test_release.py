@@ -1,22 +1,15 @@
-import sys
 import re
+import builtins
 import datetime
 import unittest
-try:
-    from unittest import mock
-except ImportError:
-    import mock
+from unittest import mock
 
-import six
 from qrcode.release import update_manpage
 
-OPEN = '{}.open'.format(six.moves.builtins.__name__)
+OPEN = f'{builtins.__name__}.open'
 DATA = 'test\n.TH "date" "version" "description"\nthis'
 
 
-@unittest.skipIf(
-    sys.version_info[0] == 3 and sys.version_info[1] < 6,
-    "mock_file not working on Python 3 when less than 3.6")
 class UpdateManpageTests(unittest.TestCase):
 
     @mock.patch(OPEN, new_callable=mock.mock_open, read_data='.TH invalid')

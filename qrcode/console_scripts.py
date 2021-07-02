@@ -10,7 +10,7 @@ import optparse
 import os
 import qrcode
 # The next block is added to get the terminal to display properly on MS platforms
-if sys.platform.startswith(('win', 'cygwin')):
+if sys.platform.startswith(('win', 'cygwin')):  # pragma: no cover
     import colorama
     colorama.init()
 
@@ -39,7 +39,7 @@ def main(args=None):
     parser.add_option(
         "--factory", help="Full python path to the image factory class to "
         "create the image with. You can use the following shortcuts to the "
-        "built-in image factory classes: {0}.".format(
+        "built-in image factory classes: {}.".format(
             ", ".join(sorted(default_factories.keys()))))
     parser.add_option(
         "--optimize", type=int, help="Optimize the data by looking for chunks "
@@ -50,6 +50,13 @@ def main(args=None):
         choices=sorted(error_correction.keys()), default='M',
         help="The error correction level to use. Choices are L (7%), "
         "M (15%, default), Q (25%), and H (30%).")
+    parser.add_option(
+        "--ascii", help="Print as ascii even if stdout is piped.", action="store_true")
+    parser.add_option(
+        "--output",
+        help="The output file. If not specified, the image is sent to "
+        "the standard output.")
+
     opts, args = parser.parse_args(args)
 
     qr = qrcode.QRCode(
@@ -67,6 +74,7 @@ def main(args=None):
 
     if args:
         data = args[0]
+        data = data.encode(errors="surrogateescape")
     else:
         # Use sys.stdin.buffer if available (Python 3) avoiding
         # UnicodeDecodeErrors.
@@ -77,23 +85,28 @@ def main(args=None):
     else:
         qr.add_data(data, optimize=opts.optimize)
 
-    if image_factory is None and os.isatty(sys.stdout.fileno()):
-        qr.print_ascii(tty=True)
-        return
+    if opts.output:
+        img = qr.make_image(image_factory=image_factory)
+        with open(opts.output, "wb") as out:
+            img.save(out)
+    else:
+        if image_factory is None and (os.isatty(sys.stdout.fileno()) or opts.ascii):
+            qr.print_ascii(tty=not opts.ascii)
+            return
 
-    img = qr.make_image(image_factory=image_factory)
+        img = qr.make_image(image_factory=image_factory)
 
-    sys.stdout.flush()
-    # Use sys.stdout.buffer if available (Python 3), avoiding
-    # UnicodeDecodeErrors.
-    stdout_buffer = getattr(sys.stdout, 'buffer', None)
-    if not stdout_buffer:
-        if sys.platform == 'win32':  # pragma: no cover
-            import msvcrt
-            msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
-        stdout_buffer = sys.stdout
+        sys.stdout.flush()
+        # Use sys.stdout.buffer if available (Python 3), avoiding
+        # UnicodeDecodeErrors.
+        stdout_buffer = getattr(sys.stdout, 'buffer', None)
+        if not stdout_buffer:
+            if sys.platform == 'win32':  # pragma: no cover
+                import msvcrt
+                msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
+            stdout_buffer = sys.stdout
 
-    img.save(stdout_buffer)
+        img.save(stdout_buffer)
 
 
 if __name__ == "__main__":
