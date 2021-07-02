@@ -5,7 +5,7 @@ import sys
 from bisect import bisect_left
 
 # Cache modules generated just based on the QR Code version
-precomputedQRBlanks = {}
+precomputed_qr_blanks = {}
 
 def make(data=None, **kwargs):
     qr = QRCode(**kwargs)
@@ -29,7 +29,7 @@ def _check_mask_pattern(mask_pattern):
         raise ValueError(
             f"Mask pattern should be in range(8) (got {mask_pattern})")
 
-def copy2DArray(x):
+def copy_2d_array(x):
     return [row[:] for row in x]
 
 class QRCode:
@@ -106,13 +106,12 @@ class QRCode:
         util.check_version(self.version)
         self.modules_count = self.version * 4 + 17
 
-        if self.version in precomputedQRBlanks:
-            self.modules = copy2DArray(precomputedQRBlanks[self.version])
+        if self.version in precomputed_qr_blanks:
+            self.modules = copy_2d_array(precomputed_qr_blanks[self.version])
         else:
             self.modules = [None] * self.modules_count
 
             for row in range(self.modules_count):
-
                 self.modules[row] = [None] * self.modules_count
 
             self.setup_position_probe_pattern(0, 0)
@@ -121,7 +120,7 @@ class QRCode:
             self.setup_position_adjust_pattern()
             self.setup_timing_pattern()
 
-            precomputedQRBlanks[self.version] = copy2DArray(self.modules)
+            precomputed_qr_blanks[self.version] = copy_2d_array(self.modules)
 
         self.setup_type_info(test, mask_pattern)
 
