@@ -4,6 +4,8 @@ from qrcode.image.base import BaseImage
 import sys
 from bisect import bisect_left
 
+# Cache modules generated just based on the QR Code version
+precomputed_qr_blanks = {}
 
 def make(data=None, **kwargs):
     qr = QRCode(**kwargs)
@@ -27,6 +29,8 @@ def _check_mask_pattern(mask_pattern):
         raise ValueError(
             f"Mask pattern should be in range(8) (got {mask_pattern})")
 
+def copy_2d_array(x):
+    return [row[:] for row in x]
 
 class QRCode:
 
@@ -101,20 +105,23 @@ class QRCode:
     def makeImpl(self, test, mask_pattern):
         util.check_version(self.version)
         self.modules_count = self.version * 4 + 17
-        self.modules = [None] * self.modules_count
 
-        for row in range(self.modules_count):
+        if self.version in precomputed_qr_blanks:
+            self.modules = copy_2d_array(precomputed_qr_blanks[self.version])
+        else:
+            self.modules = [None] * self.modules_count
 
-            self.modules[row] = [None] * self.modules_count
+            for row in range(self.modules_count):
+                self.modules[row] = [None] * self.modules_count
 
-            for col in range(self.modules_count):
-                self.modules[row][col] = None   # (col + row) % 3
+            self.setup_position_probe_pattern(0, 0)
+            self.setup_position_probe_pattern(self.modules_count - 7, 0)
+            self.setup_position_probe_pattern(0, self.modules_count - 7)
+            self.setup_position_adjust_pattern()
+            self.setup_timing_pattern()
 
-        self.setup_position_probe_pattern(0, 0)
-        self.setup_position_probe_pattern(self.modules_count - 7, 0)
-        self.setup_position_probe_pattern(0, self.modules_count - 7)
-        self.setup_position_adjust_pattern()
-        self.setup_timing_pattern()
+            precomputed_qr_blanks[self.version] = copy_2d_array(self.modules)
+
         self.setup_type_info(test, mask_pattern)
 
         if self.version >= 7:
