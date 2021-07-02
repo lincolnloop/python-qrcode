@@ -18,6 +18,10 @@ def _check_box_size(size):
         raise ValueError(
             f"Invalid box size (was {size}, expected larger than 0)")
 
+def _check_border(size):
+    if int(size) < 0:
+        raise ValueError("Invalid border value (was %s, expected 0 or larger than that)" % size)
+
 
 def _check_mask_pattern(mask_pattern):
     if mask_pattern is None:
@@ -40,6 +44,7 @@ class QRCode:
                  image_factory=None,
                  mask_pattern=None):
         _check_box_size(box_size)
+        _check_border(border)
         self.version = version and int(version)
         self.error_correction = int(error_correction)
         self.box_size = int(box_size)
