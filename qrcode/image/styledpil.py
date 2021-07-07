@@ -43,8 +43,8 @@ class StyledPilImage(qrcode.image.base.BaseImage):
         # make the QR code still parseable
         self.eye_drawer = kwargs.get("eye_drawer", SquareModuleDrawer())
 
-        embeded_image_path = kwargs.get("image_path", None)
-        self.embeded_image = kwargs.get("image", None)
+        embeded_image_path = kwargs.get("embeded_image_path", None)
+        self.embeded_image = kwargs.get("embeded_image", None)
         if not self.embeded_image and embeded_image_path:
             self.embeded_image = Image.open(embeded_image_path)
             self.has_image = True

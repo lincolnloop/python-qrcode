@@ -184,7 +184,7 @@ Examples to draw the QR code with rounded corners, radial gradiant and embedded 
 
     img_1 = qr.make_image(image_factory=StyledPilImage, module_drawer=RoundedModuleDrawer())
     img_2 = qr.make_image(image_factory=StyledPilImage, color_mask=RadialGradiantColorMask())
-    img_3 = qr.make_image(image_factory=StyledPilImage, image_path="/path/to/image.png")
+    img_3 = qr.make_image(image_factory=StyledPilImage, embeded_image_path="/path/to/image.png")
 
 Other module_drawers:
 

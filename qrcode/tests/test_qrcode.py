@@ -1,8 +1,6 @@
 import warnings
 import io
 import sys
-import qrcode.util
-import qrcode.image.svg
 import unittest
 from unittest import mock
 
@@ -13,15 +11,22 @@ except ImportError:  # pragma: no cover
     pymaging_png = None
 
 import qrcode
+import qrcode.util
+import qrcode.image.svg
 from qrcode.image.base import BaseImage
 from qrcode.image.styledpil import StyledPilImage
+from qrcode.image.styles import colormasks
 from qrcode.image.styles import moduledrawers
+from qrcode.image.pil import Image as pil_Image
 from qrcode.exceptions import DataOverflowError
 from qrcode.util import (
     QRData, MODE_NUMBER, MODE_ALPHA_NUM, MODE_8BIT_BYTE)
 from qrcode.tests.svg import SvgImageWhite
 
 UNICODE_TEXT = '\u03b1\u03b2\u03b3'
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+RED = (255, 0, 0)
 
 
 class QRCodeTests(unittest.TestCase):
@@ -101,7 +106,6 @@ class QRCodeTests(unittest.TestCase):
         qr.add_data(UNICODE_TEXT)
         img = qr.make_image()
         img.save(io.BytesIO())
-        from qrcode.image.pil import Image as pil_Image
         self.assertIsInstance(img.get_image(), pil_Image.Image)
 
     def test_render_pil_with_transparent_background(self):
@@ -227,6 +231,13 @@ class QRCodeTests(unittest.TestCase):
         img = qr.make_image(image_factory=StyledPilImage)
         img.save(io.BytesIO())
 
+    def test_render_styled_with_embeded_image(self):
+        embeded_img = pil_Image.new('RGB', (10, 10), color='red')
+        qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
+        qr.add_data(UNICODE_TEXT)
+        img = qr.make_image(image_factory=StyledPilImage, embeded_image=embeded_img)
+        img.save(io.BytesIO())
+
     def test_render_styled_with_square_module_drawer(self):
         qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
         qr.add_data(UNICODE_TEXT)
@@ -261,6 +272,49 @@ class QRCodeTests(unittest.TestCase):
         qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
         qr.add_data(UNICODE_TEXT)
         img = qr.make_image(image_factory=StyledPilImage, module_drawer=moduledrawers.HorizontalBarsDrawer())
+        img.save(io.BytesIO())
+
+    def test_render_styled_with_solid_color_mask(self):
+        qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
+        qr.add_data(UNICODE_TEXT)
+        mask = colormasks.SolidFillColorMask(back_color=WHITE, front_color=RED)
+        img = qr.make_image(image_factory=StyledPilImage, color_mask=mask)
+        img.save(io.BytesIO())
+
+    def test_render_styled_with_radial_gradient_color_mask(self):
+        qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
+        qr.add_data(UNICODE_TEXT)
+        mask = colormasks.RadialGradiantColorMask(back_color=WHITE, center_color=BLACK, edge_color=RED)
+        img = qr.make_image(image_factory=StyledPilImage, color_mask=mask)
+        img.save(io.BytesIO())
+
+    def test_render_styled_with_square_gradient_color_mask(self):
+        qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
+        qr.add_data(UNICODE_TEXT)
+        mask = colormasks.SquareGradiantColorMask(back_color=WHITE, center_color=BLACK, edge_color=RED)
+        img = qr.make_image(image_factory=StyledPilImage, color_mask=mask)
+        img.save(io.BytesIO())
+
+    def test_render_styled_with_horizontal_gradient_color_mask(self):
+        qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
+        qr.add_data(UNICODE_TEXT)
+        mask = colormasks.HorizontalGradiantColorMask(back_color=WHITE, left_color=RED, right_color=BLACK)
+        img = qr.make_image(image_factory=StyledPilImage, color_mask=mask)
+        img.save(io.BytesIO())
+
+    def test_render_styled_with_vertical_gradient_color_mask(self):
+        qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
+        qr.add_data(UNICODE_TEXT)
+        mask = colormasks.VerticalGradiantColorMask(back_color=WHITE, top_color=RED, bottom_color=BLACK)
+        img = qr.make_image(image_factory=StyledPilImage, color_mask=mask)
+        img.save(io.BytesIO())
+
+    def test_render_styled_with_image_color_mask(self):
+        img_mask = pil_Image.new('RGB', (10, 10), color='red')
+        qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
+        qr.add_data(UNICODE_TEXT)
+        mask = colormasks.ImageColorMask(back_color=WHITE, color_mask_image=img_mask)
+        img = qr.make_image(image_factory=StyledPilImage, color_mask=mask)
         img.save(io.BytesIO())
 
     def test_optimize(self):
