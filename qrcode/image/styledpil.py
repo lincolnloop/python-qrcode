@@ -62,7 +62,7 @@ class StyledPilImage(qrcode.image.base.BaseImage):
         # During the color mask process, pixels that are paint_color are replaced by a newly-calculated color
         self.paint_color = tuple(0 for i in self.color_mask.back_color)
         if self.color_mask.has_transparency:
-            self.paint_color = (self.init_color[0], self.init_color[1], self.init_color[2], 255)
+            self.paint_color = tuple([*self.color_mask.back_color[:3], 255])
 
         self.color_mask.initialize(self, img)
         self.module_drawer.initialize(self, img)
