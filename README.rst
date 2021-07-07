@@ -89,53 +89,6 @@ is.
 The ``border`` parameter controls how many boxes thick the border should be
 (the default is 4, which is the minimum according to the specs).
 
-Styling
--------
-To use apply styles to the QRCode, use the StyledPilImage image factory. 
-This takes an optional module drawer to control the shape of the QR Code, an 
-optional color mask to change the colors of the QR Code, and an optional image 
-to embed in the center.
-
-These QR Codes are not guaranteed to work with all readers, so do some 
-experimentation and set the error correction to high (especially if embedding an 
-image).
-
-Example to draw the QR code with rounded corners:
-
-.. code:: python
-
-    import qrcode
-    qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
-    qr.add_data('Some data')
-
-    img = qr.make_image(image_factory=StyledPilImage(), module_drawer=RoundedModuleDrawer())
-
-Other module_drawers are shown in doc/module_drawers.png.
-
-Example to draw the QR code with a radial gradiant:
-
-.. code:: python
-
-    import qrcode
-    qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
-    qr.add_data('Some data')
-
-    img = qr.make_image(image_factory=StyledPilImage(), color_mask=RadialGradiantColorMask())
-
-Other color masks are shown in doc/color_masks.png.
-
-Example to draw the QR code with an embedded image:
-
-.. code:: python
-
-    import qrcode
-    qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
-    qr.add_data('Some data')
-
-    img = qr.make_image(image_factory=StyledPilImage(), image_path="/path/to/image.png")
-
-
-
 Other image factories
 =====================
 
@@ -205,6 +158,41 @@ Or in Python:
     from qrcode.image.pure import PymagingImage
     img = qrcode.make('Some data here', image_factory=PymagingImage)
 
+
+Styled Image
+------------
+To apply styles to the QRCode, use the StyledPilImage image factory. 
+This takes an optional module drawer to control the shape of the QR Code, an 
+optional color mask to change the colors of the QR Code, and an optional image 
+to embed in the center.
+
+These QR Codes are not guaranteed to work with all readers, so do some 
+experimentation and set the error correction to high (especially if embedding an 
+image).
+
+Examples to draw the QR code with rounded corners, radial gradiant and embedded image:
+
+.. code:: python
+
+    import qrcode
+    from qrcode.image.styledpil import StyledPilImage
+    from qrcode.image.styles.moduledrawers import RoundedModuleDrawer
+    from qrcode.image.styles.colormasks import RadialGradiantColorMask
+
+    qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
+    qr.add_data('Some data')
+
+    img_1 = qr.make_image(image_factory=StyledPilImage, module_drawer=RoundedModuleDrawer())
+    img_2 = qr.make_image(image_factory=StyledPilImage, color_mask=RadialGradiantColorMask())
+    img_3 = qr.make_image(image_factory=StyledPilImage, image_path="/path/to/image.png")
+
+Other module_drawers:
+
+    .. image:: doc/module_drawers.png
+
+Other color masks:
+
+    .. image:: doc/color_masks.png
 
 Examples
 ========
