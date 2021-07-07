@@ -14,6 +14,8 @@ except ImportError:  # pragma: no cover
 
 import qrcode
 from qrcode.image.base import BaseImage
+from qrcode.image.styledpil import StyledPilImage
+from qrcode.image.styles import moduledrawers
 from qrcode.exceptions import DataOverflowError
 from qrcode.util import (
     QRData, MODE_NUMBER, MODE_ALPHA_NUM, MODE_8BIT_BYTE)
@@ -218,6 +220,48 @@ class QRCodeTests(unittest.TestCase):
         img = qr.make_image(image_factory=qrcode.image.pure.PymagingImage)
         with self.assertRaises(ValueError):
             img.save(io.BytesIO(), kind='FISH')
+
+    def test_render_styled_pil_image(self):
+        qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
+        qr.add_data(UNICODE_TEXT)
+        img = qr.make_image(image_factory=StyledPilImage)
+        img.save(io.BytesIO())
+
+    def test_render_styled_with_square_module_drawer(self):
+        qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
+        qr.add_data(UNICODE_TEXT)
+        img = qr.make_image(image_factory=StyledPilImage, module_drawer=moduledrawers.SquareModuleDrawer())
+        img.save(io.BytesIO())
+
+    def test_render_styled_with_gapped_module_drawer(self):
+        qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
+        qr.add_data(UNICODE_TEXT)
+        img = qr.make_image(image_factory=StyledPilImage, module_drawer=moduledrawers.GappedSquareModuleDrawer())
+        img.save(io.BytesIO())
+
+    def test_render_styled_with_circle_module_drawer(self):
+        qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
+        qr.add_data(UNICODE_TEXT)
+        img = qr.make_image(image_factory=StyledPilImage, module_drawer=moduledrawers.CircleModuleDrawer())
+        img.save(io.BytesIO())
+
+    def test_render_styled_with_rounded_module_drawer(self):
+        qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
+        qr.add_data(UNICODE_TEXT)
+        img = qr.make_image(image_factory=StyledPilImage, module_drawer=moduledrawers.RoundedModuleDrawer())
+        img.save(io.BytesIO())
+
+    def test_render_styled_with_vertical_bars_module_drawer(self):
+        qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
+        qr.add_data(UNICODE_TEXT)
+        img = qr.make_image(image_factory=StyledPilImage, module_drawer=moduledrawers.VerticalBarsDrawer())
+        img.save(io.BytesIO())
+
+    def test_render_styled_with_horizontal_bars_module_drawer(self):
+        qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
+        qr.add_data(UNICODE_TEXT)
+        img = qr.make_image(image_factory=StyledPilImage, module_drawer=moduledrawers.HorizontalBarsDrawer())
+        img.save(io.BytesIO())
 
     def test_optimize(self):
         qr = qrcode.QRCode()
