@@ -17,8 +17,8 @@ class StyledPilImage(qrcode.image.base.BaseImage):
     Styled PIL image builder, default format is PNG.
     This differs from the PilImage in that there is a module_drawer, a color_mask, and an optional image
 
-    The module_drawer should extend the QRModuleDrawer class and implement the 
-    drawrect_context(self, box, active, context), and probably also the intitialize 
+    The module_drawer should extend the QRModuleDrawer class and implement the
+    drawrect_context(self, box, active, context), and probably also the intitialize
     function. This will draw an individual "module" or square on the QR code.
 
     The color_mask will extend the QRColorMask class and will at very least implement the
@@ -26,8 +26,8 @@ class StyledPilImage(qrcode.image.base.BaseImage):
     (more advanced functionality can be gotten by instead overriding other functions defined in the QRColorMask class)
 
 
-    The Image can be specified either by path or with a Pillow Image, and if it is there will be placed in the 
-    middle of the QR code. No effort is done to ensure that the QR code is still legible after the image has been 
+    The Image can be specified either by path or with a Pillow Image, and if it is there will be placed in the
+    middle of the QR code. No effort is done to ensure that the QR code is still legible after the image has been
     placed there; Q or H level error correction levels are recommended to maintain data integrity
     """
     kind = "PNG"
@@ -48,10 +48,7 @@ class StyledPilImage(qrcode.image.base.BaseImage):
         if not self.embeded_image and embeded_image_path:
             self.embeded_image = Image.open(embeded_image_path)
             self.has_image = True
-        if self.color_mask.has_transparency:
-            mode = "RGBA"
-        else:
-            mode = "RGB"
+        mode = "RGBA" if self.color_mask.has_transparency else "RGB"
         self.mode = mode
 
         self.back_color = self.color_mask.back_color # This is the background color. Should be white or whiteish
@@ -94,8 +91,11 @@ class StyledPilImage(qrcode.image.base.BaseImage):
 
     # The eyes are treated differently, and this will find whether the referenced module is in an eye
     def is_eye(self, row, col):
-        return (row < 7 and col < 7) or (row < 7 and self.width-col-1 < 7) or (self.width-row -1< 7 and col < 7)
-
+        return (
+            (row < 7 and col < 7)
+            or (row < 7 and self.width - col < 8)
+            or (self.width - row < 8 and col < 7)
+        )
 
     def save(self, stream, format=None, **kwargs):
         if format is None:
@@ -106,5 +106,3 @@ class StyledPilImage(qrcode.image.base.BaseImage):
 
     def __getattr__(self, name):
         return getattr(self._img, name)
-
-

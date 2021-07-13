@@ -12,11 +12,11 @@ import math
 
 
 class QRColorMask:
-    """ 
+    """
     QRColorMask is used to color in the QRCode.
     By the time apply_mask is called, the QRModuleDrawer of the StyledPilImage will have drawn all of the modules on the canvas
     (the color of these modules will be mostly black, although antialiasing may result in gradiants)
-    In the base class, apply_mask is implemented such that the background color will remain, but the foreground pixels will be 
+    In the base class, apply_mask is implemented such that the background color will remain, but the foreground pixels will be
     replaced by a color determined by a call to get_fg_pixel. There is additional calculation done to preserve the gradiant artifacts
     of antialiasing
     All QRColorMask objects should be careful about RGB vs RGBA color spaces
@@ -32,7 +32,7 @@ class QRColorMask:
         self.paint_color = styledPilImage.paint_color
 
     def apply_mask(self, image):
-        width, height = image.size 
+        width, height = image.size
         for x in range(width):
             for y in range(height):
                 norm = self.extrap_color(self.back_color, self.paint_color, image.getpixel((x,y)))
@@ -50,25 +50,25 @@ class QRColorMask:
     # The following functions are helpful for color calculation:
 
     # interpolate a number between two numbers
-    def interp_num(self, n1, n2, norm): 
+    def interp_num(self, n1, n2, norm):
         return int(n2 * norm + n1 * (1-norm))
 
     # interpolate a color between two colorrs
-    def interp_color(self, col1, col2, norm): 
+    def interp_color(self, col1, col2, norm):
         return tuple(self.interp_num(col1[i], col2[i], norm) for i in range(len(col1)))
 
     # find the interpolation coefficient between two numbers
-    def extrap_num(self, n1, n2, interped_num): 
+    def extrap_num(self, n1, n2, interped_num):
         if n2 == n1:
-            return None 
+            return None
         else:
             return (interped_num - n1) / (n2 - n1)
 
     # find the interpolation coefficient between two numbers
-    def extrap_color(self, col1, col2, interped_color): 
+    def extrap_color(self, col1, col2, interped_color):
         normed = list(filter(lambda i: i is not None, [self.extrap_num(col1[i], col2[i], interped_color[i]) for i in range(len(col1))]))
-        if len(normed) == 0:
-            return None 
+        if not normed:
+            return None
         else:
             return sum(normed) / len(normed)
 
