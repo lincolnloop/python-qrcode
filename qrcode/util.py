@@ -361,10 +361,7 @@ def optimal_data_chunks(data, minimum=4):
             yield QRData(chunk, mode=MODE_NUMBER, check_data=False)
         else:
             for is_alpha, sub_chunk in _optimal_split(chunk, alpha_pattern):
-                if is_alpha:
-                    mode = MODE_ALPHA_NUM
-                else:
-                    mode = MODE_8BIT_BYTE
+                mode = MODE_ALPHA_NUM if is_alpha else MODE_8BIT_BYTE
                 yield QRData(sub_chunk, mode=mode, check_data=False)
 
 
@@ -525,15 +522,8 @@ def create_bytes(buffer, rs_blocks):
         ecdata[r] = [0] * (len(rsPoly) - 1)
         for i in range(len(ecdata[r])):
             modIndex = i + len(modPoly) - len(ecdata[r])
-            if (modIndex >= 0):
-                ecdata[r][i] = modPoly[modIndex]
-            else:
-                ecdata[r][i] = 0
-
-    totalCodeCount = 0
-    for rs_block in rs_blocks:
-        totalCodeCount += rs_block.total_count
-
+            ecdata[r][i] = modPoly[modIndex] if (modIndex >= 0) else 0
+    totalCodeCount = sum(rs_block.total_count for rs_block in rs_blocks)
     data = [None] * totalCodeCount
     index = 0
 
@@ -562,23 +552,20 @@ def create_data(version, error_correction, data_list):
 
     # Calculate the maximum number of bits for the given version.
     rs_blocks = base.rs_blocks(version, error_correction)
-    bit_limit = 0
-    for block in rs_blocks:
-        bit_limit += block.data_count * 8
-
+    bit_limit = sum(block.data_count * 8 for block in rs_blocks)
     if len(buffer) > bit_limit:
         raise exceptions.DataOverflowError(
             "Code length overflow. Data size (%s) > size available (%s)" %
             (len(buffer), bit_limit))
 
     # Terminate the bits (add up to four 0s).
-    for i in range(min(bit_limit - len(buffer), 4)):
+    for _ in range(min(bit_limit - len(buffer), 4)):
         buffer.put_bit(False)
 
     # Delimit the string into 8-bit words, padding with 0s if necessary.
     delimit = len(buffer) % 8
     if delimit:
-        for i in range(8 - delimit):
+        for _ in range(8 - delimit):
             buffer.put_bit(False)
 
     # Add special alternating padding bitstrings until buffer is full.

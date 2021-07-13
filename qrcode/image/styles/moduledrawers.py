@@ -21,7 +21,7 @@ class QRModuleDrawer:
     knows about.
     NOTE: the color that this draws in should be whatever is equivalent to black in the color space, and the specified QRColorMask
     will handle adding colors as necessary to the image
-    
+
     For examples of what these look like, see doc/module_drawers.png
     """
 
@@ -45,7 +45,7 @@ class QRModuleDrawer:
         'E': 4,
         'SW': 5,
         'S': 6,
-        'SE': 7 
+        'SE': 7
     }
     def get(self, context, direction):
         return context[self.DIRECTIONS[direction]]
@@ -64,7 +64,7 @@ class SquareModuleDrawer(QRModuleDrawer):
 
 class GappedSquareModuleDrawer(QRModuleDrawer):
     """
-    Draws the modules as simple squares that are not contiguous. 
+    Draws the modules as simple squares that are not contiguous.
     The size_ratio determines how wide the squares are relative to the width of the space they are printed in
     """
     fill = None
@@ -77,9 +77,9 @@ class GappedSquareModuleDrawer(QRModuleDrawer):
     def drawrect_context(self, box, is_active, context):
         if is_active:
             smaller_box = (
-                box[0][0] + self.delta, 
-                box[0][1] + self.delta, 
-                box[1][0] - self.delta, 
+                box[0][0] + self.delta,
+                box[0][1] + self.delta,
+                box[1][0] - self.delta,
                 box[1][1] - self.delta
             )
             self.imgDraw.rectangle(smaller_box, fill=self.fill)
@@ -90,7 +90,7 @@ class CircleModuleDrawer(QRModuleDrawer):
     """
     circle = None
     def initialize(self, styledPilImage, image):
-        box_size = styledPilImage.box_size 
+        box_size = styledPilImage.box_size
         fake_size = box_size * ANTIALIASING_FACTOR
         self.circle = Image.new(styledPilImage.mode,(fake_size, fake_size), styledPilImage.color_mask.back_color)
         ImageDraw.Draw(self.circle).ellipse((0,0, fake_size, fake_size), fill = styledPilImage.paint_color)
@@ -103,7 +103,7 @@ class CircleModuleDrawer(QRModuleDrawer):
 class RoundedModuleDrawer(QRModuleDrawer):
     """
     Draws the modules with all 90 degree corners replaced with rounded edges
-    radius_ratio determines the radius of the rounded edges - 
+    radius_ratio determines the radius of the rounded edges -
     a value of 1 means that an isolated module will be drawn as a circle,
     while a value of 0 means that the radius of the rounded edge will be 0 (and thus back to 90 degrees again)
     """
@@ -131,27 +131,27 @@ class RoundedModuleDrawer(QRModuleDrawer):
         self.NE_ROUND = self.NW_ROUND.transpose(Image.FLIP_LEFT_RIGHT)
 
     def drawrect_context(self, box, is_active, context):
-        if is_active:
-            # find rounded edges
-            nw_rounded = not self.get(context, 'W') and not self.get(context, 'N')
-            ne_rounded = not self.get(context, 'N') and not self.get(context, 'E')
-            se_rounded = not self.get(context, 'E') and not self.get(context, 'S')
-            sw_rounded = not self.get(context, 'S') and not self.get(context, 'W')
+        if not is_active:
+            return
+        # find rounded edges
+        nw_rounded = not self.get(context, 'W') and not self.get(context, 'N')
+        ne_rounded = not self.get(context, 'N') and not self.get(context, 'E')
+        se_rounded = not self.get(context, 'E') and not self.get(context, 'S')
+        sw_rounded = not self.get(context, 'S') and not self.get(context, 'W')
 
-            nw = self.NW_ROUND if nw_rounded else self.SQUARE
-            ne = self.NE_ROUND if ne_rounded else self.SQUARE
-            se = self.SE_ROUND if se_rounded else self.SQUARE
-            sw = self.SW_ROUND if sw_rounded else self.SQUARE
-            self.image.paste(nw, (box[0][0] , box[0][1]))
-            self.image.paste(ne, (box[0][0] + self.corner_width, box[0][1]))
-            self.image.paste(se, (box[0][0] + self.corner_width, box[0][1] + self.corner_width))
-            self.image.paste(sw, (box[0][0], box[0][1] + self.corner_width))
+        nw = self.NW_ROUND if nw_rounded else self.SQUARE
+        ne = self.NE_ROUND if ne_rounded else self.SQUARE
+        se = self.SE_ROUND if se_rounded else self.SQUARE
+        sw = self.SW_ROUND if sw_rounded else self.SQUARE
+        self.image.paste(nw, (box[0][0], box[0][1]))
+        self.image.paste(ne, (box[0][0] + self.corner_width, box[0][1]))
+        self.image.paste(se, (box[0][0] + self.corner_width, box[0][1] + self.corner_width))
+        self.image.paste(sw, (box[0][0], box[0][1] + self.corner_width))
 
-            
 
 class VerticalBarsDrawer(QRModuleDrawer):
     """
-    Draws vertically contiguous groups of modules as long rounded rectangles, with gaps between neighboring bands 
+    Draws vertically contiguous groups of modules as long rounded rectangles, with gaps between neighboring bands
     (the size of these gaps is inversely proportional to the horizontal_shrink)
     """
     def __init__(self, horizontal_shrink = 0.8):
@@ -192,7 +192,7 @@ class VerticalBarsDrawer(QRModuleDrawer):
 
 class HorizontalBarsDrawer(QRModuleDrawer):
     """
-    Draws horizontally contiguous groups of modules as long rounded rectangles, with gaps between neighboring bands 
+    Draws horizontally contiguous groups of modules as long rounded rectangles, with gaps between neighboring bands
     (the size of these gaps is inversely proportional to the vertical_shrink)
     """
     def __init__(self, vertical_shrink = 0.8):
