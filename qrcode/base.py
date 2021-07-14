@@ -350,7 +350,7 @@ def rs_blocks(version, error_correction):
 
     for i in range(0, len(rs_block), 3):
         count, total_count, data_count = rs_block[i:i + 3]
-        for j in range(count):
+        for _ in range(count):
             blocks.append(RSBlock(total_count, data_count))
 
     return blocks

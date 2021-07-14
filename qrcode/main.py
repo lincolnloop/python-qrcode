@@ -85,12 +85,11 @@ class QRCode:
         """
         if isinstance(data, util.QRData):
             self.data_list.append(data)
+        elif optimize:
+            self.data_list.extend(
+                util.optimal_data_chunks(data, minimum=optimize))
         else:
-            if optimize:
-                self.data_list.extend(
-                    util.optimal_data_chunks(data, minimum=optimize))
-            else:
-                self.data_list.append(util.QRData(data))
+            self.data_list.append(util.QRData(data))
         self.data_cache = None
 
     def make(self, fit=True):
@@ -148,9 +147,11 @@ class QRCode:
                 if col + c <= -1 or self.modules_count <= col + c:
                     continue
 
-                if (0 <= r and r <= 6 and (c == 0 or c == 6)
-                        or (0 <= c and c <= 6 and (r == 0 or r == 6))
-                        or (2 <= r and r <= 4 and 2 <= c and c <= 4)):
+                if (
+                    (0 <= r <= 6 and c in {0, 6})
+                    or (0 <= c <= 6 and r in {0, 6})
+                    or (2 <= r <= 4 and 2 <= c <= 4)
+                ):
                     self.modules[row + r][col + c] = True
                 else:
                     self.modules[row + r][col + c] = False
@@ -298,15 +299,12 @@ class QRCode:
         im = image_factory(
             self.border, self.modules_count, self.box_size, **kwargs)
 
-        if im.needs_context:
-            for r in range(self.modules_count):
-                for c in range(self.modules_count):
+        for r in range(self.modules_count):
+            for c in range(self.modules_count):
+                if im.needs_context:
                     im.drawrect_context(r, c, self.modules[r][c], self.get_module_context(r,c))
-        else:
-            for r in range(self.modules_count):
-                for c in range(self.modules_count):
-                    if self.modules[r][c]:
-                        im.drawrect(r,c)
+                elif self.modules[r][c]:
+                    im.drawrect(r,c)
         if im.needs_processing:
             im.process()
 
@@ -321,7 +319,7 @@ class QRCode:
 
         for r in range(row-1,row + 2):
             for c in range(col - 1, col + 2):
-                if not (r == row and c == col):
+                if r != row or c != col:
                     context.append(self.is_constrained(r,c) and self.modules[r][c])
         return context
 
@@ -341,9 +339,10 @@ class QRCode:
 
         for i in range(len(pos)):
 
+            row = pos[i]
+
             for j in range(len(pos)):
 
-                row = pos[i]
                 col = pos[j]
 
                 if self.modules[row][col] is not None:

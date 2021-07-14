@@ -30,17 +30,17 @@ class PilImage(qrcode.image.base.BaseImage):
         except AttributeError:
             pass
 
-        if fill_color != "black" or back_color != "white":
-            if back_color == "transparent":
-                mode = "RGBA"
-                back_color = None
-            else:
-                mode = "RGB"
-        else:
+        # L mode (1 mode) color = (r*299 + g*587 + b*114)//1000
+        if fill_color == "black" and back_color == "white":
             mode = "1"
-            # L mode (1 mode) color = (r*299 + g*587 + b*114)//1000
-            if fill_color == "black": fill_color = 0
-            if back_color == "white": back_color = 255
+            fill_color = 0
+            if back_color == "white":
+                back_color = 255
+        elif back_color == "transparent":
+            mode = "RGBA"
+            back_color = None
+        else:
+            mode = "RGB"
 
         img = Image.new(mode, (self.pixel_size, self.pixel_size), back_color)
         self.fill_color = fill_color

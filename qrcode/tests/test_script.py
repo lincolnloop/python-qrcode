@@ -14,10 +14,10 @@ def bad_read():
 class ScriptTest(unittest.TestCase):
     def setUp(self):
         self.tmpdir = mkdtemp()
-        
+
     def tearDown(self):
         os.rmdir(self.tmpdir)
-        
+
     @mock.patch('os.isatty', lambda *args: True)
     @mock.patch('qrcode.main.QRCode.print_ascii')
     def test_isatty(self, mock_print_ascii):
@@ -70,4 +70,3 @@ class ScriptTest(unittest.TestCase):
         tmpfile = os.path.join(self.tmpdir, "test.png")
         main(['testtext', '--output', tmpfile])
         os.remove(tmpfile)
-        
