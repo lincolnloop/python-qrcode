@@ -12,11 +12,17 @@ try:
 except ImportError:  # pragma: no cover
     pymaging_png = None
 
+try:
+    import numpy  # ensure that numpy support is installed
+except ImportError:  # pragma: no cover
+    numpy = None
+
 import qrcode
 import qrcode.image.svg
 import qrcode.util
 from qrcode.exceptions import DataOverflowError
 from qrcode.image.base import BaseImage
+from qrcode.image.numpy import NpImage
 from qrcode.image.pil import Image as pil_Image
 from qrcode.image.styledpil import StyledPilImage
 from qrcode.image.styles import colormasks, moduledrawers
@@ -229,6 +235,13 @@ class QRCodeTests(unittest.TestCase):
         img = qr.make_image(image_factory=qrcode.image.pure.PymagingImage)
         with self.assertRaises(ValueError):
             img.save(io.BytesIO(), kind='FISH')
+
+    @unittest.skipIf(not numpy, "Requires numpy")
+    def test_render_numpy_image(self):
+        qr = qrcode.QRCode()
+        qr.add_data(UNICODE_TEXT)
+        img = qr.make_image(image_factory=NpImage)
+        img.save(io.BytesIO())
 
     def test_render_styled_pil_image(self):
         qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)

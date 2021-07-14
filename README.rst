@@ -194,6 +194,23 @@ Other color masks:
 
     .. image:: doc/color_masks.png
 
+
+Numpy Array
+-----------
+
+To create the QRCode as a Numpy Array, use `NpImage` factory:
+
+.. code:: python
+
+    from numpy import array
+    import qrcode
+    from qrcode.image.numpy import NpImage
+
+    img = qrcode.make("Some text", image_factory=NpImage)
+    img.shape  # (290, 290, 3)
+    array(img)  # array([[[255, 255, 255], ...
+
+
 Examples
 ========
 

@@ -1,7 +1,10 @@
 # Needed on case-insensitive filesystems
 from __future__ import absolute_import
 
-from numpy import ones, uint8
+try:
+    from numpy import ones, uint8
+except ImportError:  # pragma: no cover
+    ones, uint8 = None, None
 
 import qrcode.image.base
 
@@ -51,8 +54,12 @@ class NpImage(qrcode.image.base.BaseImage):
             png_pk(b'IHDR', pack("!2I5B", w, h, 8, 6, 0, 0, 0)),
             png_pk(b'IDAT', compress(raw_data, 9)),
             png_pk(b'IEND', b'')])
-        with open(stream, 'wb') as f:
-            f.write(b)
+
+        if hasattr(stream, "write"):
+            stream.write(b)
+        else:
+            with open(stream, 'wb') as f:
+                f.write(b)
 
     def __getattr__(self, name):
         return getattr(self._img, name)
