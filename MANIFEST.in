@@ -3,3 +3,4 @@ include LICENSE
 include signing-key.asc
 include tox.ini
 include doc/qr.1
+ignore .pypirc

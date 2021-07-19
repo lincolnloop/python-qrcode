@@ -2,10 +2,14 @@
 Change log
 ==========
 
-7.2 (unreleased)
-================
+7.2 (19 July 2021)
+==================
 
-- Nothing changed yet.
+- Add Styled PIL image factory, allowing different color masks and shapes in QR codes
+
+- Small performance inprovement
+
+- Add check for border size parameter
 
 
 7.1 (1 July 2021)
