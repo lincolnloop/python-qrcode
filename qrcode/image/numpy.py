@@ -18,7 +18,7 @@ class NpImage(qrcode.image.base.BaseImage):
 
     def new_image(self, **kwargs):
         """Build the image class."""
-        return ones((self.pixel_size, self.pixel_size, 3), dtype=uint8) * 255
+        return ones((self.pixel_size, self.pixel_size, 1), dtype=uint8) * 255
 
     def drawrect(self, row, col):
         """Draw a single rectangle of the QR code."""
@@ -33,7 +33,7 @@ class NpImage(qrcode.image.base.BaseImage):
         self.check_kind(kind)
         h, w, _ = self._img.shape
         img = ones((h, w, 4), dtype=uint8) * 255
-        img[::-1, :, :-1] = self._img
+        img[::-1, :, :-1] = self._img[:, :, :]
         buf = img.tobytes()
         w_byte = w * 4
         raw_data = b''.join(b'\x00' + buf[span:span + w_byte]
