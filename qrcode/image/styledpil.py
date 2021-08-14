@@ -46,7 +46,7 @@ class StyledPilImage(qrcode.image.base.BaseImage):
         self.embeded_image = kwargs.get("embeded_image", None)
         if not self.embeded_image and embeded_image_path:
             self.embeded_image = Image.open(embeded_image_path)
-        mode = "RGBA" if self.color_mask.has_transparency else "RGB"
+        mode = "RGBA" if (self.color_mask.has_transparency or (self.embeded_image and 'A' in self.embeded_image.getbands())) else "RGB"
         self.mode = mode
 
         self.back_color = self.color_mask.back_color # This is the background color. Should be white or whiteish
@@ -85,7 +85,10 @@ class StyledPilImage(qrcode.image.base.BaseImage):
             logo_width = total_width - logo_offset*2
             region = self.embeded_image
             region = region.resize((logo_width, logo_width), Image.LANCZOS)
-            self._img.paste(region, logo_position)
+            if 'A' in region.getbands():
+                self._img.alpha_composite(region, logo_position)
+            else:
+                self._img.paste(region, logo_position)
 
     # The eyes are treated differently, and this will find whether the referenced module is in an eye
     def is_eye(self, row, col):
