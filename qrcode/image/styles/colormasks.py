@@ -81,6 +81,18 @@ class SolidFillColorMask(QRColorMask):
         self.front_color = front_color
         self.has_transparency = len(self.back_color) == 4
 
+    def apply_mask(self, image):
+        if self.back_color == (255,255,255) and self.front_color == (0,0,0):
+            # Optimization: the image is already drawn by QRModuleDrawer in black and white,
+            # so if these are also our mask colors we don't need to do anything.
+            # This is much faster than actually applying a mask.
+            pass
+        else:
+            # TODO there's probably a way to use PIL.ImageMath instead of doing the individual pixel comparisons
+            # that the base class uses, which would be a lot faster. (In fact doing this would probably remove
+            # the need for the B&W optimization above.)
+            QRColorMask.apply_mask(self, image)
+
     def get_fg_pixel(self, image, x, y):
         return self.front_color
 
