@@ -34,7 +34,6 @@ class StyledPilImage(qrcode.image.base.BaseImage):
 
     needs_context = True
     needs_processing = True
-    has_image = False
 
     def new_image(self, **kwargs):
         self.color_mask = kwargs.get("color_mask", SolidFillColorMask())
@@ -47,7 +46,6 @@ class StyledPilImage(qrcode.image.base.BaseImage):
         self.embeded_image = kwargs.get("embeded_image", None)
         if not self.embeded_image and embeded_image_path:
             self.embeded_image = Image.open(embeded_image_path)
-            self.has_image = True
         mode = "RGBA" if self.color_mask.has_transparency else "RGB"
         self.mode = mode
 
@@ -75,7 +73,7 @@ class StyledPilImage(qrcode.image.base.BaseImage):
 
     def process(self):
         self.color_mask.apply_mask(self._img)
-        if self.has_image:
+        if self.embeded_image:
             self.draw_embeded_image()
 
     def draw_embeded_image(self):
