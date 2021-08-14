@@ -81,10 +81,11 @@ class StyledPilImage(qrcode.image.base.BaseImage):
             total_width = int(total_width)
             logo_width_ish = int(total_width / 4)
             logo_offset = int( (int(total_width / 2) - int(logo_width_ish / 2)) / 10) * 10 # round the offset to the nearest 10
-            box = (logo_offset, logo_offset, total_width - logo_offset, total_width - logo_offset)
+            logo_position = (logo_offset, logo_offset)
+            logo_width = total_width - logo_offset*2
             region = self.embeded_image
-            region = region.resize((box[2] - box[0], box[3] - box[1]), Image.LANCZOS)
-            self._img.paste(region,box)
+            region = region.resize((logo_width, logo_width), Image.LANCZOS)
+            self._img.paste(region, logo_position)
 
     # The eyes are treated differently, and this will find whether the referenced module is in an eye
     def is_eye(self, row, col):
