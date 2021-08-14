@@ -82,7 +82,6 @@ class StyledPilImage(qrcode.image.base.BaseImage):
             logo_width_ish = int(total_width / 4)
             logo_offset = int( (int(total_width / 2) - int(logo_width_ish / 2)) / 10) * 10 # round the offset to the nearest 10
             box = (logo_offset, logo_offset, total_width - logo_offset, total_width - logo_offset)
-            self._img.crop(box)
             region = self.embeded_image
             region = region.resize((box[2] - box[0], box[3] - box[1]), Image.LANCZOS)
             self._img.paste(region,box)
