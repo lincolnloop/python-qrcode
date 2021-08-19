@@ -2,10 +2,10 @@
 Change log
 ==========
 
-7.3 (unreleased)
-================
+7.3 (19 August 2021)
+====================
 
-- Nothing changed yet.
+- Skip color mask if QR is black and white
 
 
 7.2 (19 July 2021)
