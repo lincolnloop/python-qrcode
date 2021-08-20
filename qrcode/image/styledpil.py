@@ -29,6 +29,8 @@ class StyledPilImage(qrcode.image.base.BaseImage):
     The Image can be specified either by path or with a Pillow Image, and if it is there will be placed in the
     middle of the QR code. No effort is done to ensure that the QR code is still legible after the image has been
     placed there; Q or H level error correction levels are recommended to maintain data integrity
+    A resampling filter can be specified (defaulting to PIL.Image.LANCZOS) for resizing; see PIL.Image.resize() for
+    possible options for this parameter.
     """
     kind = "PNG"
 
@@ -44,6 +46,7 @@ class StyledPilImage(qrcode.image.base.BaseImage):
 
         embeded_image_path = kwargs.get("embeded_image_path", None)
         self.embeded_image = kwargs.get("embeded_image", None)
+        self.embeded_image_resample = kwargs.get("embeded_image_resample", Image.LANCZOS)
         if not self.embeded_image and embeded_image_path:
             self.embeded_image = Image.open(embeded_image_path)
         mode = "RGBA" if (self.color_mask.has_transparency or (self.embeded_image and 'A' in self.embeded_image.getbands())) else "RGB"
@@ -84,7 +87,7 @@ class StyledPilImage(qrcode.image.base.BaseImage):
             logo_position = (logo_offset, logo_offset)
             logo_width = total_width - logo_offset*2
             region = self.embeded_image
-            region = region.resize((logo_width, logo_width), Image.LANCZOS)
+            region = region.resize((logo_width, logo_width), self.embeded_image_resample)
             if 'A' in region.getbands():
                 self._img.alpha_composite(region, logo_position)
             else:
