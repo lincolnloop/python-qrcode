@@ -2,10 +2,10 @@
 Change log
 ==========
 
-7.4 (unreleased)
-================
+7.3.1 (1 October 2021)
+======================
 
-- Nothing changed yet.
+- Improvements for embeded image.
 
 
 7.3 (19 August 2021)
