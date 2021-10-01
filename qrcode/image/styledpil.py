@@ -29,12 +29,13 @@ class StyledPilImage(qrcode.image.base.BaseImage):
     The Image can be specified either by path or with a Pillow Image, and if it is there will be placed in the
     middle of the QR code. No effort is done to ensure that the QR code is still legible after the image has been
     placed there; Q or H level error correction levels are recommended to maintain data integrity
+    A resampling filter can be specified (defaulting to PIL.Image.LANCZOS) for resizing; see PIL.Image.resize() for
+    possible options for this parameter.
     """
     kind = "PNG"
 
     needs_context = True
     needs_processing = True
-    has_image = False
 
     def new_image(self, **kwargs):
         self.color_mask = kwargs.get("color_mask", SolidFillColorMask())
@@ -45,10 +46,10 @@ class StyledPilImage(qrcode.image.base.BaseImage):
 
         embeded_image_path = kwargs.get("embeded_image_path", None)
         self.embeded_image = kwargs.get("embeded_image", None)
+        self.embeded_image_resample = kwargs.get("embeded_image_resample", Image.LANCZOS)
         if not self.embeded_image and embeded_image_path:
             self.embeded_image = Image.open(embeded_image_path)
-            self.has_image = True
-        mode = "RGBA" if self.color_mask.has_transparency else "RGB"
+        mode = "RGBA" if (self.color_mask.has_transparency or (self.embeded_image and 'A' in self.embeded_image.getbands())) else "RGB"
         self.mode = mode
 
         self.back_color = self.color_mask.back_color # This is the background color. Should be white or whiteish
@@ -75,19 +76,22 @@ class StyledPilImage(qrcode.image.base.BaseImage):
 
     def process(self):
         self.color_mask.apply_mask(self._img)
-        if self.has_image:
+        if self.embeded_image:
             self.draw_embeded_image()
 
     def draw_embeded_image(self):
             total_width,_ = self._img.size
             total_width = int(total_width)
             logo_width_ish = int(total_width / 4)
-            logo_offset = int( (int(total_width / 2) - int(logo_width_ish / 2)) / 10) * 10 # round the offset to the nearest 10
-            box = (logo_offset, logo_offset, total_width - logo_offset, total_width - logo_offset)
-            self._img.crop(box)
+            logo_offset = int( (int(total_width / 2) - int(logo_width_ish / 2)) / self.box_size) * self.box_size # round the offset to the nearest module
+            logo_position = (logo_offset, logo_offset)
+            logo_width = total_width - logo_offset*2
             region = self.embeded_image
-            region = region.resize((box[2] - box[0], box[3] - box[1]), Image.LANCZOS)
-            self._img.paste(region,box)
+            region = region.resize((logo_width, logo_width), self.embeded_image_resample)
+            if 'A' in region.getbands():
+                self._img.alpha_composite(region, logo_position)
+            else:
+                self._img.paste(region, logo_position)
 
     # The eyes are treated differently, and this will find whether the referenced module is in an eye
     def is_eye(self, row, col):
