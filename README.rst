@@ -11,6 +11,10 @@ run::
 
 .. _pillow: https://pypi.python.org/pypi/Pillow
 
+For OS run::
+
+    pip install qrcode"[pil]"
+
 
 What is a QR Code?
 ==================
@@ -161,6 +165,11 @@ Or in Python:
 
 Styled Image
 ------------
+
+Works only with _versions >=7.2
+
+.. _versions: https://github.com/lincolnloop/python-qrcode/blob/master/CHANGES.rst#72-19-july-2021
+
 To apply styles to the QRCode, use the StyledPilImage image factory. 
 This takes an optional module drawer to control the shape of the QR Code, an 
 optional color mask to change the colors of the QR Code, and an optional image 
