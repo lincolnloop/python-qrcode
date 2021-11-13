@@ -11,7 +11,7 @@ run::
 
 .. _pillow: https://pypi.python.org/pypi/Pillow
 
-For OS run::
+For macOS run::
 
     pip install qrcode"[pil]"
 
