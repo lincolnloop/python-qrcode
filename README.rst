@@ -150,7 +150,7 @@ of the resulting SVG:
 
     img = qr.make_image(attrib={'class': 'some-css-class'})
 
-You can convert the SVG image into to strings using the ``to_string()`` method.
+You can convert the SVG image into strings using the ``to_string()`` method.
 Additional keyword arguments are forwarded to ElementTrees ``tostring()``:
 
 .. code:: python
