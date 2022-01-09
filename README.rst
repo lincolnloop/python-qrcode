@@ -137,6 +137,26 @@ background of the SVG with white::
     qrcode.image.svg.SvgFillImage
     qrcode.image.svg.SvgPathFillImage
 
+The ``QRCode.make_image()`` method forwards additional keyword arguments to
+the underlying ElementTree XML library. This helps to finetune the root element
+of the resulting SVG:
+
+.. code:: python
+
+    import qrcode
+    qr = qrcode.QRCode(image_factory=qrcode.image.svg.SvgPathImage)
+    qr.add_data('Some data')
+    qr.make(fit=True)
+
+    img = qr.make_image(attrib={'class': 'some-css-class'})
+
+You can convert the SVG image into to strings using the ``to_string()`` method.
+Additional keyword arguments are forwarded to ElementTrees ``tostring()``:
+
+.. code:: python
+
+    img.to_string(encoding='unicode')
+
 
 Pure Python PNG
 ---------------
