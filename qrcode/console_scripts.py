@@ -8,7 +8,7 @@ a pipe to a file an image is written. The default image format is PNG.
 import sys
 import optparse
 import os
-import qrcode
+import __init__ as qrcode
 # The next block is added to get the terminal to display properly on MS platforms
 if sys.platform.startswith(('win', 'cygwin')):  # pragma: no cover
     import colorama
@@ -53,6 +53,8 @@ def main(args=None):
     parser.add_option(
         "--ascii", help="Print as ascii even if stdout is piped.", action="store_true")
     parser.add_option(
+        "--invert", help="Invert colorscheme.", action="store_true")
+    parser.add_option(
         "--output",
         help="The output file. If not specified, the image is sent to "
         "the standard output.")
@@ -91,7 +93,7 @@ def main(args=None):
             img.save(out)
     else:
         if image_factory is None and (os.isatty(sys.stdout.fileno()) or opts.ascii):
-            qr.print_ascii(tty=not opts.ascii)
+            qr.print_ascii(tty=not opts.invert)
             return
 
         img = qr.make_image(image_factory=image_factory)
