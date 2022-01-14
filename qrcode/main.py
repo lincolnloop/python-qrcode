@@ -232,8 +232,18 @@ class QRCode:
         out.write("\x1b[1;47m" + (" " * (modcount * 2 + 4)) + "\x1b[0m\n")
         out.flush()
 
-    def get_ascii(self, tty=False, invert=False):
-        ret=""
+    def print_ascii(self, out=None, tty=False, invert=True):
+        """
+        Output the QR Code using ASCII characters.
+        :param tty: use fixed TTY color codes (forces invert=True)
+        :param invert: invert the ASCII characters (solid <-> transparent)
+        """
+        if out is None:
+            out = sys.stdout
+
+        if tty and not out.isatty():
+            raise OSError("Not a tty")
+
         if self.data_cache is None:
             self.make()
 
@@ -256,31 +266,16 @@ class QRCode:
         for r in range(-self.border, modcount+self.border, 2):
             if tty:
                 if not invert or r < modcount+self.border-1:
-                    ret+='\x1b[48;5;232m'   # Background black
-                ret+='\x1b[38;5;255m'   # Foreground white
+                    out.write('\x1b[48;5;232m')   # Background black
+                out.write('\x1b[38;5;255m')   # Foreground white
             for c in range(-self.border, modcount+self.border):
                 pos = get_module(r, c) + (get_module(r+1, c) << 1)
-                ret+=codes[pos]
+                out.write(codes[pos])
             if tty:
-                ret+='\x1b[0m'
-            ret+='\n'
-        return ret
-
-    def print_ascii(self, out=None, tty=False, invert=False):
-        """
-        Output the QR Code using ASCII characters.
-
-        :param tty: use fixed TTY color codes (forces invert=True)
-        :param invert: invert the ASCII characters (solid <-> transparent)
-        """
-        if out is None:
-            out = sys.stdout
-
-        if tty and not out.isatty():
-            raise OSError("Not a tty")
-
-        out.write(self.get_ascii(tty, invert))
+                out.write('\x1b[0m')
+            out.write('\n')
         out.flush()
+
 
     def make_image(self, image_factory=None, **kwargs):
         """
