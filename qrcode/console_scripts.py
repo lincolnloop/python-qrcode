@@ -13,6 +13,7 @@ import qrcode
 if sys.platform.startswith(('win', 'cygwin')):  # pragma: no cover
     import colorama
     colorama.init()
+    os.system("color")
 
 default_factories = {
     'pil': 'qrcode.image.pil.PilImage',
@@ -55,6 +56,10 @@ def main(args=None):
     parser.add_option(
         "--invert", "-i", help="Invert colorscheme.", action="store_true")
     parser.add_option(
+        "--tty", "-t", help="Use a black and white colorscheme.", action="store_true")
+    parser.add_option(
+        "--raw", "-r", help="Don't convert from cp437 to unicdoe (useful for chaining)", action="store_true")
+    parser.add_option(
         "--border", type=int, default=4, help="Width of QR code border")
     parser.add_option(
         "--output",
@@ -95,7 +100,7 @@ def main(args=None):
             img.save(out)
     else:
         if image_factory is None and (os.isatty(sys.stdout.fileno()) or opts.ascii):
-            qr.print_ascii(tty=not opts.ascii, invert=opts.invert, border=opts.border)
+            qr.print_ascii(tty=opts.tty, invert=opts.invert, border=opts.border, raw=opts.raw)
             return
 
         img = qr.make_image(image_factory=image_factory)

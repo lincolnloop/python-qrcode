@@ -203,25 +203,44 @@ class QRCode:
 
         return pattern
 
-    def print_ascii(self, out=None, tty=False, invert=False, border=None):
+    def print_ascii(self, out=None, tty=False, invert=False, border=None, raw=False):
         """
         Output the QR Code using ASCII box drawing characters.
 
-        :param tty: use fixed TTY color codes
+        :param tty: use fixed TTY color codes (black and white color-scheme)
         :param invert: invert the ASCII characters (solid <-> transparent)
+        :param border: width of border around QR code
+        :param raw: Write bytes to out
         """
+        _bgblack='\x1b[48;5;232m'
+        _fgwhite='\x1b[38;5;255m'
+        _ttything='\x1b[0m'
+        _newline='\n'
+
         if out is None:
-            out = sys.stdout
+            if raw:
+                out = sys.stdout.buffer
+            else:
+                out = sys.stdout
 
         if border is None:
             border = self.border
+
+        if raw:
+            _bgblack=_bgblack.encode()
+            _fgwhite=_fgwhite.encode()
+            _ttything=_ttything.encode()
+            _newline=_newline.encode()
 
         if self.data_cache is None:
             self.make()
 
         modcount = self.modules_count
-        codes = [bytes((code,)).decode('cp437')
-                 for code in (219, 220, 223, 255)]
+        codes = [bytes((code,))
+                 for code in (219, 220, 223, 32)]
+        if not raw:
+            codes=[code.decode('cp437')
+                for code in codes]
         if invert:
             codes.reverse()
 
@@ -229,7 +248,7 @@ class QRCode:
             """
             Find which halves of the box-drawing character at a position need to be filled
 
-            :param x: The vertical position of the output character
+            :param x: The vertical   position of the output character
             :param y: The horizontal position of the output character
             :returns: A number from 0 to 3 for neither, top, bottom, and both halves respectively
             """
@@ -237,6 +256,7 @@ class QRCode:
                     max(x, y) >= modcount+border):
                 return 0
             if (not invert and x >= modcount+border):
+                # Don't fill the bottom half of the bottom row
                 return 1
             if min(x, y) < 0 or max(x, y) >= modcount:
                 return 0
@@ -245,14 +265,14 @@ class QRCode:
         for r in range(-border, modcount+border, 2):
             if tty:
                 if not invert or r < modcount+border-1:
-                    out.write('\x1b[48;5;232m')   # Background black
-                out.write('\x1b[38;5;255m')   # Foreground white
+                    out.write(_bgblack)   # Background black
+                out.write(_fgwhite)   # Foreground white
             for c in range(-border, modcount+border):
                 pos = get_module(r, c) + (get_module(r+1, c) << 1)
                 out.write(codes[pos])
             if tty:
-                out.write('\x1b[0m')
-            out.write('\n')
+                out.write(_ttything)
+            out.write(_newline)
         out.flush()
 
     def make_image(self, image_factory=None, **kwargs):
