@@ -53,6 +53,8 @@ def main(args=None):
     parser.add_option(
         "--ascii", help="Print as ascii even if stdout is piped.", action="store_true")
     parser.add_option(
+        "--invert", help="Invert colorscheme.", action="store_true")
+    parser.add_option(
         "--output",
         help="The output file. If not specified, the image is sent to "
         "the standard output.")
@@ -91,7 +93,7 @@ def main(args=None):
             img.save(out)
     else:
         if image_factory is None and (os.isatty(sys.stdout.fileno()) or opts.ascii):
-            qr.print_ascii(tty=not opts.ascii)
+            qr.print_ascii(tty=not opts.ascii, invert=opts.invert)
             return
 
         img = qr.make_image(image_factory=image_factory)

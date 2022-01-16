@@ -250,16 +250,14 @@ class QRCode:
 
         modcount = self.modules_count
         codes = [bytes((code,)).decode('cp437')
-                 for code in (255, 223, 220, 219)]
-        if tty:
-            invert = True
+                 for code in (219, 220, 223, 255)]
         if invert:
             codes.reverse()
 
         def get_module(x, y):
-            if (invert and self.border and
+            if ((invert or tty) and self.border and
                     max(x, y) >= modcount+self.border):
-                return 1
+                return int(not invert)
             if min(x, y) < 0 or max(x, y) >= modcount:
                 return 0
             return self.modules[x][y]
