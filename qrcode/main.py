@@ -203,47 +203,18 @@ class QRCode:
 
         return pattern
 
-    def print_tty(self, out=None):
+    def print_ascii(self, out=None, tty=False, invert=False, border=None):
         """
-        Output the QR Code only using TTY colors.
+        Output the QR Code using ASCII box drawing characters.
 
-        If the data has not been compiled yet, make it first.
-        """
-        if out is None:
-            import sys
-            out = sys.stdout
-
-        if not out.isatty():
-            raise OSError("Not a tty")
-
-        if self.data_cache is None:
-            self.make()
-
-        modcount = self.modules_count
-        out.write("\x1b[1;47m" + (" " * (modcount * 2 + 4)) + "\x1b[0m\n")
-        for r in range(modcount):
-            out.write("\x1b[1;47m  \x1b[40m")
-            for c in range(modcount):
-                if self.modules[r][c]:
-                    out.write("  ")
-                else:
-                    out.write("\x1b[1;47m  \x1b[40m")
-            out.write("\x1b[1;47m  \x1b[0m\n")
-        out.write("\x1b[1;47m" + (" " * (modcount * 2 + 4)) + "\x1b[0m\n")
-        out.flush()
-
-    def print_ascii(self, out=None, tty=False, invert=False):
-        """
-        Output the QR Code using ASCII characters.
-
-        :param tty: use fixed TTY color codes (forces invert=True)
+        :param tty: use fixed TTY color codes
         :param invert: invert the ASCII characters (solid <-> transparent)
         """
         if out is None:
             out = sys.stdout
 
-        if tty and not out.isatty():
-            raise OSError("Not a tty")
+        if border is None:
+            border = self.border
 
         if self.data_cache is None:
             self.make()
@@ -255,19 +226,28 @@ class QRCode:
             codes.reverse()
 
         def get_module(x, y):
-            if ((invert or tty) and self.border and
-                    max(x, y) >= modcount+self.border):
-                return int(not invert)
+            """
+            Find which halves of the box-drawing character at a position need to be filled
+
+            :param x: The vertical position of the output character
+            :param y: The horizontal position of the output character
+            :returns: A number from 0 to 3 for neither, top, bottom, and both halves respectively
+            """
+            if (invert and border and
+                    max(x, y) >= modcount+border):
+                return 0
+            if (not invert and x >= modcount+border):
+                return 1
             if min(x, y) < 0 or max(x, y) >= modcount:
                 return 0
             return self.modules[x][y]
 
-        for r in range(-self.border, modcount+self.border, 2):
+        for r in range(-border, modcount+border, 2):
             if tty:
-                if not invert or r < modcount+self.border-1:
+                if not invert or r < modcount+border-1:
                     out.write('\x1b[48;5;232m')   # Background black
                 out.write('\x1b[38;5;255m')   # Foreground white
-            for c in range(-self.border, modcount+self.border):
+            for c in range(-border, modcount+border):
                 pos = get_module(r, c) + (get_module(r+1, c) << 1)
                 out.write(codes[pos])
             if tty:

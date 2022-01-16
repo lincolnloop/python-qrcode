@@ -51,9 +51,11 @@ def main(args=None):
         help="The error correction level to use. Choices are L (7%), "
         "M (15%, default), Q (25%), and H (30%).")
     parser.add_option(
-        "--ascii", help="Print as ascii even if stdout is piped.", action="store_true")
+        "--ascii", "-a", help="Print as ascii even if stdout is piped.", action="store_true")
     parser.add_option(
-        "--invert", help="Invert colorscheme.", action="store_true")
+        "--invert", "-i", help="Invert colorscheme.", action="store_true")
+    parser.add_option(
+        "--border", type=int, default=4, help="Width of QR code border")
     parser.add_option(
         "--output",
         help="The output file. If not specified, the image is sent to "
@@ -93,7 +95,7 @@ def main(args=None):
             img.save(out)
     else:
         if image_factory is None and (os.isatty(sys.stdout.fileno()) or opts.ascii):
-            qr.print_ascii(tty=not opts.ascii, invert=opts.invert)
+            qr.print_ascii(tty=not opts.ascii, invert=opts.invert, border=opts.border)
             return
 
         img = qr.make_image(image_factory=image_factory)
