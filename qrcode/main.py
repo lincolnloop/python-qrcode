@@ -203,6 +203,34 @@ class QRCode:
 
         return pattern
 
+    def print_tty(self, out=None):
+        """
+        Output the QR Code only using TTY colors.
+        If the data has not been compiled yet, make it first.
+        """
+        if out is None:
+            import sys
+            out = sys.stdout
+
+        if not out.isatty():
+            raise OSError("Not a tty")
+
+        if self.data_cache is None:
+            self.make()
+
+        modcount = self.modules_count
+        out.write("\x1b[1;47m" + (" " * (modcount * 2 + 4)) + "\x1b[0m\n")
+        for r in range(modcount):
+            out.write("\x1b[1;47m  \x1b[40m")
+            for c in range(modcount):
+                if self.modules[r][c]:
+                    out.write("  ")
+                else:
+                    out.write("\x1b[1;47m  \x1b[40m")
+            out.write("\x1b[1;47m  \x1b[0m\n")
+        out.write("\x1b[1;47m" + (" " * (modcount * 2 + 4)) + "\x1b[0m\n")
+        out.flush()
+
     def print_ascii(self, out=None, tty=False, invert=False, border=None, raw=False):
         """
         Output the QR Code using ASCII box drawing characters.
@@ -262,7 +290,11 @@ class QRCode:
                 return 0
             return self.modules[x][y]
 
+        firstIter=True
         for r in range(-border, modcount+border, 2):
+            if not firstIter:
+                out.write(_newline)
+            firstIter=False
             if tty:
                 if not invert or r < modcount+border-1:
                     out.write(_bgblack)   # Background black
@@ -272,7 +304,6 @@ class QRCode:
                 out.write(codes[pos])
             if tty:
                 out.write(_ttything)
-            out.write(_newline)
         out.flush()
 
     def make_image(self, image_factory=None, **kwargs):
