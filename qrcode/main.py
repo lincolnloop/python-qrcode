@@ -265,7 +265,7 @@ class QRCode:
 
         modcount = self.modules_count
         codes = [bytes((code,))
-                 for code in (219, 220, 223, 32)]
+                 for code in (219, 220, 223, 255)]
         if not raw:
             codes=[code.decode('cp437')
                 for code in codes]
