@@ -231,7 +231,7 @@ class QRCode:
         out.write("\x1b[1;47m" + (" " * (modcount * 2 + 4)) + "\x1b[0m\n")
         out.flush()
 
-    def print_ascii(self, out=None, tty=False, invert=False, border=None, raw=False):
+    def print_ascii(self, out=None, tty=False, invert=False, border=None, raw=False, fg=None, bg=None):
         """
         Output the QR Code using ASCII box drawing characters.
 
@@ -239,11 +239,24 @@ class QRCode:
         :param invert: invert the ASCII characters (solid <-> transparent)
         :param border: width of border around QR code
         :param raw: Write bytes to out
+        :param fg: The X part of the ANSI code \\x1b30m
         """
-        _bgblack='\x1b[48;5;232m'
-        _fgwhite='\x1b[38;5;255m'
-        _ttything='\x1b[0m'
-        _newline='\n'
+        if fg is None:
+            _setfg = '\x1b[38;5;255m'
+        elif isinstance(fg, int):
+            _setfg='\x1b[' + str(fg%8+30) + (";1" * (fg//8)) + 'm'
+        else:
+            _setfg = fg
+
+        if bg is None:
+            _setbg = '\x1b[48;5;232m'
+        elif isinstance(bg, int):
+            _setbg='\x1b[' + str(bg%8+40) + (";1" * (bg//8)) + 'm'
+        else:
+            _setbg = bg
+
+        _resetColors = '\x1b[0m'
+        _newline = '\n'
 
         if out is None:
             if raw:
@@ -255,10 +268,10 @@ class QRCode:
             border = self.border
 
         if raw:
-            _bgblack=_bgblack.encode()
-            _fgwhite=_fgwhite.encode()
-            _ttything=_ttything.encode()
-            _newline=_newline.encode()
+            _setbg = _setbg.encode()
+            _setfg = _setfg.encode()
+            _resetColors = _resetColors.encode()
+            _newline = _newline.encode()
 
         if self.data_cache is None:
             self.make()
@@ -283,27 +296,28 @@ class QRCode:
             if (invert and border and
                     max(x, y) >= modcount+border):
                 return 0
-            if (not invert and x >= modcount+border):
+            if not invert and x >= modcount+border:
                 # Don't fill the bottom half of the bottom row
                 return 1
             if min(x, y) < 0 or max(x, y) >= modcount:
                 return 0
             return self.modules[x][y]
 
-        firstIter=True
         for r in range(-border, modcount+border, 2):
-            if not firstIter:
+            if r > -border:
+                # Don't write an extra newline at the end
                 out.write(_newline)
-            firstIter=False
-            if tty:
-                if not invert or r < modcount+border-1:
-                    out.write(_bgblack)   # Background black
-                out.write(_fgwhite)   # Foreground white
+
+            if tty or fg is not None:
+                # ANSI stuff to set output color
+                out.write(_setfg)
+            if tty or bg is not None:
+                out.write(_setbg)
             for c in range(-border, modcount+border):
                 pos = get_module(r, c) + (get_module(r+1, c) << 1)
                 out.write(codes[pos])
-            if tty:
-                out.write(_ttything)
+            if tty or fg is not None or bg is not None:
+                out.write(_resetColors)
         out.flush()
 
     def make_image(self, image_factory=None, **kwargs):
