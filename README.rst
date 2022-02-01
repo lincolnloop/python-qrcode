@@ -11,6 +11,10 @@ run::
 
 .. _pillow: https://pypi.python.org/pypi/Pillow
 
+For macOS run::
+
+    pip install qrcode"[pil]"
+
 
 What is a QR Code?
 ==================
@@ -137,6 +141,26 @@ background of the SVG with white::
     qrcode.image.svg.SvgFillImage
     qrcode.image.svg.SvgPathFillImage
 
+The ``QRCode.make_image()`` method forwards additional keyword arguments to
+the underlying ElementTree XML library. This helps to finetune the root element
+of the resulting SVG:
+
+.. code:: python
+
+    import qrcode
+    qr = qrcode.QRCode(image_factory=qrcode.image.svg.SvgPathImage)
+    qr.add_data('Some data')
+    qr.make(fit=True)
+
+    img = qr.make_image(attrib={'class': 'some-css-class'})
+
+You can convert the SVG image into strings using the ``to_string()`` method.
+Additional keyword arguments are forwarded to ElementTrees ``tostring()``:
+
+.. code:: python
+
+    img.to_string(encoding='unicode')
+
 
 Pure Python PNG
 ---------------
@@ -161,6 +185,11 @@ Or in Python:
 
 Styled Image
 ------------
+
+Works only with _versions >=7.2
+
+.. _versions: https://github.com/lincolnloop/python-qrcode/blob/master/CHANGES.rst#72-19-july-2021
+
 To apply styles to the QRCode, use the StyledPilImage image factory. 
 This takes an optional module drawer to control the shape of the QR Code, an 
 optional color mask to change the colors of the QR Code, and an optional image 

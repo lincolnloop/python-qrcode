@@ -39,11 +39,11 @@ class SvgFragmentImage(qrcode.image.base.BaseImage):
         self.check_kind(kind=kind)
         self._write(stream)
 
-    def to_string(self):
-        return ET.tostring(self._img)
+    def to_string(self, **kwargs):
+        return ET.tostring(self._img, **kwargs)
 
     def new_image(self, **kwargs):
-        return self._svg()
+        return self._svg(**kwargs)
 
     def _svg(self, tag=None, version='1.1', **kwargs):
         if tag is None:
@@ -142,10 +142,10 @@ class SvgPathImage(SvgImage):
             **self.QR_PATH_STYLE
         )
 
-    def to_string(self):
+    def to_string(self, **kwargs):
         img = self._img.__copy__()
         img.append(self.make_path())
-        return ET.tostring(img)
+        return ET.tostring(img, **kwargs)
 
     def _write(self, stream):
         self._img.append(self.make_path())
