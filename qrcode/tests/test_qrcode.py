@@ -23,7 +23,7 @@ from qrcode.image.styles import colormasks, moduledrawers
 from qrcode.tests.svg import SvgImageWhite
 from qrcode.util import MODE_8BIT_BYTE, MODE_ALPHA_NUM, MODE_NUMBER, QRData
 
-UNICODE_TEXT = '\u03b1\u03b2\u03b3'
+UNICODE_TEXT = "\u03b1\u03b2\u03b3"
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
@@ -38,12 +38,12 @@ class QRCodeTests(unittest.TestCase):
 
     def test_basic(self):
         qr = qrcode.QRCode(version=1)
-        qr.add_data('a')
+        qr.add_data("a")
         qr.make(fit=False)
 
     def test_large(self):
         qr = qrcode.QRCode(version=27)
-        qr.add_data('a')
+        qr.add_data("a")
         qr.make(fit=False)
 
     def test_invalid_version(self):
@@ -55,54 +55,54 @@ class QRCodeTests(unittest.TestCase):
 
     def test_overflow(self):
         qr = qrcode.QRCode(version=1)
-        qr.add_data('abcdefghijklmno')
+        qr.add_data("abcdefghijklmno")
         self.assertRaises(DataOverflowError, qr.make, fit=False)
 
     def test_add_qrdata(self):
         qr = qrcode.QRCode(version=1)
-        data = QRData('a')
+        data = QRData("a")
         qr.add_data(data)
         qr.make(fit=False)
 
     def test_fit(self):
         qr = qrcode.QRCode()
-        qr.add_data('a')
+        qr.add_data("a")
         qr.make()
         self.assertEqual(qr.version, 1)
-        qr.add_data('bcdefghijklmno')
+        qr.add_data("bcdefghijklmno")
         qr.make()
         self.assertEqual(qr.version, 2)
 
     def test_mode_number(self):
         qr = qrcode.QRCode()
-        qr.add_data('1234567890123456789012345678901234', optimize=0)
+        qr.add_data("1234567890123456789012345678901234", optimize=0)
         qr.make()
         self.assertEqual(qr.version, 1)
         self.assertEqual(qr.data_list[0].mode, MODE_NUMBER)
 
     def test_mode_alpha(self):
         qr = qrcode.QRCode()
-        qr.add_data('ABCDEFGHIJ1234567890', optimize=0)
+        qr.add_data("ABCDEFGHIJ1234567890", optimize=0)
         qr.make()
         self.assertEqual(qr.version, 1)
         self.assertEqual(qr.data_list[0].mode, MODE_ALPHA_NUM)
 
     def test_regression_mode_comma(self):
         qr = qrcode.QRCode()
-        qr.add_data(',', optimize=0)
+        qr.add_data(",", optimize=0)
         qr.make()
         self.assertEqual(qr.data_list[0].mode, MODE_8BIT_BYTE)
 
     def test_mode_8bit(self):
         qr = qrcode.QRCode()
-        qr.add_data('abcABC' + UNICODE_TEXT, optimize=0)
+        qr.add_data("abcABC" + UNICODE_TEXT, optimize=0)
         qr.make()
         self.assertEqual(qr.version, 1)
         self.assertEqual(qr.data_list[0].mode, MODE_8BIT_BYTE)
 
     def test_mode_8bit_newline(self):
         qr = qrcode.QRCode()
-        qr.add_data('ABCDEFGHIJ1234567890\n', optimize=0)
+        qr.add_data("ABCDEFGHIJ1234567890\n", optimize=0)
         qr.make()
         self.assertEqual(qr.data_list[0].mode, MODE_8BIT_BYTE)
 
@@ -116,13 +116,13 @@ class QRCodeTests(unittest.TestCase):
     def test_render_pil_with_transparent_background(self):
         qr = qrcode.QRCode()
         qr.add_data(UNICODE_TEXT)
-        img = qr.make_image(back_color='TransParent')
+        img = qr.make_image(back_color="TransParent")
         img.save(io.BytesIO())
 
     def test_render_pil_with_red_background(self):
         qr = qrcode.QRCode()
         qr.add_data(UNICODE_TEXT)
-        img = qr.make_image(back_color='red')
+        img = qr.make_image(back_color="red")
         img.save(io.BytesIO())
 
     def test_render_pil_with_rgb_color_tuples(self):
@@ -139,7 +139,7 @@ class QRCodeTests(unittest.TestCase):
 
     def test_make_image_with_wrong_pattern(self):
         with self.assertRaises(TypeError):
-            qrcode.QRCode(mask_pattern='string pattern')
+            qrcode.QRCode(mask_pattern="string pattern")
 
         with self.assertRaises(ValueError):
             qrcode.QRCode(mask_pattern=-1)
@@ -161,13 +161,12 @@ class QRCodeTests(unittest.TestCase):
 
     def test_qrcode_bad_factory(self):
         with self.assertRaises(TypeError):
-           qrcode.QRCode(image_factory='not_BaseImage')
+            qrcode.QRCode(image_factory="not_BaseImage")
 
         with self.assertRaises(AssertionError):
             qrcode.QRCode(image_factory=dict)
 
     def test_qrcode_factory(self):
-
         class MockFactory(BaseImage):
             drawrect = mock.Mock()
             new_image = mock.Mock()
@@ -217,9 +216,10 @@ class QRCodeTests(unittest.TestCase):
         qr.add_data(UNICODE_TEXT)
         img = qr.make_image(image_factory=qrcode.image.pure.PymagingImage)
         from pymaging import Image as pymaging_Image
+
         self.assertIsInstance(img.get_image(), pymaging_Image)
         with warnings.catch_warnings():
-            warnings.simplefilter('ignore', DeprecationWarning)
+            warnings.simplefilter("ignore", DeprecationWarning)
             img.save(io.BytesIO())
 
     @unittest.skipIf(not pymaging_png, "Requires pymaging")
@@ -228,7 +228,7 @@ class QRCodeTests(unittest.TestCase):
         qr.add_data(UNICODE_TEXT)
         img = qr.make_image(image_factory=qrcode.image.pure.PymagingImage)
         with self.assertRaises(ValueError):
-            img.save(io.BytesIO(), kind='FISH')
+            img.save(io.BytesIO(), kind="FISH")
 
     def test_render_styled_pil_image(self):
         qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
@@ -237,7 +237,7 @@ class QRCodeTests(unittest.TestCase):
         img.save(io.BytesIO())
 
     def test_render_styled_with_embeded_image(self):
-        embeded_img = pil_Image.new('RGB', (10, 10), color='red')
+        embeded_img = pil_Image.new("RGB", (10, 10), color="red")
         qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
         qr.add_data(UNICODE_TEXT)
         img = qr.make_image(image_factory=StyledPilImage, embeded_image=embeded_img)
@@ -245,7 +245,7 @@ class QRCodeTests(unittest.TestCase):
 
     def test_render_styled_with_embeded_image_path(self):
         tmpfile = os.path.join(self.tmpdir, "test.png")
-        embeded_img = pil_Image.new('RGB', (10, 10), color='red')
+        embeded_img = pil_Image.new("RGB", (10, 10), color="red")
         embeded_img.save(tmpfile)
         qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
         qr.add_data(UNICODE_TEXT)
@@ -256,37 +256,55 @@ class QRCodeTests(unittest.TestCase):
     def test_render_styled_with_square_module_drawer(self):
         qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
         qr.add_data(UNICODE_TEXT)
-        img = qr.make_image(image_factory=StyledPilImage, module_drawer=moduledrawers.SquareModuleDrawer())
+        img = qr.make_image(
+            image_factory=StyledPilImage,
+            module_drawer=moduledrawers.SquareModuleDrawer(),
+        )
         img.save(io.BytesIO())
 
     def test_render_styled_with_gapped_module_drawer(self):
         qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
         qr.add_data(UNICODE_TEXT)
-        img = qr.make_image(image_factory=StyledPilImage, module_drawer=moduledrawers.GappedSquareModuleDrawer())
+        img = qr.make_image(
+            image_factory=StyledPilImage,
+            module_drawer=moduledrawers.GappedSquareModuleDrawer(),
+        )
         img.save(io.BytesIO())
 
     def test_render_styled_with_circle_module_drawer(self):
         qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
         qr.add_data(UNICODE_TEXT)
-        img = qr.make_image(image_factory=StyledPilImage, module_drawer=moduledrawers.CircleModuleDrawer())
+        img = qr.make_image(
+            image_factory=StyledPilImage,
+            module_drawer=moduledrawers.CircleModuleDrawer(),
+        )
         img.save(io.BytesIO())
 
     def test_render_styled_with_rounded_module_drawer(self):
         qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
         qr.add_data(UNICODE_TEXT)
-        img = qr.make_image(image_factory=StyledPilImage, module_drawer=moduledrawers.RoundedModuleDrawer())
+        img = qr.make_image(
+            image_factory=StyledPilImage,
+            module_drawer=moduledrawers.RoundedModuleDrawer(),
+        )
         img.save(io.BytesIO())
 
     def test_render_styled_with_vertical_bars_module_drawer(self):
         qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
         qr.add_data(UNICODE_TEXT)
-        img = qr.make_image(image_factory=StyledPilImage, module_drawer=moduledrawers.VerticalBarsDrawer())
+        img = qr.make_image(
+            image_factory=StyledPilImage,
+            module_drawer=moduledrawers.VerticalBarsDrawer(),
+        )
         img.save(io.BytesIO())
 
     def test_render_styled_with_horizontal_bars_module_drawer(self):
         qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
         qr.add_data(UNICODE_TEXT)
-        img = qr.make_image(image_factory=StyledPilImage, module_drawer=moduledrawers.HorizontalBarsDrawer())
+        img = qr.make_image(
+            image_factory=StyledPilImage,
+            module_drawer=moduledrawers.HorizontalBarsDrawer(),
+        )
         img.save(io.BytesIO())
 
     def test_render_styled_with_default_solid_color_mask(self):
@@ -306,7 +324,9 @@ class QRCodeTests(unittest.TestCase):
     def test_render_styled_with_color_mask_with_transparency(self):
         qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
         qr.add_data(UNICODE_TEXT)
-        mask = colormasks.SolidFillColorMask(back_color=(255, 0, 255, 255), front_color=RED)
+        mask = colormasks.SolidFillColorMask(
+            back_color=(255, 0, 255, 255), front_color=RED
+        )
         img = qr.make_image(image_factory=StyledPilImage, color_mask=mask)
         img.save(io.BytesIO())
         assert img.mode == "RGBA"
@@ -314,33 +334,41 @@ class QRCodeTests(unittest.TestCase):
     def test_render_styled_with_radial_gradient_color_mask(self):
         qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
         qr.add_data(UNICODE_TEXT)
-        mask = colormasks.RadialGradiantColorMask(back_color=WHITE, center_color=BLACK, edge_color=RED)
+        mask = colormasks.RadialGradiantColorMask(
+            back_color=WHITE, center_color=BLACK, edge_color=RED
+        )
         img = qr.make_image(image_factory=StyledPilImage, color_mask=mask)
         img.save(io.BytesIO())
 
     def test_render_styled_with_square_gradient_color_mask(self):
         qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
         qr.add_data(UNICODE_TEXT)
-        mask = colormasks.SquareGradiantColorMask(back_color=WHITE, center_color=BLACK, edge_color=RED)
+        mask = colormasks.SquareGradiantColorMask(
+            back_color=WHITE, center_color=BLACK, edge_color=RED
+        )
         img = qr.make_image(image_factory=StyledPilImage, color_mask=mask)
         img.save(io.BytesIO())
 
     def test_render_styled_with_horizontal_gradient_color_mask(self):
         qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
         qr.add_data(UNICODE_TEXT)
-        mask = colormasks.HorizontalGradiantColorMask(back_color=WHITE, left_color=RED, right_color=BLACK)
+        mask = colormasks.HorizontalGradiantColorMask(
+            back_color=WHITE, left_color=RED, right_color=BLACK
+        )
         img = qr.make_image(image_factory=StyledPilImage, color_mask=mask)
         img.save(io.BytesIO())
 
     def test_render_styled_with_vertical_gradient_color_mask(self):
         qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
         qr.add_data(UNICODE_TEXT)
-        mask = colormasks.VerticalGradiantColorMask(back_color=WHITE, top_color=RED, bottom_color=BLACK)
+        mask = colormasks.VerticalGradiantColorMask(
+            back_color=WHITE, top_color=RED, bottom_color=BLACK
+        )
         img = qr.make_image(image_factory=StyledPilImage, color_mask=mask)
         img.save(io.BytesIO())
 
     def test_render_styled_with_image_color_mask(self):
-        img_mask = pil_Image.new('RGB', (10, 10), color='red')
+        img_mask = pil_Image.new("RGB", (10, 10), color="red")
         qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
         qr.add_data(UNICODE_TEXT)
         mask = colormasks.ImageColorMask(back_color=WHITE, color_mask_image=img_mask)
@@ -349,39 +377,42 @@ class QRCodeTests(unittest.TestCase):
 
     def test_optimize(self):
         qr = qrcode.QRCode()
-        text = 'A1abc12345def1HELLOa'
+        text = "A1abc12345def1HELLOa"
         qr.add_data(text, optimize=4)
         qr.make()
         self.assertEqual(
             [d.mode for d in qr.data_list],
             [
-                MODE_8BIT_BYTE, MODE_NUMBER, MODE_8BIT_BYTE, MODE_ALPHA_NUM,
-                MODE_8BIT_BYTE
-            ]
+                MODE_8BIT_BYTE,
+                MODE_NUMBER,
+                MODE_8BIT_BYTE,
+                MODE_ALPHA_NUM,
+                MODE_8BIT_BYTE,
+            ],
         )
         self.assertEqual(qr.version, 2)
 
     def test_optimize_short(self):
         qr = qrcode.QRCode()
-        text = 'A1abc1234567def1HELLOa'
+        text = "A1abc1234567def1HELLOa"
         qr.add_data(text, optimize=7)
         qr.make()
         self.assertEqual(len(qr.data_list), 3)
         self.assertEqual(
             [d.mode for d in qr.data_list],
-            [MODE_8BIT_BYTE, MODE_NUMBER, MODE_8BIT_BYTE]
+            [MODE_8BIT_BYTE, MODE_NUMBER, MODE_8BIT_BYTE],
         )
         self.assertEqual(qr.version, 2)
 
     def test_optimize_longer_than_data(self):
         qr = qrcode.QRCode()
-        text = 'ABCDEFGHIJK'
+        text = "ABCDEFGHIJK"
         qr.add_data(text, optimize=12)
         self.assertEqual(len(qr.data_list), 1)
         self.assertEqual(qr.data_list[0].mode, MODE_ALPHA_NUM)
 
     def test_optimize_size(self):
-        text = 'A1abc12345123451234512345def1HELLOHELLOHELLOHELLOa' * 5
+        text = "A1abc12345123451234512345def1HELLOHELLOHELLOHELLOa" * 5
 
         qr = qrcode.QRCode()
         qr.add_data(text)
@@ -394,14 +425,14 @@ class QRCodeTests(unittest.TestCase):
         self.assertEqual(qr.version, 11)
 
     def test_qrdata_repr(self):
-        data = b'hello'
+        data = b"hello"
         data_obj = qrcode.util.QRData(data)
         self.assertEqual(repr(data_obj), repr(data))
 
     def test_print_ascii_stdout(self):
         qr = qrcode.QRCode()
         stdout_encoding = sys.stdout.encoding
-        with mock.patch('sys.stdout') as fake_stdout:
+        with mock.patch("sys.stdout") as fake_stdout:
             # Python 2.6 needs sys.stdout.encoding to be a real string.
             sys.stdout.encoding = stdout_encoding
             fake_stdout.isatty.return_value = None
@@ -414,8 +445,8 @@ class QRCodeTests(unittest.TestCase):
         qr.print_ascii(out=f)
         printed = f.getvalue()
         f.close()
-        expected = '\u2588\u2580\u2580\u2580\u2580\u2580\u2588'
-        self.assertEqual(printed[:len(expected)], expected)
+        expected = "\u2588\u2580\u2580\u2580\u2580\u2580\u2588"
+        self.assertEqual(printed[: len(expected)], expected)
 
         f = io.StringIO()
         f.isatty = lambda: True
@@ -423,13 +454,13 @@ class QRCodeTests(unittest.TestCase):
         printed = f.getvalue()
         f.close()
         expected = (
-            '\x1b[48;5;232m\x1b[38;5;255m' +
-            '\xa0\u2584\u2584\u2584\u2584\u2584\xa0')
-        self.assertEqual(printed[:len(expected)], expected)
+            "\x1b[48;5;232m\x1b[38;5;255m" + "\xa0\u2584\u2584\u2584\u2584\u2584\xa0"
+        )
+        self.assertEqual(printed[: len(expected)], expected)
 
     def test_print_tty_stdout(self):
         qr = qrcode.QRCode()
-        with mock.patch('sys.stdout') as fake_stdout:
+        with mock.patch("sys.stdout") as fake_stdout:
             fake_stdout.isatty.return_value = None
             self.assertRaises(OSError, qr.print_tty)
             self.assertTrue(fake_stdout.isatty.called)
@@ -441,23 +472,23 @@ class QRCodeTests(unittest.TestCase):
         qr.print_tty(out=f)
         printed = f.getvalue()
         f.close()
-        BOLD_WHITE_BG = '\x1b[1;47m'
-        BLACK_BG = '\x1b[40m'
-        WHITE_BLOCK = BOLD_WHITE_BG + '  ' + BLACK_BG
-        EOL = '\x1b[0m\n'
+        BOLD_WHITE_BG = "\x1b[1;47m"
+        BLACK_BG = "\x1b[40m"
+        WHITE_BLOCK = BOLD_WHITE_BG + "  " + BLACK_BG
+        EOL = "\x1b[0m\n"
         expected = (
-            BOLD_WHITE_BG + '  '*23 + EOL +
-            WHITE_BLOCK + '  '*7 + WHITE_BLOCK)
-        self.assertEqual(printed[:len(expected)], expected)
+            BOLD_WHITE_BG + "  " * 23 + EOL + WHITE_BLOCK + "  " * 7 + WHITE_BLOCK
+        )
+        self.assertEqual(printed[: len(expected)], expected)
 
     def test_get_matrix(self):
         qr = qrcode.QRCode(border=0)
-        qr.add_data('1')
+        qr.add_data("1")
         self.assertEqual(qr.get_matrix(), qr.modules)
 
     def test_get_matrix_border(self):
         qr = qrcode.QRCode(border=1)
-        qr.add_data('1')
+        qr.add_data("1")
         matrix = [row[1:-1] for row in qr.get_matrix()[1:-1]]
         self.assertEqual(matrix, qr.modules)
 
@@ -471,6 +502,5 @@ class QRCodeTests(unittest.TestCase):
 
 
 class ShortcutTest(unittest.TestCase):
-
     def runTest(self):
-        qrcode.make('image')
+        qrcode.make("image")

@@ -14,6 +14,7 @@ class PilImage(qrcode.image.base.BaseImage):
     """
     PIL image builder, default format is PNG.
     """
+
     kind = "PNG"
 
     def new_image(self, **kwargs):

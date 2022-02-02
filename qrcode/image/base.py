@@ -1,9 +1,11 @@
 import abc
 
+
 class BaseImage:
     """
     Base QRCode image output class.
     """
+
     kind = None
     allowed_kinds = None
     needs_context = False
@@ -13,7 +15,7 @@ class BaseImage:
         self.border = border
         self.width = width
         self.box_size = box_size
-        self.pixel_size = (self.width + self.border*2) * self.box_size
+        self.pixel_size = (self.width + self.border * 2) * self.box_size
         self._img = self.new_image(**kwargs)
 
     @abc.abstractmethod
@@ -73,6 +75,5 @@ class BaseImage:
             if not allowed:
                 allowed = kind in self.allowed_kinds
         if not allowed:
-            raise ValueError(
-                f"Cannot set {type(self).__name__} type to {kind}")
+            raise ValueError(f"Cannot set {type(self).__name__} type to {kind}")
         return kind

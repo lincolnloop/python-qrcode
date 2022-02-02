@@ -1,3 +1,4 @@
+import qrcode.image.base
 from pymaging import Image
 from pymaging.colors import RGB
 from pymaging.formats import registry
@@ -5,13 +6,12 @@ from pymaging.shapes import Line
 from pymaging.webcolors import Black, White
 from pymaging_png.png import PNG
 
-import qrcode.image.base
-
 
 class PymagingImage(qrcode.image.base.BaseImage):
     """
     pymaging image builder, default format is PNG.
     """
+
     kind = "PNG"
     allowed_kinds = ("PNG",)
 
@@ -44,6 +44,8 @@ class PymagingImage(qrcode.image.base.BaseImage):
         pymaging (pymaging_png at least) uses lower case for the type.
         """
         if transform is None:
-            transform = lambda x: x.lower()
-        return super().check_kind(
-            kind, transform=transform, **kwargs)
+
+            def transform(x):
+                return x.lower()
+
+        return super().check_kind(kind, transform=transform, **kwargs)
