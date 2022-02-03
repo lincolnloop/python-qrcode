@@ -1,11 +1,22 @@
+import sys
+from bisect import bisect_left
+from typing import (
+    Dict,
+    Generic,
+    List,
+    Literal,
+    Optional,
+    Type,
+    TypeVar,
+    overload,
+)
+
 from qrcode import constants, exceptions, util
 from qrcode.image.base import BaseImage
 
-import sys
-from bisect import bisect_left
-
+ModulesType = List[List[Optional[bool]]]
 # Cache modules generated just based on the QR Code version
-precomputed_qr_blanks = {}
+precomputed_qr_blanks: Dict[int, ModulesType] = {}
 
 
 def make(data=None, **kwargs):
@@ -41,14 +52,20 @@ def copy_2d_array(x):
     return [row[:] for row in x]
 
 
-class QRCode:
+GenericImage = TypeVar("GenericImage", bound=BaseImage)
+GenericImageLocal = TypeVar("GenericImageLocal", bound=BaseImage)
+
+
+class QRCode(Generic[GenericImage]):
+    modules: ModulesType
+
     def __init__(
         self,
         version=None,
         error_correction=constants.ERROR_CORRECT_M,
         box_size=10,
         border=4,
-        image_factory=None,
+        image_factory: Type[GenericImage] = None,
         mask_pattern=None,
     ):
         _check_box_size(box_size)
@@ -78,7 +95,7 @@ class QRCode:
         """
         Reset the internal data.
         """
-        self.modules = None
+        self.modules = [[]]
         self.modules_count = 0
         self.data_cache = None
         self.data_list = []
@@ -285,6 +302,16 @@ class QRCode:
             out.write("\n")
         out.flush()
 
+    @overload
+    def make_image(self, image_factory: Literal[None] = None, **kwargs) -> GenericImage:
+        ...
+
+    @overload
+    def make_image(
+        self, image_factory: Type[GenericImageLocal] = None, **kwargs
+    ) -> GenericImageLocal:
+        ...
+
     def make_image(self, image_factory=None, **kwargs):
         """
         Make an image from the QR Code data.
@@ -321,7 +348,7 @@ class QRCode:
         return im
 
     # return true if and only if (row, col) is in the module
-    def is_constrained(self, row, col):
+    def is_constrained(self, row: int, col: int) -> bool:
         return (
             row >= 0
             and row < len(self.modules)

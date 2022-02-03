@@ -1,4 +1,5 @@
 import abc
+from typing import TYPE_CHECKING, Any, Optional, Tuple, Type, Union
 
 
 class BaseImage:
@@ -6,8 +7,8 @@ class BaseImage:
     Base QRCode image output class.
     """
 
-    kind = None
-    allowed_kinds = None
+    kind: Optional[str] = None
+    allowed_kinds: Optional[Tuple[str]] = None
     needs_context = False
     needs_processing = False
 
@@ -52,7 +53,7 @@ class BaseImage:
         return [(x, y), (x + self.box_size - 1, y + self.box_size - 1)]
 
     @abc.abstractmethod
-    def new_image(self, **kwargs):
+    def new_image(self, **kwargs) -> Any:
         """
         Build the image class. Subclasses should return the class created.
         """

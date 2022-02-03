@@ -1,4 +1,5 @@
 from decimal import Decimal
+from typing import List, Literal, Optional, Type, Union, overload
 
 try:
     import lxml.etree as ET
@@ -24,8 +25,13 @@ class SvgFragmentImage(qrcode.image.base.BaseImage):
         # Save the unit size, for example the default box_size of 10 is '1mm'.
         self.unit_size = self.units(self.box_size)
 
-    def drawrect(self, row, col):
-        self._img.append(self._rect(row, col))
+    @overload
+    def units(self, pixels: Union[int, Decimal], text: Literal[False]) -> Decimal:
+        ...
+
+    @overload
+    def units(self, pixels: Union[int, Decimal], text: Literal[True] = True) -> str:
+        ...
 
     def units(self, pixels, text=True):
         """
@@ -77,7 +83,7 @@ class SvgImage(SvgFragmentImage):
     Creates a QR-code image as a standalone SVG document.
     """
 
-    background = None
+    background: Optional[str] = None
 
     def _svg(self, tag="svg", **kwargs):
         svg = super()._svg(tag=tag, **kwargs)
