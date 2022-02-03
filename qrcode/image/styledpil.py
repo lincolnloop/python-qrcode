@@ -8,11 +8,11 @@ except ImportError:  # pragma: no cover
     import Image
 
 import qrcode.image.base
-from qrcode.image.styles.colormasks import SolidFillColorMask
+from qrcode.image.styles.colormasks import QRColorMask, SolidFillColorMask
 from qrcode.image.styles.moduledrawers import SquareModuleDrawer
 
 
-class StyledPilImage(qrcode.image.base.BaseImage):
+class StyledPilImage(qrcode.image.base.BaseImageWithDrawer):
     """
     Styled PIL image builder, default format is PNG.
 
@@ -41,17 +41,12 @@ class StyledPilImage(qrcode.image.base.BaseImage):
 
     kind = "PNG"
 
-    needs_context = True
     needs_processing = True
+    color_mask: QRColorMask
+    default_drawer_class = SquareModuleDrawer
 
-    def new_image(self, **kwargs):
+    def __init__(self, *args, **kwargs):
         self.color_mask = kwargs.get("color_mask", SolidFillColorMask())
-        self.module_drawer = kwargs.get("module_drawer", SquareModuleDrawer())
-        # The eye drawer can be overridden by another module drawer as well,
-        # but you have to be more careful with these in order to make the QR
-        # code still parseable
-        self.eye_drawer = kwargs.get("eye_drawer", SquareModuleDrawer())
-
         embeded_image_path = kwargs.get("embeded_image_path", None)
         self.embeded_image = kwargs.get("embeded_image", None)
         self.embeded_image_resample = kwargs.get(
@@ -59,21 +54,6 @@ class StyledPilImage(qrcode.image.base.BaseImage):
         )
         if not self.embeded_image and embeded_image_path:
             self.embeded_image = Image.open(embeded_image_path)
-        mode = (
-            "RGBA"
-            if (
-                self.color_mask.has_transparency
-                or (self.embeded_image and "A" in self.embeded_image.getbands())
-            )
-            else "RGB"
-        )
-        self.mode = mode
-
-        self.back_color = (
-            self.color_mask.back_color
-        )  # This is the background color. Should be white or whiteish
-
-        img = Image.new(mode, (self.pixel_size, self.pixel_size), self.back_color)
 
         # the paint_color is the color the module drawer will use to draw upon
         # a canvas During the color mask process, pixels that are paint_color
@@ -82,17 +62,25 @@ class StyledPilImage(qrcode.image.base.BaseImage):
         if self.color_mask.has_transparency:
             self.paint_color = tuple([*self.color_mask.back_color[:3], 255])
 
-        self.color_mask.initialize(self, img)
-        self.module_drawer.initialize(self, img)
-        self.eye_drawer.initialize(self, img)
-        return img
+        super().__init__(*args, **kwargs)
 
-    def drawrect_context(self, row, col, is_active, context):
-        box = self.pixel_box(row, col)
-        if self.is_eye(row, col):
-            self.eye_drawer.drawrect_context(box, is_active, context)
-        else:
-            self.module_drawer.drawrect_context(box, is_active, context)
+    def new_image(self, **kwargs):
+        mode = (
+            "RGBA"
+            if (
+                self.color_mask.has_transparency
+                or (self.embeded_image and "A" in self.embeded_image.getbands())
+            )
+            else "RGB"
+        )
+        # This is the background color. Should be white or whiteish
+        back_color = self.color_mask.back_color
+
+        return Image.new(mode, (self.pixel_size, self.pixel_size), back_color)
+
+    def init_new_image(self):
+        self.color_mask.initialize(self, self._img)
+        super().init_new_image()
 
     def process(self):
         self.color_mask.apply_mask(self._img)
@@ -115,15 +103,6 @@ class StyledPilImage(qrcode.image.base.BaseImage):
             self._img.alpha_composite(region, logo_position)
         else:
             self._img.paste(region, logo_position)
-
-    # The eyes are treated differently, and this will find whether the
-    # referenced module is in an eye
-    def is_eye(self, row, col):
-        return (
-            (row < 7 and col < 7)
-            or (row < 7 and self.width - col < 8)
-            or (self.width - row < 8 and col < 7)
-        )
 
     def save(self, stream, format=None, **kwargs):
         if format is None:

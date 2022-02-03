@@ -5,6 +5,7 @@ from typing import (
     Generic,
     List,
     Literal,
+    NamedTuple,
     Optional,
     Type,
     TypeVar,
@@ -50,6 +51,21 @@ def _check_mask_pattern(mask_pattern):
 
 def copy_2d_array(x):
     return [row[:] for row in x]
+
+
+class ActiveWithNeighbors(NamedTuple):
+    NW: bool
+    N: bool
+    NE: bool
+    W: bool
+    me: bool
+    E: bool
+    SW: bool
+    S: bool
+    SE: bool
+
+    def __bool__(self) -> bool:
+        return self.me
 
 
 GenericImage = TypeVar("GenericImage", bound=BaseImage)
@@ -337,9 +353,7 @@ class QRCode(Generic[GenericImage]):
         for r in range(self.modules_count):
             for c in range(self.modules_count):
                 if im.needs_context:
-                    im.drawrect_context(
-                        r, c, self.modules[r][c], self.get_module_context(r, c)
-                    )
+                    im.drawrect_context(r, c, qr=self)
                 elif self.modules[r][c]:
                     im.drawrect(r, c)
         if im.needs_processing:
@@ -355,15 +369,6 @@ class QRCode(Generic[GenericImage]):
             and col >= 0
             and col < len(self.modules[row])
         )
-
-    def get_module_context(self, row, col):
-        context = []
-
-        for r in range(row - 1, row + 2):
-            for c in range(col - 1, col + 2):
-                if r != row or c != col:
-                    context.append(self.is_constrained(r, c) and self.modules[r][c])
-        return context
 
     def setup_timing_pattern(self):
         for r in range(8, self.modules_count - 8):
@@ -512,3 +517,10 @@ class QRCode(Generic[GenericImage]):
         code += [[False] * width] * self.border
 
         return code
+
+    def active_with_neighbors(self, row: int, col: int) -> ActiveWithNeighbors:
+        context: List[bool] = []
+        for r in range(row - 1, row + 2):
+            for c in range(col - 1, col + 2):
+                context.append(self.is_constrained(r, c) and bool(self.modules[r][c]))
+        return ActiveWithNeighbors(*context)

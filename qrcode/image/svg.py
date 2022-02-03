@@ -1,14 +1,18 @@
+import decimal
 from decimal import Decimal
 from typing import List, Literal, Optional, Type, Union, overload
+
+import qrcode.image.base
+from qrcode.image.styles.moduledrawers.base import QRModuleDrawer
+from qrcode.image.styles.moduledrawers.svg import SvgPathSquareDrawer, SvgSquareDrawer
 
 try:
     import lxml.etree as ET
 except ImportError:
-    import xml.etree.ElementTree as ET
-import qrcode.image.base
+    import xml.etree.ElementTree as ET  # type: ignore
 
 
-class SvgFragmentImage(qrcode.image.base.BaseImage):
+class SvgFragmentImage(qrcode.image.base.BaseImageWithDrawer):
     """
     SVG image builder
 
@@ -18,6 +22,7 @@ class SvgFragmentImage(qrcode.image.base.BaseImage):
     _SVG_namespace = "http://www.w3.org/2000/svg"
     kind = "SVG"
     allowed_kinds = ("SVG",)
+    default_drawer_class: Type[QRModuleDrawer] = SvgSquareDrawer
 
     def __init__(self, *args, **kwargs):
         ET.register_namespace("svg", self._SVG_namespace)
@@ -40,7 +45,14 @@ class SvgFragmentImage(qrcode.image.base.BaseImage):
         units = Decimal(pixels) / 10
         if not text:
             return units
-        return "%smm" % units
+        units = units.quantize(Decimal("0.001"))
+        context = decimal.Context(traps=[decimal.Inexact])
+        try:
+            for d in (Decimal("0.01"), Decimal("0.1"), Decimal("0")):
+                units = units.quantize(d, context=context)
+        except decimal.Inexact:
+            pass
+        return f"{units}mm"
 
     def save(self, stream, kind=None):
         self.check_kind(kind=kind)
@@ -58,18 +70,6 @@ class SvgFragmentImage(qrcode.image.base.BaseImage):
         dimension = self.units(self.pixel_size)
         return ET.Element(
             tag, width=dimension, height=dimension, version=version, **kwargs
-        )
-
-    def _rect(self, row, col, tag=None):
-        if tag is None:
-            tag = ET.QName(self._SVG_namespace, "rect")
-        x, y = self.pixel_box(row, col)[0]
-        return ET.Element(
-            tag,
-            x=self.units(x),
-            y=self.units(y),
-            width=self.unit_size,
-            height=self.unit_size,
         )
 
     def _write(self, stream):
@@ -101,9 +101,6 @@ class SvgImage(SvgFragmentImage):
             )
         return svg
 
-    def _rect(self, row, col):
-        return super()._rect(row, col, tag="rect")
-
     def _write(self, stream):
         ET.ElementTree(self._img).write(stream, encoding="UTF-8", xml_declaration=True)
 
@@ -121,8 +118,12 @@ class SvgPathImage(SvgImage):
         "stroke": "none",
     }
 
+    needs_processing = True
+    path: ET.Element = None
+    default_drawer_class: Type[QRModuleDrawer] = SvgPathSquareDrawer
+
     def __init__(self, *args, **kwargs):
-        self._points = set()
+        self._subpaths: List[str] = []
         super().__init__(*args, **kwargs)
 
     def _svg(self, viewBox=None, **kwargs):
@@ -131,45 +132,17 @@ class SvgPathImage(SvgImage):
             viewBox = "0 0 {d} {d}".format(d=dimension)
         return super()._svg(viewBox=viewBox, **kwargs)
 
-    def drawrect(self, row, col):
-        # (x, y)
-        self._points.add((col, row))
-
-    def _generate_subpaths(self):
-        """Generates individual QR points as subpaths"""
-
-        rect_size = self.units(self.box_size, text=False)
-
-        for point in self._points:
-            x_base = self.units((point[0] + self.border) * self.box_size, text=False)
-            y_base = self.units((point[1] + self.border) * self.box_size, text=False)
-
-            yield (
-                "M %(x0)s %(y0)s L %(x0)s %(y1)s L %(x1)s %(y1)s L %(x1)s "
-                "%(y0)s z"
-                % dict(
-                    x0=x_base,
-                    y0=y_base,
-                    x1=x_base + rect_size,
-                    y1=y_base + rect_size,
-                )
-            )
-
-    def make_path(self):
-        subpaths = self._generate_subpaths()
-
-        return ET.Element(
-            ET.QName("path"), d=" ".join(subpaths), id="qr-path", **self.QR_PATH_STYLE
+    def process(self):
+        # Store the path just in case someone wants to use it again or in some
+        # unique way.
+        self.path = ET.Element(
+            ET.QName("path"),
+            d="".join(self._subpaths),
+            id="qr-path",
+            **self.QR_PATH_STYLE,
         )
-
-    def to_string(self, **kwargs):
-        img = self._img.__copy__()
-        img.append(self.make_path())
-        return ET.tostring(img, **kwargs)
-
-    def _write(self, stream):
-        self._img.append(self.make_path())
-        super()._write(stream)
+        self._subpaths = []
+        self._img.append(self.path)
 
 
 class SvgFillImage(SvgImage):
