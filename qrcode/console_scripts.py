@@ -5,10 +5,13 @@ qr - Convert stdin (or the first argument) to a QR Code.
 When stdout is a tty the QR Code is printed to the terminal and when stdout is
 a pipe to a file an image is written. The default image format is PNG.
 """
-import sys
 import optparse
 import os
+import sys
+from typing import Iterable, Optional, Type
+
 import qrcode
+from qrcode.image.base import BaseImage, DrawerAliases
 
 # The next block is added to get the terminal to display properly on MS platforms
 if sys.platform.startswith(("win", "cygwin")):  # pragma: no cover
@@ -43,9 +46,11 @@ def main(args=None):
         "--factory",
         help="Full python path to the image factory class to "
         "create the image with. You can use the following shortcuts to the "
-        "built-in image factory classes: {}.".format(
-            ", ".join(sorted(default_factories.keys()))
-        ),
+        f"built-in image factory classes: {commas(default_factories)}.",
+    )
+    parser.add_option(
+        "--factory-drawer",
+        help=f"Use an alternate drawer. {get_drawer_help()}.",
     )
     parser.add_option(
         "--optimize",
@@ -73,17 +78,20 @@ def main(args=None):
 
     opts, args = parser.parse_args(args)
 
-    qr = qrcode.QRCode(error_correction=error_correction[opts.error_correction])
-
     if opts.factory:
         module = default_factories.get(opts.factory, opts.factory)
-        if "." not in module:
-            parser.error("The image factory is not a full python path")
-        module, name = module.rsplit(".", 1)
-        imp = __import__(module, {}, [], [name])
-        image_factory = getattr(imp, name)
+        try:
+            image_factory = get_factory(module)
+        except ValueError as e:
+            parser.error(str(e))
+            image_factory = None
     else:
         image_factory = None
+
+    qr = qrcode.QRCode(
+        error_correction=error_correction[opts.error_correction],
+        image_factory=image_factory,
+    )
 
     if args:
         data = args[0]
@@ -99,7 +107,7 @@ def main(args=None):
         qr.add_data(data, optimize=opts.optimize)
 
     if opts.output:
-        img = qr.make_image(image_factory=image_factory)
+        img = qr.make_image()
         with open(opts.output, "wb") as out:
             img.save(out)
     else:
@@ -107,7 +115,24 @@ def main(args=None):
             qr.print_ascii(tty=not opts.ascii)
             return
 
-        img = qr.make_image(image_factory=image_factory)
+        kwargs = {}
+        aliases: Optional[DrawerAliases] = getattr(
+            qr.image_factory, "drawer_aliases", None
+        )
+        if aliases and opts.factory_drawer:
+            if not aliases:
+                parser.error(f"The selected factory has no drawer aliases.")
+            if opts.factory_drawer not in aliases:
+                parser.error(
+                    f"{opts.factory_drawer} factory drawer not found. Expected {commas(aliases)}"
+                )
+            drawer_cls, drawer_kwargs = aliases[opts.factory_drawer]
+            kwargs["module_drawer"] = drawer_cls(**drawer_kwargs)
+        elif opts.factory == "svg-circles":
+            from qrcode.image.styles.moduledrawers.svg import SvgCircleDrawer
+
+            kwargs["module_drawer"] = SvgCircleDrawer()
+        img = qr.make_image(**kwargs)
 
         sys.stdout.flush()
         # Use sys.stdout.buffer if available (Python 3), avoiding
@@ -121,6 +146,42 @@ def main(args=None):
             stdout_buffer = sys.stdout
 
         img.save(stdout_buffer)
+
+
+def get_factory(module: str) -> Type[BaseImage]:
+    if "." not in module:
+        raise ValueError("The image factory is not a full python path")
+    module, name = module.rsplit(".", 1)
+    imp = __import__(module, {}, {}, [name])
+    return getattr(imp, name)
+
+
+def get_drawer_help() -> str:
+    help = {}
+    for alias, module in default_factories.items():
+        try:
+            image = get_factory(module)
+        except ImportError:
+            continue
+        aliases: Optional[DrawerAliases] = getattr(image, "drawer_aliases", None)
+        if not aliases:
+            continue
+        factories = help.setdefault(commas(aliases), set())
+        factories.add(alias)
+
+    return ". ".join(
+        f"For {commas(factories, 'and')}, use: {aliases}"
+        for aliases, factories in help.items()
+    )
+
+
+def commas(items: Iterable[str], joiner="or") -> str:
+    items = tuple(items)
+    if not items:
+        return ""
+    if len(items) == 1:
+        return items[0]
+    return f"{', '.join(items[:-1])} {joiner} {items[-1]}"
 
 
 if __name__ == "__main__":

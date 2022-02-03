@@ -3,8 +3,8 @@ from decimal import Decimal
 from typing import List, Literal, Optional, Type, Union, overload
 
 import qrcode.image.base
+from qrcode.image.styles.moduledrawers import svg as svg_drawers
 from qrcode.image.styles.moduledrawers.base import QRModuleDrawer
-from qrcode.image.styles.moduledrawers.svg import SvgPathSquareDrawer, SvgSquareDrawer
 
 try:
     import lxml.etree as ET
@@ -22,7 +22,7 @@ class SvgFragmentImage(qrcode.image.base.BaseImageWithDrawer):
     _SVG_namespace = "http://www.w3.org/2000/svg"
     kind = "SVG"
     allowed_kinds = ("SVG",)
-    default_drawer_class: Type[QRModuleDrawer] = SvgSquareDrawer
+    default_drawer_class: Type[QRModuleDrawer] = svg_drawers.SvgSquareDrawer
 
     def __init__(self, *args, **kwargs):
         ET.register_namespace("svg", self._SVG_namespace)
@@ -84,6 +84,11 @@ class SvgImage(SvgFragmentImage):
     """
 
     background: Optional[str] = None
+    drawer_aliases = {
+        "circle": (svg_drawers.SvgCircleDrawer, {}),
+        "gapped-circle": (svg_drawers.SvgCircleDrawer, {"size_ratio": Decimal(0.8)}),
+        "gapped-square": (svg_drawers.SvgSquareDrawer, {"size_ratio": Decimal(0.8)}),
+    }
 
     def _svg(self, tag="svg", **kwargs):
         svg = super()._svg(tag=tag, **kwargs)
@@ -120,7 +125,18 @@ class SvgPathImage(SvgImage):
 
     needs_processing = True
     path: ET.Element = None
-    default_drawer_class: Type[QRModuleDrawer] = SvgPathSquareDrawer
+    default_drawer_class: Type[QRModuleDrawer] = svg_drawers.SvgPathSquareDrawer
+    drawer_aliases = {
+        "circle": (svg_drawers.SvgPathCircleDrawer, {}),
+        "gapped-circle": (
+            svg_drawers.SvgPathCircleDrawer,
+            {"size_ratio": Decimal(0.8)},
+        ),
+        "gapped-square": (
+            svg_drawers.SvgPathSquareDrawer,
+            {"size_ratio": Decimal(0.8)},
+        ),
+    }
 
     def __init__(self, *args, **kwargs):
         self._subpaths: List[str] = []
