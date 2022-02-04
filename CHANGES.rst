@@ -5,7 +5,13 @@ Change log
 7.4 (unreleased)
 ================
 
-- Nothing changed yet.
+- Restructure the factory drawers, allowing different shapes in SVG image
+  factories as well.
+
+- Add a ``--factory-drawer`` option to the ``qr`` console script.
+
+- Optimize the output for the ``SVGPathImage`` factory (more than 30% reduction
+  in file sizes).
 
 
 7.3.1 (1 October 2021)
