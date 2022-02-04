@@ -8,7 +8,7 @@ a pipe to a file an image is written. The default image format is PNG.
 import optparse
 import os
 import sys
-from typing import Iterable, Optional, Type
+from typing import Dict, Iterable, Optional, Set, Type
 
 import qrcode
 from qrcode.image.base import BaseImage, DrawerAliases
@@ -157,7 +157,7 @@ def get_factory(module: str) -> Type[BaseImage]:
 
 
 def get_drawer_help() -> str:
-    help = {}
+    help: Dict[str, Set] = {}
     for alias, module in default_factories.items():
         try:
             image = get_factory(module)

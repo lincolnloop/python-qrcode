@@ -84,7 +84,7 @@ class SvgImage(SvgFragmentImage):
     """
 
     background: Optional[str] = None
-    drawer_aliases = {
+    drawer_aliases: qrcode.image.base.DrawerAliases = {
         "circle": (svg_drawers.SvgCircleDrawer, {}),
         "gapped-circle": (svg_drawers.SvgCircleDrawer, {"size_ratio": Decimal(0.8)}),
         "gapped-square": (svg_drawers.SvgSquareDrawer, {"size_ratio": Decimal(0.8)}),
