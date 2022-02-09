@@ -52,3 +52,9 @@ class QRCodeSvgTests(unittest.TestCase):
         qr.add_data(UNICODE_TEXT)
         img = qr.make_image(image_factory=SvgImageWhite)
         img.save(io.BytesIO())
+
+    def test_svg_circle_drawer(self):
+        qr = qrcode.QRCode()
+        qr.add_data(UNICODE_TEXT)
+        img = qr.make_image(image_factory=svg.SvgPathImage, module_drawer="circle")
+        img.save(io.BytesIO())

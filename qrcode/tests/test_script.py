@@ -1,10 +1,11 @@
+import io
 import os
 import sys
 import unittest
 from tempfile import mkdtemp
 from unittest import mock
 
-from qrcode.console_scripts import main
+from qrcode.console_scripts import main, commas
 
 
 def bad_read():
@@ -31,13 +32,11 @@ class ScriptTest(unittest.TestCase):
 
     @mock.patch("os.isatty", lambda *args: True)
     @mock.patch("qrcode.main.QRCode.print_ascii")
-    def test_stdin(self, mock_print_ascii):
-        mock_stdin = mock.Mock(sys.stdin)
-        stdin_buffer = getattr(mock_stdin, "buffer", mock_stdin)
-        stdin_buffer.read.return_value = "testtext"
-        with mock.patch("sys.stdin", mock_stdin):
-            main([])
-        self.assertTrue(stdin_buffer.read.called)
+    @mock.patch("sys.stdin")
+    def test_stdin(self, mock_stdin, mock_print_ascii):
+        mock_stdin.buffer.read.return_value = "testtext"
+        main([])
+        self.assertTrue(mock_stdin.buffer.read.called)
         mock_print_ascii.assert_called_with(tty=True)
 
     @mock.patch("os.isatty", lambda *args: True)
@@ -66,7 +65,34 @@ class ScriptTest(unittest.TestCase):
     def test_bad_factory(self, mock_stderr):
         self.assertRaises(SystemExit, main, "testtext --factory fish".split())
 
+    @mock.patch.object(sys, "argv", "qr testtext output".split())
+    def test_sys_argv(self):
+        main()
+
     def test_output(self):
         tmpfile = os.path.join(self.tmpdir, "test.png")
         main(["testtext", "--output", tmpfile])
         os.remove(tmpfile)
+
+    @mock.patch("sys.stderr", new_callable=io.StringIO)
+    def test_factory_drawer_none(self, mock_stderr):
+        with self.assertRaises(SystemExit):
+            main("testtext --factory pil --factory-drawer nope".split())
+        self.assertIn("The selected factory has no drawer aliases", mock_stderr.getvalue())
+
+    @mock.patch("sys.stderr", new_callable=io.StringIO)
+    def test_factory_drawer_bad(self, mock_stderr):
+        with self.assertRaises(SystemExit):
+            main("testtext --factory svg --factory-drawer sobad".split())
+        self.assertIn("sobad factory drawer not found", mock_stderr.getvalue())
+
+    @mock.patch("sys.stderr", new_callable=io.StringIO)
+    def test_factory_drawer(self, mock_stderr):
+        main("testtext --factory svg --factory-drawer circle".split())
+
+    def test_commas(self):
+        self.assertEqual(commas([]), "")
+        self.assertEqual(commas(['A']), "A")
+        self.assertEqual(commas('AB'), "A or B")
+        self.assertEqual(commas("ABC"), "A, B or C")
+        self.assertEqual(commas("ABC", joiner="and"), "A, B and C")

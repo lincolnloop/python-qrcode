@@ -38,13 +38,13 @@ class BaseImage:
         """
         Draw a single rectangle of the QR code given the surrounding context
         """
-        raise NotImplementedError("BaseImage.drawrect_context")
+        raise NotImplementedError("BaseImage.drawrect_context")  # pragma: no cover
 
     def process(self):
         """
         Processes QR code after completion
         """
-        raise NotImplementedError("BaseImage.drawimage")
+        raise NotImplementedError("BaseImage.drawimage")  # pragma: no cover
 
     @abc.abstractmethod
     def save(self, stream, kind=None):
@@ -106,13 +106,13 @@ class BaseImage:
 
 
 class BaseImageWithDrawer(BaseImage):
-    default_drawer_class: "Type[QRModuleDrawer]"
+    default_drawer_class: Type[QRModuleDrawer]
     drawer_aliases: DrawerAliases = {}
 
-    def get_default_module_drawer(self) -> "QRModuleDrawer":
+    def get_default_module_drawer(self) -> QRModuleDrawer:
         return self.default_drawer_class()
 
-    def get_default_eye_drawer(self) -> "QRModuleDrawer":
+    def get_default_eye_drawer(self) -> QRModuleDrawer:
         return self.default_drawer_class()
 
     needs_context = True
@@ -123,16 +123,22 @@ class BaseImageWithDrawer(BaseImage):
     def __init__(
         self,
         *args,
-        module_drawer: "QRModuleDrawer" = None,
-        eye_drawer: "QRModuleDrawer" = None,
+        module_drawer: Union[QRModuleDrawer, str] = None,
+        eye_drawer: Union[QRModuleDrawer, str] = None,
         **kwargs,
     ):
-        self.module_drawer = module_drawer or self.get_default_module_drawer()
+        self.module_drawer = self.get_drawer(module_drawer) or self.get_default_module_drawer()
         # The eye drawer can be overridden by another module drawer as well,
         # but you have to be more careful with these in order to make the QR
         # code still parseable
-        self.eye_drawer = eye_drawer or self.get_default_eye_drawer()
+        self.eye_drawer = self.get_drawer(eye_drawer) or self.get_default_eye_drawer()
         super().__init__(*args, **kwargs)
+
+    def get_drawer(self, drawer: Union[QRModuleDrawer, str, None]) -> Optional[QRModuleDrawer]:
+        if not isinstance(drawer, str):
+            return drawer
+        drawer_cls, kwargs = self.drawer_aliases[drawer]
+        return drawer_cls(**kwargs)
 
     def init_new_image(self):
         self.module_drawer.initialize(img=self)

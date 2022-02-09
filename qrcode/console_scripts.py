@@ -5,10 +5,11 @@ qr - Convert stdin (or the first argument) to a QR Code.
 When stdout is a tty the QR Code is printed to the terminal and when stdout is
 a pipe to a file an image is written. The default image format is PNG.
 """
+from ctypes import cast
 import optparse
 import os
 import sys
-from typing import Dict, Iterable, Optional, Set, Type
+from typing import Dict, Iterable, NoReturn, Optional, Set, Type
 
 import qrcode
 from qrcode.image.base import BaseImage, DrawerAliases
@@ -41,7 +42,13 @@ def main(args=None):
     from pkg_resources import get_distribution
 
     version = get_distribution("qrcode").version
-    parser = optparse.OptionParser(usage=__doc__.strip(), version=version)
+    parser = optparse.OptionParser(usage=(__doc__ or "").strip(), version=version)
+
+    # Wrap parser.error in a typed NoReturn method for better typing.
+    def raise_error(msg: str) -> NoReturn:
+        parser.error(msg)
+        raise  # pragma: no cover
+
     parser.add_option(
         "--factory",
         help="Full python path to the image factory class to "
@@ -83,8 +90,7 @@ def main(args=None):
         try:
             image_factory = get_factory(module)
         except ValueError as e:
-            parser.error(str(e))
-            image_factory = None
+            raise_error(str(e))
     else:
         image_factory = None
 
@@ -97,10 +103,7 @@ def main(args=None):
         data = args[0]
         data = data.encode(errors="surrogateescape")
     else:
-        # Use sys.stdin.buffer if available (Python 3) avoiding
-        # UnicodeDecodeErrors.
-        stdin_buffer = getattr(sys.stdin, "buffer", sys.stdin)
-        data = stdin_buffer.read()
+        data = sys.stdin.buffer.read()
     if opts.optimize is None:
         qr.add_data(data)
     else:
@@ -119,33 +122,19 @@ def main(args=None):
         aliases: Optional[DrawerAliases] = getattr(
             qr.image_factory, "drawer_aliases", None
         )
-        if aliases and opts.factory_drawer:
+        if opts.factory_drawer:
             if not aliases:
-                parser.error(f"The selected factory has no drawer aliases.")
+                raise_error(f"The selected factory has no drawer aliases.")
             if opts.factory_drawer not in aliases:
-                parser.error(
+                raise_error(
                     f"{opts.factory_drawer} factory drawer not found. Expected {commas(aliases)}"
                 )
             drawer_cls, drawer_kwargs = aliases[opts.factory_drawer]
             kwargs["module_drawer"] = drawer_cls(**drawer_kwargs)
-        elif opts.factory == "svg-circles":
-            from qrcode.image.styles.moduledrawers.svg import SvgCircleDrawer
-
-            kwargs["module_drawer"] = SvgCircleDrawer()
         img = qr.make_image(**kwargs)
 
         sys.stdout.flush()
-        # Use sys.stdout.buffer if available (Python 3), avoiding
-        # UnicodeDecodeErrors.
-        stdout_buffer = getattr(sys.stdout, "buffer", None)
-        if not stdout_buffer:
-            if sys.platform == "win32":  # pragma: no cover
-                import msvcrt
-
-                msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
-            stdout_buffer = sys.stdout
-
-        img.save(stdout_buffer)
+        img.save(sys.stdout.buffer)
 
 
 def get_factory(module: str) -> Type[BaseImage]:
@@ -161,7 +150,7 @@ def get_drawer_help() -> str:
     for alias, module in default_factories.items():
         try:
             image = get_factory(module)
-        except ImportError:
+        except ImportError:  # pragma: no cover
             continue
         aliases: Optional[DrawerAliases] = getattr(image, "drawer_aliases", None)
         if not aliases:
@@ -184,5 +173,5 @@ def commas(items: Iterable[str], joiner="or") -> str:
     return f"{', '.join(items[:-1])} {joiner} {items[-1]}"
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     main()

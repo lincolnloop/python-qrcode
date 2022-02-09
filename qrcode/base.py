@@ -245,11 +245,10 @@ class Polynomial:
         if not num:  # pragma: no cover
             raise Exception(f"{len(num)}/{shift}")
 
+        offset = 0
         for offset in range(len(num)):
             if num[offset] != 0:
                 break
-        else:
-            offset += 1
 
         self.num = num[offset:] + [0] * shift
 
