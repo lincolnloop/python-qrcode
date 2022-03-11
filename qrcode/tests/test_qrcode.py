@@ -6,20 +6,25 @@ import warnings
 from tempfile import mkdtemp
 from unittest import mock
 
+import qrcode
+import qrcode.util
+from qrcode.exceptions import DataOverflowError
+from qrcode.image.base import BaseImage
+from qrcode.image.styles import moduledrawers
+from qrcode.util import MODE_8BIT_BYTE, MODE_ALPHA_NUM, MODE_NUMBER, QRData
+
 try:
     import pymaging_png  # type: ignore
     from qrcode.image.pure import PymagingImage
 except ImportError:  # pragma: no cover
     pymaging_png = None
 
-import qrcode
-import qrcode.util
-from qrcode.exceptions import DataOverflowError
-from qrcode.image.base import BaseImage
-from qrcode.image.pil import Image as pil_Image
-from qrcode.image.styledpil import StyledPilImage
-from qrcode.image.styles import colormasks, moduledrawers
-from qrcode.util import MODE_8BIT_BYTE, MODE_ALPHA_NUM, MODE_NUMBER, QRData
+try:
+    from qrcode.image.pil import Image as pil_Image
+    from qrcode.image.styledpil import StyledPilImage
+    from qrcode.image.styles import colormasks
+except:
+    pil_Image = None
 
 UNICODE_TEXT = "\u03b1\u03b2\u03b3"
 WHITE = (255, 255, 255)
@@ -104,6 +109,7 @@ class QRCodeTests(unittest.TestCase):
         qr.make()
         self.assertEqual(qr.data_list[0].mode, MODE_8BIT_BYTE)
 
+    @unittest.skipIf(not pil_Image, "Requires PIL")
     def test_render_pil(self):
         qr = qrcode.QRCode()
         qr.add_data(UNICODE_TEXT)
@@ -111,24 +117,28 @@ class QRCodeTests(unittest.TestCase):
         img.save(io.BytesIO())
         self.assertIsInstance(img.get_image(), pil_Image.Image)
 
+    @unittest.skipIf(not pil_Image, "Requires PIL")
     def test_render_pil_with_transparent_background(self):
         qr = qrcode.QRCode()
         qr.add_data(UNICODE_TEXT)
         img = qr.make_image(back_color="TransParent")
         img.save(io.BytesIO())
 
+    @unittest.skipIf(not pil_Image, "Requires PIL")
     def test_render_pil_with_red_background(self):
         qr = qrcode.QRCode()
         qr.add_data(UNICODE_TEXT)
         img = qr.make_image(back_color="red")
         img.save(io.BytesIO())
 
+    @unittest.skipIf(not pil_Image, "Requires PIL")
     def test_render_pil_with_rgb_color_tuples(self):
         qr = qrcode.QRCode()
         qr.add_data(UNICODE_TEXT)
         img = qr.make_image(back_color=(255, 195, 235), fill_color=(55, 95, 35))
         img.save(io.BytesIO())
 
+    @unittest.skipIf(not pil_Image, "Requires PIL")
     def test_render_with_pattern(self):
         qr = qrcode.QRCode(mask_pattern=3)
         qr.add_data(UNICODE_TEXT)
@@ -195,12 +205,14 @@ class QRCodeTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             img.save(io.BytesIO(), kind="FISH")
 
+    @unittest.skipIf(not pil_Image, "Requires PIL")
     def test_render_styled_pil_image(self):
         qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_L)
         qr.add_data(UNICODE_TEXT)
         img = qr.make_image(image_factory=StyledPilImage)
         img.save(io.BytesIO())
 
+    @unittest.skipIf(not pil_Image, "Requires PIL")
     def test_render_styled_with_embeded_image(self):
         embeded_img = pil_Image.new("RGB", (10, 10), color="red")
         qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_L)
@@ -208,6 +220,7 @@ class QRCodeTests(unittest.TestCase):
         img = qr.make_image(image_factory=StyledPilImage, embeded_image=embeded_img)
         img.save(io.BytesIO())
 
+    @unittest.skipIf(not pil_Image, "Requires PIL")
     def test_render_styled_with_embeded_image_path(self):
         tmpfile = os.path.join(self.tmpdir, "test.png")
         embeded_img = pil_Image.new("RGB", (10, 10), color="red")
@@ -218,6 +231,7 @@ class QRCodeTests(unittest.TestCase):
         img.save(io.BytesIO())
         os.remove(tmpfile)
 
+    @unittest.skipIf(not pil_Image, "Requires PIL")
     def test_render_styled_with_square_module_drawer(self):
         qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_L)
         qr.add_data(UNICODE_TEXT)
@@ -227,6 +241,7 @@ class QRCodeTests(unittest.TestCase):
         )
         img.save(io.BytesIO())
 
+    @unittest.skipIf(not pil_Image, "Requires PIL")
     def test_render_styled_with_gapped_module_drawer(self):
         qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_L)
         qr.add_data(UNICODE_TEXT)
@@ -236,6 +251,7 @@ class QRCodeTests(unittest.TestCase):
         )
         img.save(io.BytesIO())
 
+    @unittest.skipIf(not pil_Image, "Requires PIL")
     def test_render_styled_with_circle_module_drawer(self):
         qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_L)
         qr.add_data(UNICODE_TEXT)
@@ -245,6 +261,7 @@ class QRCodeTests(unittest.TestCase):
         )
         img.save(io.BytesIO())
 
+    @unittest.skipIf(not pil_Image, "Requires PIL")
     def test_render_styled_with_rounded_module_drawer(self):
         qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_L)
         qr.add_data(UNICODE_TEXT)
@@ -254,6 +271,7 @@ class QRCodeTests(unittest.TestCase):
         )
         img.save(io.BytesIO())
 
+    @unittest.skipIf(not pil_Image, "Requires PIL")
     def test_render_styled_with_vertical_bars_module_drawer(self):
         qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_L)
         qr.add_data(UNICODE_TEXT)
@@ -263,6 +281,7 @@ class QRCodeTests(unittest.TestCase):
         )
         img.save(io.BytesIO())
 
+    @unittest.skipIf(not pil_Image, "Requires PIL")
     def test_render_styled_with_horizontal_bars_module_drawer(self):
         qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_L)
         qr.add_data(UNICODE_TEXT)
@@ -272,6 +291,7 @@ class QRCodeTests(unittest.TestCase):
         )
         img.save(io.BytesIO())
 
+    @unittest.skipIf(not pil_Image, "Requires PIL")
     def test_render_styled_with_default_solid_color_mask(self):
         qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_L)
         qr.add_data(UNICODE_TEXT)
@@ -279,6 +299,7 @@ class QRCodeTests(unittest.TestCase):
         img = qr.make_image(image_factory=StyledPilImage, color_mask=mask)
         img.save(io.BytesIO())
 
+    @unittest.skipIf(not pil_Image, "Requires PIL")
     def test_render_styled_with_solid_color_mask(self):
         qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_L)
         qr.add_data(UNICODE_TEXT)
@@ -286,6 +307,7 @@ class QRCodeTests(unittest.TestCase):
         img = qr.make_image(image_factory=StyledPilImage, color_mask=mask)
         img.save(io.BytesIO())
 
+    @unittest.skipIf(not pil_Image, "Requires PIL")
     def test_render_styled_with_color_mask_with_transparency(self):
         qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_L)
         qr.add_data(UNICODE_TEXT)
@@ -296,6 +318,7 @@ class QRCodeTests(unittest.TestCase):
         img.save(io.BytesIO())
         assert img.mode == "RGBA"
 
+    @unittest.skipIf(not pil_Image, "Requires PIL")
     def test_render_styled_with_radial_gradient_color_mask(self):
         qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_L)
         qr.add_data(UNICODE_TEXT)
@@ -305,6 +328,7 @@ class QRCodeTests(unittest.TestCase):
         img = qr.make_image(image_factory=StyledPilImage, color_mask=mask)
         img.save(io.BytesIO())
 
+    @unittest.skipIf(not pil_Image, "Requires PIL")
     def test_render_styled_with_square_gradient_color_mask(self):
         qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_L)
         qr.add_data(UNICODE_TEXT)
@@ -314,6 +338,7 @@ class QRCodeTests(unittest.TestCase):
         img = qr.make_image(image_factory=StyledPilImage, color_mask=mask)
         img.save(io.BytesIO())
 
+    @unittest.skipIf(not pil_Image, "Requires PIL")
     def test_render_styled_with_horizontal_gradient_color_mask(self):
         qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_L)
         qr.add_data(UNICODE_TEXT)
@@ -323,6 +348,7 @@ class QRCodeTests(unittest.TestCase):
         img = qr.make_image(image_factory=StyledPilImage, color_mask=mask)
         img.save(io.BytesIO())
 
+    @unittest.skipIf(not pil_Image, "Requires PIL")
     def test_render_styled_with_vertical_gradient_color_mask(self):
         qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_L)
         qr.add_data(UNICODE_TEXT)
@@ -332,6 +358,7 @@ class QRCodeTests(unittest.TestCase):
         img = qr.make_image(image_factory=StyledPilImage, color_mask=mask)
         img.save(io.BytesIO())
 
+    @unittest.skipIf(not pil_Image, "Requires PIL")
     def test_render_styled_with_image_color_mask(self):
         img_mask = pil_Image.new("RGB", (10, 10), color="red")
         qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_L)
@@ -465,5 +492,6 @@ class QRCodeTests(unittest.TestCase):
 
 
 class ShortcutTest(unittest.TestCase):
+    @unittest.skipIf(not pil_Image, "Requires PIL")
     def runTest(self):
         qrcode.make("image")

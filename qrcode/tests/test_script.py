@@ -7,6 +7,14 @@ from unittest import mock
 
 from qrcode.console_scripts import main, commas
 
+try:
+    from PIL import Image
+except ImportError:
+    try:
+        import Image
+    except ImportError:
+        Image = None
+
 
 def bad_read():
     raise UnicodeDecodeError("utf-8", b"0x80", 0, 1, "invalid start byte")
@@ -27,6 +35,7 @@ class ScriptTest(unittest.TestCase):
 
     @mock.patch("os.isatty", lambda *args: False)
     @mock.patch("sys.stdout")
+    @unittest.skipIf(not Image, "Requires PIL")
     def test_piped(self, mock_stdout):
         main(["testtext"])
 
@@ -66,15 +75,18 @@ class ScriptTest(unittest.TestCase):
         self.assertRaises(SystemExit, main, "testtext --factory fish".split())
 
     @mock.patch.object(sys, "argv", "qr testtext output".split())
+    @unittest.skipIf(not Image, "Requires PIL")
     def test_sys_argv(self):
         main()
 
+    @unittest.skipIf(not Image, "Requires PIL")
     def test_output(self):
         tmpfile = os.path.join(self.tmpdir, "test.png")
         main(["testtext", "--output", tmpfile])
         os.remove(tmpfile)
 
     @mock.patch("sys.stderr", new_callable=io.StringIO)
+    @unittest.skipIf(not Image, "Requires PIL")
     def test_factory_drawer_none(self, mock_stderr):
         with self.assertRaises(SystemExit):
             main("testtext --factory pil --factory-drawer nope".split())
