@@ -186,26 +186,45 @@ Or in Python:
 Styled Image
 ------------
 
-Works only with _versions >=7.2
+Works only with versions_ >=7.2 (SVG styled images require 7.4).
 
 .. _versions: https://github.com/lincolnloop/python-qrcode/blob/master/CHANGES.rst#72-19-july-2021
 
-To apply styles to the QRCode, use the StyledPilImage image factory. 
-This takes an optional module drawer to control the shape of the QR Code, an 
-optional color mask to change the colors of the QR Code, and an optional image 
-to embed in the center.
+To apply styles to the QRCode, use the ``StyledPilImage`` or one of the
+standard SVG_ image factories. These accept an optional ``module_drawer``
+parameter to control the shape of the QR Code.
 
-These QR Codes are not guaranteed to work with all readers, so do some 
-experimentation and set the error correction to high (especially if embedding an 
-image).
+These QR Codes are not guaranteed to work with all readers, so do some
+experimentation and set the error correction to high (especially if embedding
+an image).
 
-Examples to draw the QR code with rounded corners, radial gradiant and embedded image:
+Other PIL module drawers:
+
+    .. image:: doc/module_drawers.png
+
+For SVGs, use ``SvgSquareDrawer``, ``SvgCircleDrawer``,
+``SvgPathSquareDrawer``, or ``SvgPathCircleDrawer``.
+
+These all accept a ``size_ratio`` argument which allows for "gapped" squares or
+circles by reducing this less than the default of ``Decimal(1)``.
+
+
+The ``StyledPilImage`` additionally accepts an optional ``color_mask``
+parameter to change the colors of the QR Code, and an optional
+``embeded_image_path`` to embed an image in the center of the code.
+
+Other color masks:
+
+    .. image:: doc/color_masks.png
+
+Here is a code example to draw a QR code with rounded corners, radial gradiant
+and an embedded image:
 
 .. code:: python
 
     import qrcode
     from qrcode.image.styledpil import StyledPilImage
-    from qrcode.image.styles.moduledrawers import RoundedModuleDrawer
+    from qrcode.image.styles.moduledrawers.pil import RoundedModuleDrawer
     from qrcode.image.styles.colormasks import RadialGradiantColorMask
 
     qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
@@ -214,14 +233,6 @@ Examples to draw the QR code with rounded corners, radial gradiant and embedded 
     img_1 = qr.make_image(image_factory=StyledPilImage, module_drawer=RoundedModuleDrawer())
     img_2 = qr.make_image(image_factory=StyledPilImage, color_mask=RadialGradiantColorMask())
     img_3 = qr.make_image(image_factory=StyledPilImage, embeded_image_path="/path/to/image.png")
-
-Other module_drawers:
-
-    .. image:: doc/module_drawers.png
-
-Other color masks:
-
-    .. image:: doc/color_masks.png
 
 Examples
 ========
