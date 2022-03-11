@@ -50,8 +50,7 @@ class QRCodeTests(unittest.TestCase):
         qr.make(fit=False)
 
     def test_invalid_version(self):
-        qr = qrcode.QRCode(version=41)
-        self.assertRaises(ValueError, qr.make, fit=False)
+        self.assertRaises(ValueError, qrcode.QRCode, version=41)
 
     def test_invalid_border(self):
         self.assertRaises(ValueError, qrcode.QRCode, border=-1)

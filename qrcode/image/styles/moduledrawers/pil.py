@@ -2,7 +2,7 @@
 from __future__ import absolute_import
 
 import abc
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, List, Union
 
 from qrcode.image.styles.moduledrawers.base import QRModuleDrawer
 
@@ -150,7 +150,7 @@ class RoundedModuleDrawer(StyledPilQRModuleDrawer):
         self.SE_ROUND = self.NW_ROUND.transpose(Image.ROTATE_180)
         self.NE_ROUND = self.NW_ROUND.transpose(Image.FLIP_LEFT_RIGHT)
 
-    def drawrect(self, box, is_active):
+    def drawrect(self, box: List[List[int]], is_active: "Union[bool, ActiveWithNeighbors]"):
         if not is_active:
             return
         # find rounded edges

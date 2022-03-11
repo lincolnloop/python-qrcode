@@ -9,6 +9,7 @@ from typing import (
     Optional,
     Type,
     TypeVar,
+    cast,
     overload,
 )
 
@@ -74,6 +75,7 @@ GenericImageLocal = TypeVar("GenericImageLocal", bound=BaseImage)
 
 class QRCode(Generic[GenericImage]):
     modules: ModulesType
+    _version: Optional[int] = None
 
     def __init__(
         self,
@@ -81,12 +83,12 @@ class QRCode(Generic[GenericImage]):
         error_correction=constants.ERROR_CORRECT_M,
         box_size=10,
         border=4,
-        image_factory: Type[GenericImage] = None,
+        image_factory: Optional[Type[GenericImage]] = None,
         mask_pattern=None,
     ):
         _check_box_size(box_size)
         _check_border(border)
-        self.version = version and int(version)
+        self.version = version
         self.error_correction = int(error_correction)
         self.box_size = int(box_size)
         # Spec says border should be at least four boxes wide, but allow for
@@ -97,6 +99,19 @@ class QRCode(Generic[GenericImage]):
         if image_factory is not None:
             assert issubclass(image_factory, BaseImage)
         self.clear()
+
+    @property
+    def version(self) -> int:
+        if self._version is None:
+            self.best_fit()
+        return cast(int, self._version)
+
+    @version.setter
+    def version(self, value) -> None:
+        if value is not None:
+            value = int(value)
+            util.check_version(value)
+        self._version = value
 
     @property
     def mask_pattern(self):
@@ -147,17 +162,14 @@ class QRCode(Generic[GenericImage]):
             self.makeImpl(False, self.mask_pattern)
 
     def makeImpl(self, test, mask_pattern):
-        util.check_version(self.version)
         self.modules_count = self.version * 4 + 17
 
         if self.version in precomputed_qr_blanks:
             self.modules = copy_2d_array(precomputed_qr_blanks[self.version])
         else:
-            self.modules = [None] * self.modules_count
-
-            for row in range(self.modules_count):
-                self.modules[row] = [None] * self.modules_count
-
+            self.modules = [
+                [None] * self.modules_count for i in range(self.modules_count)
+            ]
             self.setup_position_probe_pattern(0, 0)
             self.setup_position_probe_pattern(self.modules_count - 7, 0)
             self.setup_position_probe_pattern(0, self.modules_count - 7)
@@ -298,12 +310,12 @@ class QRCode(Generic[GenericImage]):
         if invert:
             codes.reverse()
 
-        def get_module(x, y):
+        def get_module(x, y) -> int:
             if invert and self.border and max(x, y) >= modcount + self.border:
                 return 1
             if min(x, y) < 0 or max(x, y) >= modcount:
                 return 0
-            return self.modules[x][y]
+            return cast(int, self.modules[x][y])
 
         for r in range(-self.border, modcount + self.border, 2):
             if tty:
@@ -513,7 +525,7 @@ class QRCode(Generic[GenericImage]):
         code = [[False] * width] * self.border
         x_border = [False] * self.border
         for module in self.modules:
-            code.append(x_border + module + x_border)
+            code.append(x_border + cast(List[bool], module) + x_border)
         code += [[False] * width] * self.border
 
         return code
