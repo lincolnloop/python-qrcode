@@ -1,3 +1,4 @@
+from typing import NamedTuple
 from qrcode import constants
 
 EXP_TABLE = list(range(256))
@@ -288,10 +289,9 @@ class Polynomial:
         return Polynomial(num, 0) % other
 
 
-class RSBlock:
-    def __init__(self, total_count, data_count):
-        self.total_count = total_count
-        self.data_count = data_count
+class RSBlock(NamedTuple):
+    total_count: int
+    data_count: int
 
 
 def rs_blocks(version, error_correction):

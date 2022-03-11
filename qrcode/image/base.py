@@ -123,8 +123,8 @@ class BaseImageWithDrawer(BaseImage):
     def __init__(
         self,
         *args,
-        module_drawer: Union[QRModuleDrawer, str] = None,
-        eye_drawer: Union[QRModuleDrawer, str] = None,
+        module_drawer: Union[QRModuleDrawer, str, None] = None,
+        eye_drawer: Union[QRModuleDrawer, str, None] = None,
         **kwargs,
     ):
         self.module_drawer = self.get_drawer(module_drawer) or self.get_default_module_drawer()

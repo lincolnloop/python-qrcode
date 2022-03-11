@@ -1,7 +1,9 @@
 import math
 import re
+from typing import List
 
 from qrcode import LUT, base, exceptions
+from qrcode.base import RSBlock
 
 # QR encoding modes.
 MODE_NUMBER = 1 << 0
@@ -468,7 +470,7 @@ class QRData:
 
 class BitBuffer:
     def __init__(self):
-        self.buffer = []
+        self.buffer: List[int] = []
         self.length = 0
 
     def __repr__(self):
@@ -494,27 +496,23 @@ class BitBuffer:
         self.length += 1
 
 
-def create_bytes(buffer, rs_blocks):
+def create_bytes(buffer: BitBuffer, rs_blocks: List[RSBlock]):
     offset = 0
 
     maxDcCount = 0
     maxEcCount = 0
 
-    dcdata = [0] * len(rs_blocks)
-    ecdata = [0] * len(rs_blocks)
+    dcdata: List[List[int]] = []
+    ecdata: List[List[int]] = []
 
-    for r in range(len(rs_blocks)):
-
-        dcCount = rs_blocks[r].data_count
-        ecCount = rs_blocks[r].total_count - dcCount
+    for rs_block in rs_blocks:
+        dcCount = rs_block.data_count
+        ecCount = rs_block.total_count - dcCount
 
         maxDcCount = max(maxDcCount, dcCount)
         maxEcCount = max(maxEcCount, ecCount)
 
-        dcdata[r] = [0] * dcCount
-
-        for i in range(len(dcdata[r])):
-            dcdata[r][i] = 0xFF & buffer.buffer[i + offset]
+        current_dc = [0xFF & buffer.buffer[i + offset] for i in range(dcCount)]
         offset += dcCount
 
         # Get error correction polynomial.
@@ -525,28 +523,27 @@ def create_bytes(buffer, rs_blocks):
             for i in range(ecCount):
                 rsPoly = rsPoly * base.Polynomial([1, base.gexp(i)], 0)
 
-        rawPoly = base.Polynomial(dcdata[r], len(rsPoly) - 1)
+        rawPoly = base.Polynomial(current_dc, len(rsPoly) - 1)
 
         modPoly = rawPoly % rsPoly
-        ecdata[r] = [0] * (len(rsPoly) - 1)
-        for i in range(len(ecdata[r])):
-            modIndex = i + len(modPoly) - len(ecdata[r])
-            ecdata[r][i] = modPoly[modIndex] if (modIndex >= 0) else 0
-    totalCodeCount = sum(rs_block.total_count for rs_block in rs_blocks)
-    data = [None] * totalCodeCount
-    index = 0
+        current_ec = []
+        mod_offset = len(modPoly) - dcCount
+        for i in range(dcCount):
+            modIndex = i + mod_offset
+            current_ec.append(modPoly[modIndex] if (modIndex >= 0) else 0)
 
+        dcdata.append(current_dc)
+        ecdata.append(current_ec)
+
+    data = []
     for i in range(maxDcCount):
-        for r in range(len(rs_blocks)):
-            if i < len(dcdata[r]):
-                data[index] = dcdata[r][i]
-                index += 1
-
+        for dc in dcdata:
+            if i < len(dc):
+                data.append(dc[i])
     for i in range(maxEcCount):
-        for r in range(len(rs_blocks)):
-            if i < len(ecdata[r]):
-                data[index] = ecdata[r][i]
-                index += 1
+        for ec in ecdata:
+            if i < len(ec):
+                data.append(ec[i])
 
     return data
 
