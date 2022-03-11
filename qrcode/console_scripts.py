@@ -5,7 +5,6 @@ qr - Convert stdin (or the first argument) to a QR Code.
 When stdout is a tty the QR Code is printed to the terminal and when stdout is
 a pipe to a file an image is written. The default image format is PNG.
 """
-from ctypes import cast
 import optparse
 import os
 import sys
@@ -124,10 +123,11 @@ def main(args=None):
         )
         if opts.factory_drawer:
             if not aliases:
-                raise_error(f"The selected factory has no drawer aliases.")
+                raise_error("The selected factory has no drawer aliases.")
             if opts.factory_drawer not in aliases:
                 raise_error(
-                    f"{opts.factory_drawer} factory drawer not found. Expected {commas(aliases)}"
+                    f"{opts.factory_drawer} factory drawer not found."
+                    f" Expected {commas(aliases)}"
                 )
             drawer_cls, drawer_kwargs = aliases[opts.factory_drawer]
             kwargs["module_drawer"] = drawer_cls(**drawer_kwargs)

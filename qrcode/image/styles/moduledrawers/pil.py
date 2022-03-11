@@ -150,7 +150,9 @@ class RoundedModuleDrawer(StyledPilQRModuleDrawer):
         self.SE_ROUND = self.NW_ROUND.transpose(Image.ROTATE_180)
         self.NE_ROUND = self.NW_ROUND.transpose(Image.FLIP_LEFT_RIGHT)
 
-    def drawrect(self, box: List[List[int]], is_active: "Union[bool, ActiveWithNeighbors]"):
+    def drawrect(
+        self, box: List[List[int]], is_active: "Union[bool, ActiveWithNeighbors]"
+    ):
         if not is_active:
             return
         # find rounded edges

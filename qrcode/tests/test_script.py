@@ -5,7 +5,7 @@ import unittest
 from tempfile import mkdtemp
 from unittest import mock
 
-from qrcode.console_scripts import main, commas
+from qrcode.console_scripts import commas, main
 
 try:
     from PIL import Image
@@ -90,7 +90,9 @@ class ScriptTest(unittest.TestCase):
     def test_factory_drawer_none(self, mock_stderr):
         with self.assertRaises(SystemExit):
             main("testtext --factory pil --factory-drawer nope".split())
-        self.assertIn("The selected factory has no drawer aliases", mock_stderr.getvalue())
+        self.assertIn(
+            "The selected factory has no drawer aliases", mock_stderr.getvalue()
+        )
 
     @mock.patch("sys.stderr", new_callable=io.StringIO)
     def test_factory_drawer_bad(self, mock_stderr):
@@ -104,7 +106,7 @@ class ScriptTest(unittest.TestCase):
 
     def test_commas(self):
         self.assertEqual(commas([]), "")
-        self.assertEqual(commas(['A']), "A")
-        self.assertEqual(commas('AB'), "A or B")
+        self.assertEqual(commas(["A"]), "A")
+        self.assertEqual(commas("AB"), "A or B")
         self.assertEqual(commas("ABC"), "A, B or C")
         self.assertEqual(commas("ABC", joiner="and"), "A, B and C")

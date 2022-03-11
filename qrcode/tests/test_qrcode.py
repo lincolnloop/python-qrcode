@@ -1,6 +1,5 @@
 import io
 import os
-import sys
 import unittest
 import warnings
 from tempfile import mkdtemp
@@ -23,7 +22,7 @@ try:
     from qrcode.image.pil import Image as pil_Image
     from qrcode.image.styledpil import StyledPilImage
     from qrcode.image.styles import colormasks
-except:
+except ImportError:
     pil_Image = None
 
 UNICODE_TEXT = "\u03b1\u03b2\u03b3"
@@ -422,7 +421,6 @@ class QRCodeTests(unittest.TestCase):
 
     def test_print_ascii_stdout(self):
         qr = qrcode.QRCode()
-        stdout_encoding = sys.stdout.encoding
         with mock.patch("sys.stdout") as fake_stdout:
             fake_stdout.isatty.return_value = None
             self.assertRaises(OSError, qr.print_ascii, tty=True)
