@@ -2,6 +2,7 @@
 .tox
 dist/
 .coverage
+.coverage.*
 htmlcov/
 build/
 qrcode.egg-info/
