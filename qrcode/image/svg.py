@@ -1,6 +1,8 @@
 import decimal
 from decimal import Decimal
-from typing import List, Literal, Optional, Type, Union, overload
+from typing import List, Optional, Type, Union, overload
+
+from typing_extensions import Literal
 
 import qrcode.image.base
 from qrcode.image.styles.moduledrawers import svg as svg_drawers

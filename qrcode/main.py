@@ -4,7 +4,6 @@ from typing import (
     Dict,
     Generic,
     List,
-    Literal,
     NamedTuple,
     Optional,
     Type,
@@ -12,6 +11,8 @@ from typing import (
     cast,
     overload,
 )
+
+from typing_extensions import Literal
 
 from qrcode import constants, exceptions, util
 from qrcode.image.base import BaseImage
