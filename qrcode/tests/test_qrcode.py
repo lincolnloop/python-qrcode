@@ -7,23 +7,20 @@ from unittest import mock
 
 import qrcode
 import qrcode.util
+from qrcode.compat.pil import Image as pil_Image
 from qrcode.exceptions import DataOverflowError
 from qrcode.image.base import BaseImage
-from qrcode.image.styles import moduledrawers
+from qrcode.image.styledpil import StyledPilImage
+from qrcode.image.styles import colormasks, moduledrawers
 from qrcode.util import MODE_8BIT_BYTE, MODE_ALPHA_NUM, MODE_NUMBER, QRData
 
 try:
     import pymaging_png  # type: ignore
+
     from qrcode.image.pure import PymagingImage
 except ImportError:  # pragma: no cover
     pymaging_png = None
 
-try:
-    from qrcode.image.pil import Image as pil_Image
-    from qrcode.image.styledpil import StyledPilImage
-    from qrcode.image.styles import colormasks
-except ImportError:
-    pil_Image = None
 
 UNICODE_TEXT = "\u03b1\u03b2\u03b3"
 WHITE = (255, 255, 255)
@@ -204,7 +201,7 @@ class QRCodeTests(unittest.TestCase):
             img.save(io.BytesIO(), kind="FISH")
 
     @unittest.skipIf(not pil_Image, "Requires PIL")
-    def test_render_styled_pil_image(self):
+    def test_render_styled_Image(self):
         qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_L)
         qr.add_data(UNICODE_TEXT)
         img = qr.make_image(image_factory=StyledPilImage)

@@ -1,13 +1,9 @@
 # Needed on case-insensitive filesystems
 from __future__ import absolute_import
 
-# Try to import PIL in either of the two ways it can be installed.
-try:
-    from PIL import Image
-except ImportError:  # pragma: no cover
-    import Image
-
 import math
+
+from qrcode.compat.pil import Image
 
 
 class QRColorMask:
@@ -78,19 +74,14 @@ class QRColorMask:
 
     # find the interpolation coefficient between two numbers
     def extrap_color(self, col1, col2, interped_color):
-        normed = list(
-            filter(
-                lambda i: i is not None,
-                [
-                    self.extrap_num(col1[i], col2[i], interped_color[i])
-                    for i in range(len(col1))
-                ],
-            )
-        )
+        normed = []
+        for c1, c2, ci in zip(col1, col2, interped_color):
+            extrap = self.extrap_num(c1, c2, ci)
+            if extrap is not None:
+                normed.append(extrap)
         if not normed:
             return None
-        else:
-            return sum(normed) / len(normed)
+        return sum(normed) / len(normed)
 
 
 class SolidFillColorMask(QRColorMask):

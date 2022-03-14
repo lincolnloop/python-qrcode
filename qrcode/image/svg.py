@@ -5,13 +5,9 @@ from typing import List, Optional, Type, Union, overload
 from typing_extensions import Literal
 
 import qrcode.image.base
+from qrcode.compat.etree import ET
 from qrcode.image.styles.moduledrawers import svg as svg_drawers
 from qrcode.image.styles.moduledrawers.base import QRModuleDrawer
-
-try:
-    import lxml.etree as ET
-except ImportError:
-    import xml.etree.ElementTree as ET  # type: ignore
 
 
 class SvgFragmentImage(qrcode.image.base.BaseImageWithDrawer):
@@ -71,7 +67,11 @@ class SvgFragmentImage(qrcode.image.base.BaseImageWithDrawer):
             tag = ET.QName(self._SVG_namespace, "svg")
         dimension = self.units(self.pixel_size)
         return ET.Element(
-            tag, width=dimension, height=dimension, version=version, **kwargs
+            tag,  # type: ignore
+            width=dimension,
+            height=dimension,
+            version=version,
+            **kwargs,
         )
 
     def _write(self, stream):
@@ -126,7 +126,7 @@ class SvgPathImage(SvgImage):
     }
 
     needs_processing = True
-    path: ET.Element = None
+    path: Optional[ET.Element] = None
     default_drawer_class: Type[QRModuleDrawer] = svg_drawers.SvgPathSquareDrawer
     drawer_aliases = {
         "circle": (svg_drawers.SvgPathCircleDrawer, {}),
@@ -154,7 +154,7 @@ class SvgPathImage(SvgImage):
         # Store the path just in case someone wants to use it again or in some
         # unique way.
         self.path = ET.Element(
-            ET.QName("path"),
+            ET.QName("path"),  # type: ignore
             d="".join(self._subpaths),
             id="qr-path",
             **self.QR_PATH_STYLE,

@@ -1,10 +1,10 @@
 import qrcode.image.base
-from pymaging import Image
-from pymaging.colors import RGB
-from pymaging.formats import registry
-from pymaging.shapes import Line
-from pymaging.webcolors import Black, White
-from pymaging_png.png import PNG
+from pymaging import Image  # type: ignore
+from pymaging.colors import RGB  # type: ignore
+from pymaging.formats import registry  # type: ignore
+from pymaging.shapes import Line  # type: ignore
+from pymaging.webcolors import Black, White  # type: ignore
+from pymaging_png.png import PNG  # type: ignore
 
 
 class PymagingImage(qrcode.image.base.BaseImage):
@@ -43,9 +43,8 @@ class PymagingImage(qrcode.image.base.BaseImage):
         """
         pymaging (pymaging_png at least) uses lower case for the type.
         """
-        if transform is None:
 
-            def transform(x):
-                return x.lower()
+        def lower_case(x):
+            return x.lower()
 
-        return super().check_kind(kind, transform=transform, **kwargs)
+        return super().check_kind(kind, transform=transform or lower_case, **kwargs)

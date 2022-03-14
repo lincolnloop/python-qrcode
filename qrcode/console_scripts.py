@@ -15,7 +15,7 @@ from qrcode.image.base import BaseImage, DrawerAliases
 
 # The next block is added to get the terminal to display properly on MS platforms
 if sys.platform.startswith(("win", "cygwin")):  # pragma: no cover
-    import colorama
+    import colorama  # type: ignore
 
     colorama.init()
 

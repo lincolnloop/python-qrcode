@@ -1,11 +1,10 @@
 from __future__ import absolute_import
 
 import abc
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from qrcode.image.base import BaseImage
-    from qrcode.main import ActiveWithNeighbors
 
 
 class QRModuleDrawer(abc.ABC):
@@ -33,5 +32,5 @@ class QRModuleDrawer(abc.ABC):
         self.img = img
 
     @abc.abstractmethod
-    def drawrect(self, box, is_active: "Union[bool, ActiveWithNeighbors]") -> None:
+    def drawrect(self, box, is_active) -> None:
         ...

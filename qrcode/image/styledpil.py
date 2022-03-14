@@ -1,13 +1,8 @@
 # Needed on case-insensitive filesystems
 from __future__ import absolute_import
 
-# Try to import PIL in either of the two ways it can be installed.
-try:
-    from PIL import Image
-except ImportError:  # pragma: no cover
-    import Image
-
 import qrcode.image.base
+from qrcode.compat.pil import Image
 from qrcode.image.styles.colormasks import QRColorMask, SolidFillColorMask
 from qrcode.image.styles.moduledrawers import SquareModuleDrawer
 
@@ -88,6 +83,8 @@ class StyledPilImage(qrcode.image.base.BaseImageWithDrawer):
             self.draw_embeded_image()
 
     def draw_embeded_image(self):
+        if not self.embeded_image:
+            return
         total_width, _ = self._img.size
         total_width = int(total_width)
         logo_width_ish = int(total_width / 4)

@@ -1,17 +1,10 @@
 # Needed on case-insensitive filesystems
 from __future__ import absolute_import
 
-import abc
-from typing import TYPE_CHECKING, List, Union
+from typing import TYPE_CHECKING, List
 
+from qrcode.compat.pil import Image, ImageDraw
 from qrcode.image.styles.moduledrawers.base import QRModuleDrawer
-
-# Try to import PIL in either of the two ways it can be installed.
-try:
-    from PIL import Image, ImageDraw
-except ImportError:  # pragma: no cover
-    import Image
-    import ImageDraw
 
 if TYPE_CHECKING:
     from qrcode.image.styledpil import StyledPilImage
@@ -33,10 +26,6 @@ class StyledPilQRModuleDrawer(QRModuleDrawer):
 
     img: "StyledPilImage"
 
-    @abc.abstractmethod
-    def drawrect(self, box, is_active: Union[bool, "ActiveWithNeighbors"]) -> None:
-        ...
-
 
 class SquareModuleDrawer(StyledPilQRModuleDrawer):
     """
@@ -47,7 +36,7 @@ class SquareModuleDrawer(StyledPilQRModuleDrawer):
         super().initialize(*args, **kwargs)
         self.imgDraw = ImageDraw.Draw(self.img._img)
 
-    def drawrect(self, box, is_active):
+    def drawrect(self, box, is_active: bool):
         if is_active:
             self.imgDraw.rectangle(box, fill=self.img.paint_color)
 
@@ -68,7 +57,7 @@ class GappedSquareModuleDrawer(StyledPilQRModuleDrawer):
         self.imgDraw = ImageDraw.Draw(self.img._img)
         self.delta = (1 - self.size_ratio) * self.img.box_size / 2
 
-    def drawrect(self, box, is_active: "Union[bool, ActiveWithNeighbors]"):
+    def drawrect(self, box, is_active: bool):
         if is_active:
             smaller_box = (
                 box[0][0] + self.delta,
@@ -100,7 +89,7 @@ class CircleModuleDrawer(StyledPilQRModuleDrawer):
         )
         self.circle = self.circle.resize((box_size, box_size), Image.LANCZOS)
 
-    def drawrect(self, box, is_active: "Union[bool, ActiveWithNeighbors]"):
+    def drawrect(self, box, is_active: bool):
         if is_active:
             self.img._img.paste(self.circle, (box[0][0], box[0][1]))
 
@@ -150,9 +139,7 @@ class RoundedModuleDrawer(StyledPilQRModuleDrawer):
         self.SE_ROUND = self.NW_ROUND.transpose(Image.ROTATE_180)
         self.NE_ROUND = self.NW_ROUND.transpose(Image.FLIP_LEFT_RIGHT)
 
-    def drawrect(
-        self, box: List[List[int]], is_active: "Union[bool, ActiveWithNeighbors]"
-    ):
+    def drawrect(self, box: List[List[int]], is_active: "ActiveWithNeighbors"):
         if not is_active:
             return
         # find rounded edges
@@ -212,8 +199,7 @@ class VerticalBarsDrawer(StyledPilQRModuleDrawer):
         self.ROUND_TOP = base.resize((shrunken_width, height), Image.LANCZOS)
         self.ROUND_BOTTOM = self.ROUND_TOP.transpose(Image.FLIP_TOP_BOTTOM)
 
-    def drawrect(self, box, is_active: "Union[bool, ActiveWithNeighbors]"):
-        assert not isinstance(is_active, bool)
+    def drawrect(self, box, is_active: "ActiveWithNeighbors"):
         if is_active:
             # find rounded edges
             top_rounded = not is_active.N
@@ -266,8 +252,7 @@ class HorizontalBarsDrawer(StyledPilQRModuleDrawer):
         self.ROUND_LEFT = base.resize((width, shrunken_height), Image.LANCZOS)
         self.ROUND_RIGHT = self.ROUND_LEFT.transpose(Image.FLIP_LEFT_RIGHT)
 
-    def drawrect(self, box, is_active: "Union[bool, ActiveWithNeighbors]"):
-        assert not isinstance(is_active, bool)
+    def drawrect(self, box, is_active: "ActiveWithNeighbors"):
         if is_active:
             # find rounded edges
             left_rounded = not is_active.W

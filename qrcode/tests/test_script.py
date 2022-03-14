@@ -5,15 +5,8 @@ import unittest
 from tempfile import mkdtemp
 from unittest import mock
 
+from qrcode.compat.pil import Image
 from qrcode.console_scripts import commas, main
-
-try:
-    from PIL import Image
-except ImportError:
-    try:
-        import Image
-    except ImportError:
-        Image = None
 
 
 def bad_read():

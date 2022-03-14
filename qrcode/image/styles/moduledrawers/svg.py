@@ -2,12 +2,8 @@ import abc
 from decimal import Decimal
 from typing import TYPE_CHECKING, NamedTuple
 
-try:
-    import lxml.etree as ET
-except ImportError:
-    import xml.etree.ElementTree as ET  # type: ignore
-
 from qrcode.image.styles.moduledrawers.base import QRModuleDrawer
+from qrcode.compat.etree import ET
 
 if TYPE_CHECKING:
     from qrcode.image.svg import SvgFragmentImage, SvgPathImage
@@ -58,7 +54,7 @@ class SvgQRModuleDrawer(BaseSvgQRModuleDrawer):
         super().initialize(*args, **kwargs)
         self.tag_qname = ET.QName(self.img._SVG_namespace, self.tag)
 
-    def drawrect(self, box, is_active):
+    def drawrect(self, box, is_active: bool):
         if not is_active:
             return
         self.img._img.append(self.el(box))
@@ -76,7 +72,7 @@ class SvgSquareDrawer(SvgQRModuleDrawer):
     def el(self, box):
         coords = self.coords(box)
         return ET.Element(
-            self.tag_qname,
+            self.tag_qname,  # type: ignore
             x=self.img.units(coords.x0),
             y=self.img.units(coords.y0),
             width=self.unit_size,
@@ -94,7 +90,7 @@ class SvgCircleDrawer(SvgQRModuleDrawer):
     def el(self, box):
         coords = self.coords(box)
         return ET.Element(
-            self.tag_qname,
+            self.tag_qname,  # type: ignore
             cx=self.img.units(coords.xh),
             cy=self.img.units(coords.yh),
             r=self.radius,
@@ -104,7 +100,7 @@ class SvgCircleDrawer(SvgQRModuleDrawer):
 class SvgPathQRModuleDrawer(BaseSvgQRModuleDrawer):
     img: "SvgPathImage"
 
-    def drawrect(self, box, is_active):
+    def drawrect(self, box, is_active: bool):
         if not is_active:
             return
         self.img._subpaths.append(self.subpath(box))
