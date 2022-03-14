@@ -527,8 +527,8 @@ def create_bytes(buffer: BitBuffer, rs_blocks: List[RSBlock]):
 
         modPoly = rawPoly % rsPoly
         current_ec = []
-        mod_offset = len(modPoly) - dcCount
-        for i in range(dcCount):
+        mod_offset = len(modPoly) - ecCount
+        for i in range(ecCount):
             modIndex = i + mod_offset
             current_ec.append(modPoly[modIndex] if (modIndex >= 0) else 0)
 
@@ -538,12 +538,14 @@ def create_bytes(buffer: BitBuffer, rs_blocks: List[RSBlock]):
     data = []
     for i in range(maxDcCount):
         for dc in dcdata:
-            if i < len(dc):
-                data.append(dc[i])
+            if i >= len(dc):
+                break
+            data.append(dc[i])
     for i in range(maxEcCount):
         for ec in ecdata:
-            if i < len(ec):
-                data.append(ec[i])
+            if i >= len(ec):
+                break
+            data.append(ec[i])
 
     return data
 
