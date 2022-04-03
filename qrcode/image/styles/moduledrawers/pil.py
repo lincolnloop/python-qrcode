@@ -74,6 +74,8 @@ class CircleModuleDrawer(StyledPilQRModuleDrawer):
     """
 
     circle = None
+    def __init__(self, resample_method=Image.LANCZOS):
+        self.resample_method = resample_method
 
     def initialize(self, *args, **kwargs):
         super().initialize(*args, **kwargs)
@@ -87,7 +89,7 @@ class CircleModuleDrawer(StyledPilQRModuleDrawer):
         ImageDraw.Draw(self.circle).ellipse(
             (0, 0, fake_size, fake_size), fill=self.img.paint_color
         )
-        self.circle = self.circle.resize((box_size, box_size), Image.LANCZOS)
+        self.circle = self.circle.resize((box_size, box_size), self.resample_method)
 
     def drawrect(self, box, is_active: bool):
         if is_active:
@@ -106,8 +108,9 @@ class RoundedModuleDrawer(StyledPilQRModuleDrawer):
 
     needs_neighbors = True
 
-    def __init__(self, radius_ratio=1):
+    def __init__(self, radius_ratio=1, resample_method=Image.LANCZOS):
         self.radius_ratio = radius_ratio
+        self.resample_method = resample_method
 
     def initialize(self, *args, **kwargs):
         super().initialize(*args, **kwargs)
@@ -133,7 +136,7 @@ class RoundedModuleDrawer(StyledPilQRModuleDrawer):
         base_draw.rectangle((radius, 0, fake_width, fake_width), fill=front_color)
         base_draw.rectangle((0, radius, fake_width, fake_width), fill=front_color)
         self.NW_ROUND = base.resize(
-            (self.corner_width, self.corner_width), Image.LANCZOS
+            (self.corner_width, self.corner_width), self.resample_method
         )
         self.SW_ROUND = self.NW_ROUND.transpose(Image.FLIP_TOP_BOTTOM)
         self.SE_ROUND = self.NW_ROUND.transpose(Image.ROTATE_180)
@@ -169,8 +172,9 @@ class VerticalBarsDrawer(StyledPilQRModuleDrawer):
 
     needs_neighbors = True
 
-    def __init__(self, horizontal_shrink=0.8):
+    def __init__(self, horizontal_shrink=0.8, resample_method=Image.LANCZOS):
         self.horizontal_shrink = horizontal_shrink
+        self.resample_method = resample_method
 
     def initialize(self, *args, **kwargs):
         super().initialize(*args, **kwargs)
@@ -196,7 +200,7 @@ class VerticalBarsDrawer(StyledPilQRModuleDrawer):
         base_draw = ImageDraw.Draw(base)
         base_draw.ellipse((0, 0, fake_width, fake_height * 2), fill=front_color)
 
-        self.ROUND_TOP = base.resize((shrunken_width, height), Image.LANCZOS)
+        self.ROUND_TOP = base.resize((shrunken_width, height), self.resample_method)
         self.ROUND_BOTTOM = self.ROUND_TOP.transpose(Image.FLIP_TOP_BOTTOM)
 
     def drawrect(self, box, is_active: "ActiveWithNeighbors"):
@@ -222,13 +226,15 @@ class HorizontalBarsDrawer(StyledPilQRModuleDrawer):
 
     needs_neighbors = True
 
-    def __init__(self, vertical_shrink=0.8):
+    def __init__(self, vertical_shrink=0.8, resample_method=Image.LANCZOS):
         self.vertical_shrink = vertical_shrink
+        self.resample_method = resample_method
 
     def initialize(self, *args, **kwargs):
         super().initialize(*args, **kwargs)
         self.half_width = int(self.img.box_size / 2)
         self.delta = int((1 - self.vertical_shrink) * self.half_width)
+
         self.setup_edges()
 
     def setup_edges(self):
@@ -249,7 +255,7 @@ class HorizontalBarsDrawer(StyledPilQRModuleDrawer):
         base_draw = ImageDraw.Draw(base)
         base_draw.ellipse((0, 0, fake_width * 2, fake_height), fill=front_color)
 
-        self.ROUND_LEFT = base.resize((width, shrunken_height), Image.LANCZOS)
+        self.ROUND_LEFT = base.resize((width, shrunken_height), self.resample_method)
         self.ROUND_RIGHT = self.ROUND_LEFT.transpose(Image.FLIP_LEFT_RIGHT)
 
     def drawrect(self, box, is_active: "ActiveWithNeighbors"):
