@@ -74,7 +74,7 @@ class CircleModuleDrawer(StyledPilQRModuleDrawer):
     """
 
     circle = None
-    def __init__(self, resample_method=Image.LANCZOS):
+    def __init__(self, resample_method=Image.Resampling.LANCZOS):
         self.resample_method = resample_method
 
     def initialize(self, *args, **kwargs):
@@ -108,7 +108,7 @@ class RoundedModuleDrawer(StyledPilQRModuleDrawer):
 
     needs_neighbors = True
 
-    def __init__(self, radius_ratio=1, resample_method=Image.LANCZOS):
+    def __init__(self, radius_ratio=1, resample_method=Image.Resampling.LANCZOS):
         self.radius_ratio = radius_ratio
         self.resample_method = resample_method
 
@@ -172,7 +172,7 @@ class VerticalBarsDrawer(StyledPilQRModuleDrawer):
 
     needs_neighbors = True
 
-    def __init__(self, horizontal_shrink=0.8, resample_method=Image.LANCZOS):
+    def __init__(self, horizontal_shrink=0.8, resample_method=Image.Resampling.LANCZOS):
         self.horizontal_shrink = horizontal_shrink
         self.resample_method = resample_method
 
@@ -226,7 +226,7 @@ class HorizontalBarsDrawer(StyledPilQRModuleDrawer):
 
     needs_neighbors = True
 
-    def __init__(self, vertical_shrink=0.8, resample_method=Image.LANCZOS):
+    def __init__(self, vertical_shrink=0.8, resample_method=Image.Resampling.LANCZOS):
         self.vertical_shrink = vertical_shrink
         self.resample_method = resample_method
 
