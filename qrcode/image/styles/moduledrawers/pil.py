@@ -87,7 +87,7 @@ class CircleModuleDrawer(StyledPilQRModuleDrawer):
         ImageDraw.Draw(self.circle).ellipse(
             (0, 0, fake_size, fake_size), fill=self.img.paint_color
         )
-        self.circle = self.circle.resize((box_size, box_size), Image.LANCZOS)
+        self.circle = self.circle.resize((box_size, box_size), Image.Resampling.LANCZOS)
 
     def drawrect(self, box, is_active: bool):
         if is_active:
@@ -133,11 +133,11 @@ class RoundedModuleDrawer(StyledPilQRModuleDrawer):
         base_draw.rectangle((radius, 0, fake_width, fake_width), fill=front_color)
         base_draw.rectangle((0, radius, fake_width, fake_width), fill=front_color)
         self.NW_ROUND = base.resize(
-            (self.corner_width, self.corner_width), Image.LANCZOS
+            (self.corner_width, self.corner_width), Image.Resampling.LANCZOS
         )
-        self.SW_ROUND = self.NW_ROUND.transpose(Image.FLIP_TOP_BOTTOM)
-        self.SE_ROUND = self.NW_ROUND.transpose(Image.ROTATE_180)
-        self.NE_ROUND = self.NW_ROUND.transpose(Image.FLIP_LEFT_RIGHT)
+        self.SW_ROUND = self.NW_ROUND.transpose(Image.Transpose.FLIP_TOP_BOTTOM)
+        self.SE_ROUND = self.NW_ROUND.transpose(Image.Transpose.ROTATE_180)
+        self.NE_ROUND = self.NW_ROUND.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
 
     def drawrect(self, box: List[List[int]], is_active: "ActiveWithNeighbors"):
         if not is_active:
@@ -196,8 +196,8 @@ class VerticalBarsDrawer(StyledPilQRModuleDrawer):
         base_draw = ImageDraw.Draw(base)
         base_draw.ellipse((0, 0, fake_width, fake_height * 2), fill=front_color)
 
-        self.ROUND_TOP = base.resize((shrunken_width, height), Image.LANCZOS)
-        self.ROUND_BOTTOM = self.ROUND_TOP.transpose(Image.FLIP_TOP_BOTTOM)
+        self.ROUND_TOP = base.resize((shrunken_width, height), Image.Resampling.LANCZOS)
+        self.ROUND_BOTTOM = self.ROUND_TOP.transpose(Image.Transpose.FLIP_TOP_BOTTOM)
 
     def drawrect(self, box, is_active: "ActiveWithNeighbors"):
         if is_active:
@@ -249,8 +249,8 @@ class HorizontalBarsDrawer(StyledPilQRModuleDrawer):
         base_draw = ImageDraw.Draw(base)
         base_draw.ellipse((0, 0, fake_width * 2, fake_height), fill=front_color)
 
-        self.ROUND_LEFT = base.resize((width, shrunken_height), Image.LANCZOS)
-        self.ROUND_RIGHT = self.ROUND_LEFT.transpose(Image.FLIP_LEFT_RIGHT)
+        self.ROUND_LEFT = base.resize((width, shrunken_height), Image.Resampling.LANCZOS)
+        self.ROUND_RIGHT = self.ROUND_LEFT.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
 
     def drawrect(self, box, is_active: "ActiveWithNeighbors"):
         if is_active:
