@@ -5,22 +5,17 @@ import warnings
 from tempfile import mkdtemp
 from unittest import mock
 
+import png
+
 import qrcode
 import qrcode.util
 from qrcode.compat.pil import Image as pil_Image
 from qrcode.exceptions import DataOverflowError
 from qrcode.image.base import BaseImage
+from qrcode.image.pure import PyPNGImage
 from qrcode.image.styledpil import StyledPilImage
 from qrcode.image.styles import colormasks, moduledrawers
 from qrcode.util import MODE_8BIT_BYTE, MODE_ALPHA_NUM, MODE_NUMBER, QRData
-
-try:
-    import pymaging_png  # type: ignore
-
-    from qrcode.image.pure import PymagingImage
-except ImportError:  # pragma: no cover
-    pymaging_png = None
-
 
 UNICODE_TEXT = "\u03b1\u03b2\u03b3"
 WHITE = (255, 255, 255)
@@ -180,25 +175,14 @@ class QRCodeTests(unittest.TestCase):
         self.assertTrue(MockFactory.new_image.called)
         self.assertTrue(MockFactory.drawrect.called)
 
-    @unittest.skipIf(not pymaging_png, "Requires pymaging with PNG support")
-    def test_render_pymaging_png(self):
+    def test_render_pypng(self):
         qr = qrcode.QRCode()
         qr.add_data(UNICODE_TEXT)
-        img = qr.make_image(image_factory=PymagingImage)
-        from pymaging import Image as pymaging_Image  # type: ignore
+        img = qr.make_image(image_factory=PyPNGImage)
+        self.assertIsInstance(img.get_image(), png.Writer)
 
-        self.assertIsInstance(img.get_image(), pymaging_Image)
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", DeprecationWarning)
-            img.save(io.BytesIO())
-
-    @unittest.skipIf(not pymaging_png, "Requires pymaging")
-    def test_render_pymaging_png_bad_kind(self):
-        qr = qrcode.QRCode()
-        qr.add_data(UNICODE_TEXT)
-        img = qr.make_image(image_factory=PymagingImage)
-        with self.assertRaises(ValueError):
-            img.save(io.BytesIO(), kind="FISH")
+        print(img.width, img.box_size, img.border)
+        img.save(io.BytesIO())
 
     @unittest.skipIf(not pil_Image, "Requires PIL")
     def test_render_styled_Image(self):

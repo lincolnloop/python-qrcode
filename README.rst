@@ -165,22 +165,20 @@ Additional keyword arguments are forwarded to ElementTrees ``tostring()``:
 Pure Python PNG
 ---------------
 
-Install the following two packages::
+If Pillow is not installed, the default image factory will be a pure Python PNG
+encoder taht uses `pypng`.
 
-    pip install -e git+git://github.com/ojii/pymaging.git#egg=pymaging
-    pip install -e git+git://github.com/ojii/pymaging-png.git#egg=pymaging-png
+You can use the factory explicitly from your command line::
 
-From your command line::
-
-    qr --factory=pymaging "Some text" > test.png
+    qr --factory=png "Some text" > test.png
 
 Or in Python:
 
 .. code:: python
 
     import qrcode
-    from qrcode.image.pure import PymagingImage
-    img = qrcode.make('Some data here', image_factory=PymagingImage)
+    from qrcode.image.pure import PyPNGImage
+    img = qrcode.make('Some data here', image_factory=PyPNGImage)
 
 
 Styled Image

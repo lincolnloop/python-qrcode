@@ -13,6 +13,13 @@ Change log
 - Optimize the output for the ``SVGPathImage`` factory (more than 30% reduction
   in file sizes).
 
+- Add a ``pypng`` image factory as a pure Python PNG solution. If ``pillow`` is
+  *not* installed, then this becomes the default factory.
+
+- The ``pymaging`` image factory has been removed, but its factory shortcut and
+  the actual PymagingImage factory class now just link to the PyPNGImage
+  factory.
+
 
 7.3.1 (1 October 2021)
 ======================

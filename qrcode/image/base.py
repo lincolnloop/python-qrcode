@@ -19,6 +19,7 @@ class BaseImage:
     allowed_kinds: Optional[Tuple[str]] = None
     needs_context = False
     needs_processing = False
+    needs_drawrect = True
 
     def __init__(self, border, width, box_size, *args, **kwargs):
         self.border = border
@@ -26,6 +27,7 @@ class BaseImage:
         self.box_size = box_size
         self.pixel_size = (self.width + self.border * 2) * self.box_size
         self._img = self.new_image(**kwargs)
+        self.modules = kwargs["qrcode_modules"]
         self.init_new_image()
 
     @abc.abstractmethod

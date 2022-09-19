@@ -21,10 +21,12 @@ if sys.platform.startswith(("win", "cygwin")):  # pragma: no cover
 
 default_factories = {
     "pil": "qrcode.image.pil.PilImage",
-    "pymaging": "qrcode.image.pure.PymagingImage",
+    "png": "qrcode.image.pure.PyPNGImage",
     "svg": "qrcode.image.svg.SvgImage",
     "svg-fragment": "qrcode.image.svg.SvgFragmentImage",
     "svg-path": "qrcode.image.svg.SvgPathImage",
+    # Keeping for backwards compatibility:
+    "pymaging": "qrcode.image.pure.PymagingImage",
 }
 
 error_correction = {
