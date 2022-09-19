@@ -5,7 +5,9 @@ Pure python QR Code generator
 Generate QR codes.
 
 A standard install uses pypng_ to generate PNG files and can also render QR
-codes directly to the console.
+codes directly to the console. A standard install is just::
+
+    pip install pil
 
 For more image functionality, install qrcode with the ``pil`` dependency so
 that pillow_ is installed and can be used for generating images::
