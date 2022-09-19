@@ -143,9 +143,9 @@ background of the SVG with white::
     qrcode.image.svg.SvgFillImage
     qrcode.image.svg.SvgPathFillImage
 
-The ``QRCode.make_image()`` method forwards additional keyword arguments to
-the underlying ElementTree XML library. This helps to finetune the root element
-of the resulting SVG:
+The ``QRCode.make_image()`` method forwards additional keyword arguments to the
+underlying ElementTree XML library. This helps to fine tune the root element of
+the resulting SVG:
 
 .. code:: python
 
@@ -168,7 +168,7 @@ Pure Python PNG
 ---------------
 
 If Pillow is not installed, the default image factory will be a pure Python PNG
-encoder taht uses `pypng`.
+encoder that uses `pypng`.
 
 You can use the factory explicitly from your command line::
 
@@ -217,7 +217,7 @@ Other color masks:
 
     .. image:: doc/color_masks.png
 
-Here is a code example to draw a QR code with rounded corners, radial gradiant
+Here is a code example to draw a QR code with rounded corners, radial gradient
 and an embedded image:
 
 .. code:: python
@@ -267,7 +267,7 @@ Pipe ascii output to text file in command line::
     qr --ascii "Some data" > "test.txt"
     cat test.txt
 
-Alternative to piping output to file to avoid PoweShell issues::
+Alternative to piping output to file to avoid PowerShell issues::
 
     # qr "Some data" > test.png
     qr --output=test.png "Some data"
