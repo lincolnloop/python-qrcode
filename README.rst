@@ -4,16 +4,16 @@ Pure python QR Code generator
 
 Generate QR codes.
 
-For a standard install (which will include pillow_ for generating images),
-run::
+A standard install uses pypng_ to generate PNG files and can also render QR
+codes directly to the console.
 
-    pip install qrcode[pil]
+For more image functionality, install qrcode with the ``pil`` dependency so
+that pillow_ is installed and can be used for generating images::
 
+    pip install "qrcode[pil]"
+
+.. _pypng: https://pypi.python.org/pypi/pypng
 .. _pillow: https://pypi.python.org/pypi/Pillow
-
-For macOS run::
-
-    pip install qrcode"[pil]"
 
 
 What is a QR Code?
