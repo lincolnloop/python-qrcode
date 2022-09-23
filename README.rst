@@ -4,16 +4,18 @@ Pure python QR Code generator
 
 Generate QR codes.
 
-For a standard install (which will include pillow_ for generating images),
-run::
+A standard install uses pypng_ to generate PNG files and can also render QR
+codes directly to the console. A standard install is just::
 
-    pip install qrcode[pil]
+    pip install pil
 
+For more image functionality, install qrcode with the ``pil`` dependency so
+that pillow_ is installed and can be used for generating images::
+
+    pip install "qrcode[pil]"
+
+.. _pypng: https://pypi.python.org/pypi/pypng
 .. _pillow: https://pypi.python.org/pypi/Pillow
-
-For macOS run::
-
-    pip install qrcode"[pil]"
 
 
 What is a QR Code?
@@ -141,9 +143,9 @@ background of the SVG with white::
     qrcode.image.svg.SvgFillImage
     qrcode.image.svg.SvgPathFillImage
 
-The ``QRCode.make_image()`` method forwards additional keyword arguments to
-the underlying ElementTree XML library. This helps to finetune the root element
-of the resulting SVG:
+The ``QRCode.make_image()`` method forwards additional keyword arguments to the
+underlying ElementTree XML library. This helps to fine tune the root element of
+the resulting SVG:
 
 .. code:: python
 
@@ -165,22 +167,20 @@ Additional keyword arguments are forwarded to ElementTrees ``tostring()``:
 Pure Python PNG
 ---------------
 
-Install the following two packages::
+If Pillow is not installed, the default image factory will be a pure Python PNG
+encoder that uses `pypng`.
 
-    pip install -e git+git://github.com/ojii/pymaging.git#egg=pymaging
-    pip install -e git+git://github.com/ojii/pymaging-png.git#egg=pymaging-png
+You can use the factory explicitly from your command line::
 
-From your command line::
-
-    qr --factory=pymaging "Some text" > test.png
+    qr --factory=png "Some text" > test.png
 
 Or in Python:
 
 .. code:: python
 
     import qrcode
-    from qrcode.image.pure import PymagingImage
-    img = qrcode.make('Some data here', image_factory=PymagingImage)
+    from qrcode.image.pure import PyPNGImage
+    img = qrcode.make('Some data here', image_factory=PyPNGImage)
 
 
 Styled Image
@@ -217,7 +217,7 @@ Other color masks:
 
     .. image:: doc/color_masks.png
 
-Here is a code example to draw a QR code with rounded corners, radial gradiant
+Here is a code example to draw a QR code with rounded corners, radial gradient
 and an embedded image:
 
 .. code:: python
@@ -267,7 +267,7 @@ Pipe ascii output to text file in command line::
     qr --ascii "Some data" > "test.txt"
     cat test.txt
 
-Alternative to piping output to file to avoid PoweShell issues::
+Alternative to piping output to file to avoid PowerShell issues::
 
     # qr "Some data" > test.png
     qr --output=test.png "Some data"
