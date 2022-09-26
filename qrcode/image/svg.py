@@ -112,6 +112,7 @@ class SvgImage(SvgFragmentImage):
         ET.ElementTree(self._img).write(stream, encoding="UTF-8", xml_declaration=True)
 
 
+
 class SvgPathImage(SvgImage):
     """
     SVG image builder with one single <path> element (removes white spaces
@@ -161,6 +162,46 @@ class SvgPathImage(SvgImage):
         )
         self._subpaths = []
         self._img.append(self.path)
+
+
+
+class SvgForPlotters(SvgPathImage):
+    """
+    Draws the modules as concentric squares ; this is made necessary for tools such as plotters
+    and laser cutters which otherwise only draw the outline of the module.
+
+    The stroke_width parameter determines how many concentric squares are drawn.
+    """
+    QR_PATH_STYLE = {'fill': 'none', 'fill-rule': 'nonzero', 
+                     'stroke': '#000000'}
+
+    def __init__(self, *args, **kwargs):
+        self.stroke_width = kwargs.pop('stroke_width', 0.2)
+        self.QR_PATH_STYLE['stroke-width'] = f'{self.stroke_width}'
+        super().__init__(*args, **kwargs)
+
+
+    def _generate_subpaths(self):
+        """Generates individual QR points as subpaths"""
+
+        rect_size = self.units(self.box_size, text=False)
+
+        for point in self._points:
+            x_base = self.units(
+                (point[0]+self.border)*self.box_size, text=False)
+            y_base = self.units(
+                (point[1]+self.border)*self.box_size, text=False)
+
+            for x in range(1,int(float(rect_size)/self.stroke_width/2)+1):
+                if x%2==1:
+                    offset = x*self.stroke_width
+                    yield (
+                        'M %(x0)s %(y0)s L %(x0)s %(y1)s L %(x1)s %(y1)s L %(x1)s '
+                        '%(y0)s z' % dict(
+                            x0=float(x_base)+offset, y0=float(y_base)+offset,
+                            x1=float(x_base+rect_size)-offset, y1=float(y_base+rect_size)-offset,
+                      ))
+
 
 
 class SvgFillImage(SvgImage):
