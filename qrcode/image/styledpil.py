@@ -16,7 +16,7 @@ class StyledPilImage(qrcode.image.base.BaseImageWithDrawer):
 
     The module_drawer should extend the QRModuleDrawer class and implement the
     drawrect_context(self, box, active, context), and probably also the
-    intitialize function. This will draw an individual "module" or square on
+    initialize function. This will draw an individual "module" or square on
     the QR code.
 
     The color_mask will extend the QRColorMask class and will at very least
