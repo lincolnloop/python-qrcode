@@ -26,8 +26,8 @@ class BaseImage:
         self.width = width
         self.box_size = box_size
         self.pixel_size = (self.width + self.border * 2) * self.box_size
+        self.modules = kwargs.pop("qrcode_modules")
         self._img = self.new_image(**kwargs)
-        self.modules = kwargs["qrcode_modules"]
         self.init_new_image()
 
     @abc.abstractmethod
