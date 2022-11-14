@@ -13,10 +13,10 @@ class QRColorMask:
     By the time apply_mask is called, the QRModuleDrawer of the StyledPilImage
     will have drawn all of the modules on the canvas (the color of these
     modules will be mostly black, although antialiasing may result in
-    gradiants) In the base class, apply_mask is implemented such that the
+    gradients) In the base class, apply_mask is implemented such that the
     background color will remain, but the foreground pixels will be replaced by
     a color determined by a call to get_fg_pixel. There is additional
-    calculation done to preserve the gradiant artifacts of antialiasing.
+    calculation done to preserve the gradient artifacts of antialiasing.
 
     All QRColorMask objects should be careful about RGB vs RGBA color spaces.
 
@@ -114,7 +114,7 @@ class SolidFillColorMask(QRColorMask):
 
 class RadialGradiantColorMask(QRColorMask):
     """
-    Fills in the foreground with a radial gradiant from the center to the edge
+    Fills in the foreground with a radial gradient from the center to the edge
     """
 
     def __init__(
@@ -137,7 +137,7 @@ class RadialGradiantColorMask(QRColorMask):
 
 class SquareGradiantColorMask(QRColorMask):
     """
-    Fills in the foreground with a square gradiant from the center to the edge
+    Fills in the foreground with a square gradient from the center to the edge
     """
 
     def __init__(
@@ -160,7 +160,7 @@ class SquareGradiantColorMask(QRColorMask):
 
 class HorizontalGradiantColorMask(QRColorMask):
     """
-    Fills in the foreground with a gradiant sweeping from the left to the right
+    Fills in the foreground with a gradient sweeping from the left to the right
     """
 
     def __init__(
@@ -178,7 +178,7 @@ class HorizontalGradiantColorMask(QRColorMask):
 
 class VerticalGradiantColorMask(QRColorMask):
     """
-    Fills in the forefround with a gradiant sweeping from the top to the bottom
+    Fills in the forefround with a gradient sweeping from the top to the bottom
     """
 
     def __init__(

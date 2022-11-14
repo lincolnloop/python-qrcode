@@ -249,7 +249,7 @@ def _lost_point_level2(modules, modules_count):
         this_row = modules[row]
         next_row = modules[row + 1]
         # use iter() and next() to skip next four-block. e.g.
-        # d a f   if top-right a != b botton-right,
+        # d a f   if top-right a != b bottom-right,
         # c b e   then both abcd and abef won't lost any point.
         modules_range_iter = iter(modules_range)
         for col in modules_range_iter:
