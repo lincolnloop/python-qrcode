@@ -30,7 +30,7 @@ class StyledPilImage(qrcode.image.base.BaseImageWithDrawer):
     ensure that the QR code is still legible after the image has been placed
     there; Q or H level error correction levels are recommended to maintain
     data integrity A resampling filter can be specified (defaulting to
-    PIL.Image.LANCZOS) for resizing; see PIL.Image.resize() for possible
+    PIL.Image.Resampling.LANCZOS) for resizing; see PIL.Image.resize() for possible
     options for this parameter.
     """
 
@@ -45,7 +45,7 @@ class StyledPilImage(qrcode.image.base.BaseImageWithDrawer):
         embeded_image_path = kwargs.get("embeded_image_path", None)
         self.embeded_image = kwargs.get("embeded_image", None)
         self.embeded_image_resample = kwargs.get(
-            "embeded_image_resample", Image.LANCZOS
+            "embeded_image_resample", Image.Resampling.LANCZOS
         )
         if not self.embeded_image and embeded_image_path:
             self.embeded_image = Image.open(embeded_image_path)
