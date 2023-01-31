@@ -2,8 +2,8 @@
 Change log
 ==========
 
-7.4 (unreleased)
-================
+7.4 (1 February 2023)
+=====================
 
 - Restructure the factory drawers, allowing different shapes in SVG image
   factories as well.
