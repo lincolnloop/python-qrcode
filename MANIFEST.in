@@ -1,3 +1,4 @@
+recursive-include doc *.png
 include *.rst
 include LICENSE
 include signing-key.asc
