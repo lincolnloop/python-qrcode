@@ -2,6 +2,12 @@
 Change log
 ==========
 
+7.5 (unreleased)
+================
+
+- Nothing changed yet.
+
+
 7.4 (1 February 2023)
 =====================
 
