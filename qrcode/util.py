@@ -538,14 +538,12 @@ def create_bytes(buffer: BitBuffer, rs_blocks: List[RSBlock]):
     data = []
     for i in range(maxDcCount):
         for dc in dcdata:
-            if i >= len(dc):
-                break
-            data.append(dc[i])
+            if i < len(dc):
+                data.append(dc[i])
     for i in range(maxEcCount):
         for ec in ecdata:
-            if i >= len(ec):
-                break
-            data.append(ec[i])
+            if i < len(ec):
+                data.append(ec[i])
 
     return data
 
