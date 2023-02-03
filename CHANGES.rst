@@ -5,7 +5,8 @@ Change log
 7.5 (unreleased)
 ================
 
-- Nothing changed yet.
+- Fix bad over-optimization in v7.4 that broke large QR codes. Thanks to
+  mattiasj-axis!
 
 
 7.4 (1 February 2023)
