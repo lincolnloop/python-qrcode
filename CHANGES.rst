@@ -2,8 +2,8 @@
 Change log
 ==========
 
-7.5 (unreleased)
-================
+7.4.2 (6 February 2023)
+=======================
 
 - Allow ``pypng`` factory to allow for saving to a string (like
   ``qr.save("some_file.png")``) in addition to file-like objects. 
