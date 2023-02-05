@@ -184,6 +184,18 @@ class QRCodeTests(unittest.TestCase):
         print(img.width, img.box_size, img.border)
         img.save(io.BytesIO())
 
+    def test_render_pypng_to_str(self):
+        qr = qrcode.QRCode()
+        qr.add_data(UNICODE_TEXT)
+        img = qr.make_image(image_factory=PyPNGImage)
+        self.assertIsInstance(img.get_image(), png.Writer)
+
+        mock_open = mock.mock_open()
+        with mock.patch("qrcode.image.pure.open", mock_open, create=True):
+            img.save("test_file.png")
+        mock_open.assert_called_once_with("test_file.png", "wb")
+        mock_open("test_file.png", "wb").write.assert_called()
+
     @unittest.skipIf(not pil_Image, "Requires PIL")
     def test_render_styled_Image(self):
         qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_L)
