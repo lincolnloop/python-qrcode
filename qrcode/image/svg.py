@@ -2,7 +2,11 @@ import decimal
 from decimal import Decimal
 from typing import List, Optional, Type, Union, overload
 
-from typing_extensions import Literal
+try:
+    # Python 3.8+
+    from typing import Literal
+except ImportError:
+    from typing_extensions import Literal
 
 import qrcode.image.base
 from qrcode.compat.etree import ET

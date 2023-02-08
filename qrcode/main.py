@@ -12,7 +12,11 @@ from typing import (
     overload,
 )
 
-from typing_extensions import Literal
+try:
+    # Python 3.8+
+    from typing import Literal
+except ImportError:
+    from typing_extensions import Literal
 
 from qrcode import constants, exceptions, util
 from qrcode.image.base import BaseImage
