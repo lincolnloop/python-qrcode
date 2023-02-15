@@ -1,3 +1,21 @@
 [build-system]
 requires = ["setuptools >= 48"]
 build-backend = "setuptools.build_meta"
+
+[tool.ruff]
+target-version = "py37"
+exclude = [
+    ".tox",
+    ".git",
+    "__pycache__",
+    "build",
+    "dist",
+]
+ignore = []
+line-length = 90
+select = [
+    "E",
+    "F",
+    "W",
+    "I",
+]
