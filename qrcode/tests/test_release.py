@@ -1,6 +1,6 @@
-import re
 import builtins
 import datetime
+import re
 import unittest
 from unittest import mock
 
