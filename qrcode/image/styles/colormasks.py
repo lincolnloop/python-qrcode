@@ -1,6 +1,6 @@
 import math
 
-from qrcode.compat.pil import Image
+from PIL import Image
 
 
 class QRColorMask:

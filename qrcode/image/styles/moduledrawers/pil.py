@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, List
 
-from qrcode.compat.pil import Image, ImageDraw
+from PIL import Image, ImageDraw
 from qrcode.image.styles.moduledrawers.base import QRModuleDrawer
 
 if TYPE_CHECKING:

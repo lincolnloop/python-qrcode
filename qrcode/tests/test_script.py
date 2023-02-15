@@ -5,7 +5,7 @@ import unittest
 from tempfile import mkdtemp
 from unittest import mock
 
-from qrcode.compat.pil import Image
+from PIL import Image
 from qrcode.console_scripts import commas, main
 
 
