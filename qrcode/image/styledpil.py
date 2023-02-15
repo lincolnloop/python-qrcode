@@ -1,8 +1,5 @@
-# Needed on case-insensitive filesystems
-from __future__ import absolute_import
-
 import qrcode.image.base
-from qrcode.compat.pil import Image
+from PIL import Image
 from qrcode.image.styles.colormasks import QRColorMask, SolidFillColorMask
 from qrcode.image.styles.moduledrawers import SquareModuleDrawer
 

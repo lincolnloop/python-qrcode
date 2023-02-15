@@ -2,7 +2,7 @@ import unittest
 from unittest import mock
 
 from qrcode import run_example
-from qrcode.compat.pil import Image
+from PIL import Image
 
 
 class ExampleTest(unittest.TestCase):
