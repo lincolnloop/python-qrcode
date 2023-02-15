@@ -15,12 +15,8 @@ from qrcode.image.base import BaseImage
 from qrcode.image.pure import PyPNGImage
 from qrcode.image.styledpil import StyledPilImage
 from qrcode.image.styles import colormasks, moduledrawers
+from qrcode.tests.consts import UNICODE_TEXT, WHITE, BLACK, RED
 from qrcode.util import MODE_8BIT_BYTE, MODE_ALPHA_NUM, MODE_NUMBER, QRData
-
-UNICODE_TEXT = "\u03b1\u03b2\u03b3"
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-RED = (255, 0, 0)
 
 
 class QRCodeTests(unittest.TestCase):

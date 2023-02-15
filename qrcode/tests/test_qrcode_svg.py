@@ -5,8 +5,7 @@ from tempfile import mkdtemp
 
 import qrcode
 from qrcode.image import svg
-
-UNICODE_TEXT = "\u03b1\u03b2\u03b3"
+from qrcode.tests.consts import UNICODE_TEXT
 
 
 class SvgImageWhite(svg.SvgImage):
