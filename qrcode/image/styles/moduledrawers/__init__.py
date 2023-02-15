@@ -6,5 +6,5 @@ try:
     from .pil import RoundedModuleDrawer  # noqa: F401
     from .pil import SquareModuleDrawer  # noqa: F401
     from .pil import VerticalBarsDrawer  # noqa: F401
-except ImportError:
+except ImportError:  # pragma: no cover
     pass

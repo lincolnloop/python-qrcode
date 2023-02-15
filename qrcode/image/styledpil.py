@@ -104,8 +104,7 @@ class StyledPilImage(qrcode.image.base.BaseImageWithDrawer):
     def save(self, stream, format=None, **kwargs):
         if format is None:
             format = kwargs.get("kind", self.kind)
-        if "kind" in kwargs:
-            del kwargs["kind"]
+        kwargs.pop("kind", None)
         self._img.save(stream, format=format, **kwargs)
 
     def __getattr__(self, name):
