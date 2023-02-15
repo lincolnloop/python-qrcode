@@ -1,13 +1,23 @@
 from qrcode.main import QRCode
-from qrcode.main import make  # noqa
-from qrcode.constants import (  # noqa
+from qrcode.main import make
+from qrcode.constants import (
     ERROR_CORRECT_L,
     ERROR_CORRECT_M,
     ERROR_CORRECT_Q,
     ERROR_CORRECT_H,
 )
 
-from qrcode import image  # noqa
+from qrcode import image
+
+__all__ = [
+    "ERROR_CORRECT_H",
+    "ERROR_CORRECT_L",
+    "ERROR_CORRECT_M",
+    "ERROR_CORRECT_Q",
+    "QRCode",
+    "image",
+    "make",
+]
 
 
 def run_example(data="http://www.lincolnloop.com", *args, **kwargs):
