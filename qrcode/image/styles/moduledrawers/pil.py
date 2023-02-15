@@ -1,6 +1,3 @@
-# Needed on case-insensitive filesystems
-from __future__ import absolute_import
-
 from typing import TYPE_CHECKING, List
 
 from qrcode.compat.pil import Image, ImageDraw
