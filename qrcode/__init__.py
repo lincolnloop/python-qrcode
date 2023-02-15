@@ -1,13 +1,11 @@
-from qrcode.main import QRCode
-from qrcode.main import make
+from qrcode import image
 from qrcode.constants import (
+    ERROR_CORRECT_H,
     ERROR_CORRECT_L,
     ERROR_CORRECT_M,
     ERROR_CORRECT_Q,
-    ERROR_CORRECT_H,
 )
-
-from qrcode import image
+from qrcode.main import QRCode, make
 
 __all__ = [
     "ERROR_CORRECT_H",

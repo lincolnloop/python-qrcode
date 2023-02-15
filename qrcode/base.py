@@ -1,4 +1,5 @@
 from typing import NamedTuple
+
 from qrcode import constants
 
 EXP_TABLE = list(range(256))
