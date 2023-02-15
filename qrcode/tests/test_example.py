@@ -1,13 +1,13 @@
-import unittest
 from unittest import mock
 
+import pytest
+
 from qrcode import run_example
-from qrcode.compat.pil import Image
+
+pytest.importorskip("PIL", reason="Requires PIL")
 
 
-class ExampleTest(unittest.TestCase):
-    @unittest.skipIf(not Image, "Requires PIL")
-    @mock.patch("PIL.Image.Image.show")
-    def runTest(self, mock_show):
-        run_example()
-        mock_show.assert_called_with()
+@mock.patch("PIL.Image.Image.show")
+def test_example(mock_show):
+    run_example()
+    mock_show.assert_called_with()
