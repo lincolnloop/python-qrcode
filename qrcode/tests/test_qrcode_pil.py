@@ -20,7 +20,7 @@ class PILQRCodeTests(unittest.TestCase):
         qr.add_data(UNICODE_TEXT)
         img = qr.make_image()
         img.save(io.BytesIO())
-        self.assertIsInstance(img.get_image(), Image.Image)
+        assert isinstance(img.get_image(), Image.Image)
 
     def test_render_pil_with_transparent_background(self):
         qr = qrcode.QRCode()
