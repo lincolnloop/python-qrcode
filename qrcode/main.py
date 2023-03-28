@@ -1,13 +1,16 @@
 import sys
 from bisect import bisect_left
 from typing import (
+    Any,
     Dict,
     Generic,
     List,
     NamedTuple,
     Optional,
+    TextIO,
     Type,
     TypeVar,
+    Union,
     cast,
     overload,
 )
@@ -18,30 +21,55 @@ from qrcode import constants, exceptions, util
 from qrcode.image.base import BaseImage
 from qrcode.image.pure import PyPNGImage
 
+T = TypeVar("T")
+
 ModulesType = List[List[Optional[bool]]]
 # Cache modules generated just based on the QR Code version
 precomputed_qr_blanks: Dict[int, ModulesType] = {}
 
+InputData = Union[str, bytes, util.QRData]
 
-def make(data=None, **kwargs):
-    qr = QRCode(**kwargs)
+GenericImage = TypeVar("GenericImage", bound=BaseImage)
+
+DEFAULT_ERROR_CORRECTION = constants.ERROR_CORRECT_M
+DEFAULT_BOX_SIZE = 10
+DEFAULT_BORDER = 4
+
+
+def make(
+    data: InputData,
+    version: Optional[int] = None,
+    error_correction: int = DEFAULT_ERROR_CORRECTION,
+    box_size: int = DEFAULT_BOX_SIZE,
+    border: int = DEFAULT_BORDER,
+    image_factory: Optional[Type[GenericImage]] = None,
+    mask_pattern: Optional[int] = None,
+) -> GenericImage:
+    qr = QRCode(
+        version=version,
+        error_correction=error_correction,
+        box_size=box_size,
+        border=border,
+        image_factory=image_factory,
+        mask_pattern=mask_pattern,
+    )
     qr.add_data(data)
     return qr.make_image()
 
 
-def _check_box_size(size):
+def _check_box_size(size: int) -> None:
     if int(size) <= 0:
         raise ValueError(f"Invalid box size (was {size}, expected larger than 0)")
 
 
-def _check_border(size):
+def _check_border(size: int) -> None:
     if int(size) < 0:
         raise ValueError(
             "Invalid border value (was %s, expected 0 or larger than that)" % size
         )
 
 
-def _check_mask_pattern(mask_pattern):
+def _check_mask_pattern(mask_pattern: Optional[int]) -> None:
     if mask_pattern is None:
         return
     if not isinstance(mask_pattern, int):
@@ -52,7 +80,7 @@ def _check_mask_pattern(mask_pattern):
         raise ValueError(f"Mask pattern should be in range(8) (got {mask_pattern})")
 
 
-def copy_2d_array(x):
+def copy_2d_array(x: List[List[T]]) -> List[List[T]]:
     return [row[:] for row in x]
 
 
@@ -71,26 +99,25 @@ class ActiveWithNeighbors(NamedTuple):
         return self.me
 
 
-GenericImage = TypeVar("GenericImage", bound=BaseImage)
-GenericImageLocal = TypeVar("GenericImageLocal", bound=BaseImage)
-
-
 class QRCode(Generic[GenericImage]):
     modules: ModulesType
+    data_list: List[util.QRData]
+    modules_count: int
+    data_cache: Optional[List[int]]
     _version: Optional[int] = None
 
     def __init__(
         self,
-        version=None,
-        error_correction=constants.ERROR_CORRECT_M,
-        box_size=10,
-        border=4,
+        version: Optional[int] = None,
+        error_correction: int = DEFAULT_ERROR_CORRECTION,
+        box_size: int = DEFAULT_BOX_SIZE,
+        border: int = DEFAULT_BORDER,
         image_factory: Optional[Type[GenericImage]] = None,
-        mask_pattern=None,
-    ):
+        mask_pattern: Optional[int] = None,
+    ) -> None:
         _check_box_size(box_size)
         _check_border(border)
-        self.version = version
+        self.version = version  # type: ignore
         self.error_correction = int(error_correction)
         self.box_size = int(box_size)
         # Spec says border should be at least four boxes wide, but allow for
@@ -105,26 +132,27 @@ class QRCode(Generic[GenericImage]):
     @property
     def version(self) -> int:
         if self._version is None:
-            self.best_fit()
-        return cast(int, self._version)
+            version = self.best_fit()
+            return version
+        return self._version
 
     @version.setter
-    def version(self, value) -> None:
+    def version(self, value: Optional[int]) -> None:
         if value is not None:
             value = int(value)
             util.check_version(value)
         self._version = value
 
     @property
-    def mask_pattern(self):
+    def mask_pattern(self) -> Optional[int]:
         return self._mask_pattern
 
     @mask_pattern.setter
-    def mask_pattern(self, pattern):
+    def mask_pattern(self, pattern: Optional[int]) -> None:
         _check_mask_pattern(pattern)
         self._mask_pattern = pattern
 
-    def clear(self):
+    def clear(self) -> None:
         """
         Reset the internal data.
         """
@@ -133,7 +161,11 @@ class QRCode(Generic[GenericImage]):
         self.data_cache = None
         self.data_list = []
 
-    def add_data(self, data, optimize=20):
+    def add_data(
+        self,
+        data: InputData,
+        optimize: int = 20,
+    ) -> None:
         """
         Add data to this QR Code.
 
@@ -149,7 +181,7 @@ class QRCode(Generic[GenericImage]):
             self.data_list.append(util.QRData(data))
         self.data_cache = None
 
-    def make(self, fit=True):
+    def make(self, fit: bool = True) -> None:
         """
         Compile the data into a QR Code array.
 
@@ -163,7 +195,7 @@ class QRCode(Generic[GenericImage]):
         else:
             self.makeImpl(False, self.mask_pattern)
 
-    def makeImpl(self, test, mask_pattern):
+    def makeImpl(self, test: bool, mask_pattern: int) -> None:
         self.modules_count = self.version * 4 + 17
 
         if self.version in precomputed_qr_blanks:
@@ -191,7 +223,7 @@ class QRCode(Generic[GenericImage]):
             )
         self.map_data(self.data_cache, mask_pattern)
 
-    def setup_position_probe_pattern(self, row, col):
+    def setup_position_probe_pattern(self, row: int, col: int) -> None:
         for r in range(-1, 8):
 
             if row + r <= -1 or self.modules_count <= row + r:
@@ -211,7 +243,7 @@ class QRCode(Generic[GenericImage]):
                 else:
                     self.modules[row + r][col + c] = False
 
-    def best_fit(self, start=None):
+    def best_fit(self, start: Optional[int] = None) -> int:
         """
         Find the minimum size required to fit in the data.
         """
@@ -241,7 +273,7 @@ class QRCode(Generic[GenericImage]):
             self.best_fit(start=self.version)
         return self.version
 
-    def best_mask_pattern(self):
+    def best_mask_pattern(self) -> int:
         """
         Find the most efficient mask pattern.
         """
@@ -259,7 +291,7 @@ class QRCode(Generic[GenericImage]):
 
         return pattern
 
-    def print_tty(self, out=None):
+    def print_tty(self, out: Optional[TextIO] = None) -> None:
         """
         Output the QR Code only using TTY colors.
 
@@ -289,7 +321,12 @@ class QRCode(Generic[GenericImage]):
         out.write("\x1b[1;47m" + (" " * (modcount * 2 + 4)) + "\x1b[0m\n")
         out.flush()
 
-    def print_ascii(self, out=None, tty=False, invert=False):
+    def print_ascii(
+        self,
+        out: Optional[TextIO] = None,
+        tty: bool = False,
+        invert: bool = False,
+    ) -> None:
         """
         Output the QR Code using ASCII characters.
 
@@ -312,7 +349,7 @@ class QRCode(Generic[GenericImage]):
         if invert:
             codes.reverse()
 
-        def get_module(x, y) -> int:
+        def get_module(x: int, y: int) -> int:
             if invert and self.border and max(x, y) >= modcount + self.border:
                 return 1
             if min(x, y) < 0 or max(x, y) >= modcount:
@@ -333,16 +370,26 @@ class QRCode(Generic[GenericImage]):
         out.flush()
 
     @overload
-    def make_image(self, image_factory: Literal[None] = None, **kwargs) -> GenericImage:
+    def make_image(
+        self,
+        image_factory: Literal[None] = None,
+        **kwargs: Any,
+    ) -> GenericImage:
         ...
 
     @overload
     def make_image(
-        self, image_factory: Type[GenericImageLocal] = None, **kwargs
-    ) -> GenericImageLocal:
+        self,
+        image_factory: Optional[Type[GenericImage]] = None,
+        **kwargs: Any,
+    ) -> GenericImage:
         ...
 
-    def make_image(self, image_factory=None, **kwargs):
+    def make_image(
+        self,
+        image_factory: Optional[Type[GenericImage]] = None,
+        **kwargs: Any,
+    ) -> GenericImage:
         """
         Make an image from the QR Code data.
 
@@ -360,9 +407,9 @@ class QRCode(Generic[GenericImage]):
                 from qrcode.image.pil import Image, PilImage
 
                 # Use PIL by default if available, otherwise use PyPNG.
-                image_factory = PilImage if Image else PyPNGImage
+                image_factory = PilImage if Image else PyPNGImage  # type: ignore
 
-        im = image_factory(
+        im = image_factory(  # type: ignore[misc]
             self.border,
             self.modules_count,
             self.box_size,
@@ -391,7 +438,7 @@ class QRCode(Generic[GenericImage]):
             and col < len(self.modules[row])
         )
 
-    def setup_timing_pattern(self):
+    def setup_timing_pattern(self) -> None:
         for r in range(8, self.modules_count - 8):
             if self.modules[r][6] is not None:
                 continue
@@ -402,7 +449,7 @@ class QRCode(Generic[GenericImage]):
                 continue
             self.modules[6][c] = c % 2 == 0
 
-    def setup_position_adjust_pattern(self):
+    def setup_position_adjust_pattern(self) -> None:
         pos = util.pattern_position(self.version)
 
         for i in range(len(pos)):
@@ -431,7 +478,7 @@ class QRCode(Generic[GenericImage]):
                         else:
                             self.modules[row + r][col + c] = False
 
-    def setup_type_number(self, test):
+    def setup_type_number(self, test: bool) -> None:
         bits = util.BCH_type_number(self.version)
 
         for i in range(18):
@@ -442,7 +489,7 @@ class QRCode(Generic[GenericImage]):
             mod = not test and ((bits >> i) & 1) == 1
             self.modules[i % 3 + self.modules_count - 8 - 3][i // 3] = mod
 
-    def setup_type_info(self, test, mask_pattern):
+    def setup_type_info(self, test: bool, mask_pattern: int) -> None:
         data = (self.error_correction << 3) | mask_pattern
         bits = util.BCH_type_info(data)
 
@@ -473,7 +520,7 @@ class QRCode(Generic[GenericImage]):
         # fixed module
         self.modules[self.modules_count - 8][8] = not test
 
-    def map_data(self, data, mask_pattern):
+    def map_data(self, data: List[int], mask_pattern: int) -> None:
         inc = -1
         row = self.modules_count - 1
         bitIndex = 7
@@ -518,7 +565,7 @@ class QRCode(Generic[GenericImage]):
                     inc = -inc
                     break
 
-    def get_matrix(self):
+    def get_matrix(self) -> ModulesType:
         """
         Return the QR Code as a multidimensional array, including the border.
 
@@ -531,10 +578,11 @@ class QRCode(Generic[GenericImage]):
             return self.modules
 
         width = len(self.modules) + self.border * 2
-        code = [[False] * width] * self.border
+        code: ModulesType = [[False] * width] * self.border
         x_border = [False] * self.border
         for module in self.modules:
-            code.append(x_border + cast(List[bool], module) + x_border)
+            module_code: List[bool] = x_border + cast(List[bool], module) + x_border
+            code.append(cast(List[Optional[bool]], module_code))
         code += [[False] * width] * self.border
 
         return code

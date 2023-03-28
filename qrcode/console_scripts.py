@@ -8,14 +8,14 @@ a pipe to a file an image is written. The default image format is PNG.
 import optparse
 import os
 import sys
-from typing import Dict, Iterable, NoReturn, Optional, Set, Type
+from typing import Any, Dict, Iterable, List, NoReturn, Optional, Set, Type, Union
 
 import qrcode
 from qrcode.image.base import BaseImage, DrawerAliases
 
 # The next block is added to get the terminal to display properly on MS platforms
 if sys.platform.startswith(("win", "cygwin")):  # pragma: no cover
-    import colorama  # type: ignore
+    import colorama
 
     colorama.init()
 
@@ -29,7 +29,7 @@ default_factories = {
     "pymaging": "qrcode.image.pure.PymagingImage",
 }
 
-error_correction = {
+error_correction: Dict[str, int] = {
     "L": qrcode.ERROR_CORRECT_L,
     "M": qrcode.ERROR_CORRECT_M,
     "Q": qrcode.ERROR_CORRECT_Q,
@@ -37,7 +37,7 @@ error_correction = {
 }
 
 
-def main(args=None):
+def main(args: Optional[Union[List[str], str]] = None) -> None:
     if args is None:
         args = sys.argv[1:]
     from pkg_resources import get_distribution
@@ -100,6 +100,7 @@ def main(args=None):
         image_factory=image_factory,
     )
 
+    data: Union[str, bytes]
     if args:
         data = args[0]
         data = data.encode(errors="surrogateescape")
@@ -119,7 +120,7 @@ def main(args=None):
             qr.print_ascii(tty=not opts.ascii)
             return
 
-        kwargs = {}
+        kwargs: Dict[str, Any] = {}
         aliases: Optional[DrawerAliases] = getattr(
             qr.image_factory, "drawer_aliases", None
         )
@@ -144,11 +145,11 @@ def get_factory(module: str) -> Type[BaseImage]:
         raise ValueError("The image factory is not a full python path")
     module, name = module.rsplit(".", 1)
     imp = __import__(module, {}, {}, [name])
-    return getattr(imp, name)
+    return getattr(imp, name)  # type: ignore[no-any-return]
 
 
 def get_drawer_help() -> str:
-    help: Dict[str, Set] = {}
+    help: Dict[str, Set[str]] = {}
     for alias, module in default_factories.items():
         try:
             image = get_factory(module)
@@ -157,7 +158,7 @@ def get_drawer_help() -> str:
         aliases: Optional[DrawerAliases] = getattr(image, "drawer_aliases", None)
         if not aliases:
             continue
-        factories = help.setdefault(commas(aliases), set())
+        factories: Set[str] = help.setdefault(commas(aliases), set())
         factories.add(alias)
 
     return ". ".join(
@@ -166,7 +167,7 @@ def get_drawer_help() -> str:
     )
 
 
-def commas(items: Iterable[str], joiner="or") -> str:
+def commas(items: Iterable[str], joiner: str = "or") -> str:
     items = tuple(items)
     if not items:
         return ""

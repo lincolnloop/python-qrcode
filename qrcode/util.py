@@ -1,9 +1,26 @@
 import math
 import re
-from typing import List
+from typing import (
+    TYPE_CHECKING,
+    Callable,
+    Dict,
+    Iterator,
+    List,
+    Optional,
+    Pattern,
+    Tuple,
+    Union,
+    cast,
+    overload,
+)
+
+from typing_extensions import Literal
 
 from qrcode import LUT, base, exceptions
 from qrcode.base import RSBlock
+
+if TYPE_CHECKING:
+    from qrcode.main import ModulesType
 
 # QR encoding modes.
 MODE_NUMBER = 1 << 0
@@ -12,19 +29,19 @@ MODE_8BIT_BYTE = 1 << 2
 MODE_KANJI = 1 << 3
 
 # Encoding mode sizes.
-MODE_SIZE_SMALL = {
+MODE_SIZE_SMALL: Dict[int, int] = {
     MODE_NUMBER: 10,
     MODE_ALPHA_NUM: 9,
     MODE_8BIT_BYTE: 8,
     MODE_KANJI: 8,
 }
-MODE_SIZE_MEDIUM = {
+MODE_SIZE_MEDIUM: Dict[int, int] = {
     MODE_NUMBER: 12,
     MODE_ALPHA_NUM: 11,
     MODE_8BIT_BYTE: 16,
     MODE_KANJI: 10,
 }
-MODE_SIZE_LARGE = {
+MODE_SIZE_LARGE: Dict[int, int] = {
     MODE_NUMBER: 14,
     MODE_ALPHA_NUM: 13,
     MODE_8BIT_BYTE: 16,
@@ -35,9 +52,9 @@ ALPHA_NUM = b"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:"
 RE_ALPHA_NUM = re.compile(b"^[" + re.escape(ALPHA_NUM) + rb"]*\Z")
 
 # The number of bits for numeric delimited data lengths.
-NUMBER_LENGTH = {3: 10, 2: 7, 1: 4}
+NUMBER_LENGTH: Dict[int, int] = {3: 10, 2: 7, 1: 4}
 
-PATTERN_POSITION_TABLE = [
+PATTERN_POSITION_TABLE: List[List[int]] = [
     [],
     [6, 18],
     [6, 22],
@@ -98,7 +115,7 @@ PAD1 = 0x11
 
 
 # Precompute bit count limits, indexed by error correction level and code size
-def _data_count(block):
+def _data_count(block: RSBlock) -> int:
     return block.data_count
 
 
@@ -112,7 +129,7 @@ BIT_LIMIT_TABLE = [
 ]
 
 
-def BCH_type_info(data):
+def BCH_type_info(data: int) -> int:
     d = data << 10
     while BCH_digit(d) - BCH_digit(G15) >= 0:
         d ^= G15 << (BCH_digit(d) - BCH_digit(G15))
@@ -120,14 +137,14 @@ def BCH_type_info(data):
     return ((data << 10) | d) ^ G15_MASK
 
 
-def BCH_type_number(data):
+def BCH_type_number(data: int) -> int:
     d = data << 12
     while BCH_digit(d) - BCH_digit(G18) >= 0:
         d ^= G18 << (BCH_digit(d) - BCH_digit(G18))
     return (data << 12) | d
 
 
-def BCH_digit(data):
+def BCH_digit(data: int) -> int:
     digit = 0
     while data != 0:
         digit += 1
@@ -135,11 +152,11 @@ def BCH_digit(data):
     return digit
 
 
-def pattern_position(version):
+def pattern_position(version: int) -> List[int]:
     return PATTERN_POSITION_TABLE[version - 1]
 
 
-def mask_func(pattern):
+def mask_func(pattern: int) -> Callable[[int, int], bool]:
     """
     Return the mask function for the given mask pattern.
     """
@@ -159,10 +176,10 @@ def mask_func(pattern):
         return lambda i, j: ((i * j) % 2 + (i * j) % 3) % 2 == 0
     if pattern == 7:  # 111
         return lambda i, j: ((i * j) % 3 + (i + j) % 2) % 2 == 0
-    raise TypeError("Bad mask pattern: " + pattern)  # pragma: no cover
+    raise TypeError("Bad mask pattern: " + str(pattern))  # pragma: no cover
 
 
-def mode_sizes_for_version(version):
+def mode_sizes_for_version(version: int) -> Dict[int, int]:
     if version < 10:
         return MODE_SIZE_SMALL
     elif version < 27:
@@ -171,7 +188,7 @@ def mode_sizes_for_version(version):
         return MODE_SIZE_LARGE
 
 
-def length_in_bits(mode, version):
+def length_in_bits(mode: int, version: int) -> int:
     if mode not in (MODE_NUMBER, MODE_ALPHA_NUM, MODE_8BIT_BYTE, MODE_KANJI):
         raise TypeError(f"Invalid mode ({mode})")  # pragma: no cover
 
@@ -180,15 +197,13 @@ def length_in_bits(mode, version):
     return mode_sizes_for_version(version)[mode]
 
 
-def check_version(version):
+def check_version(version: int) -> None:
     if version < 1 or version > 40:
         raise ValueError(f"Invalid version (was {version}, expected 1 to 40)")
 
 
-def lost_point(modules):
+def lost_point(modules: ModulesType) -> int:
     modules_count = len(modules)
-
-    lost_point = 0
 
     lost_point = _lost_point_level1(modules, modules_count)
     lost_point += _lost_point_level2(modules, modules_count)
@@ -198,8 +213,8 @@ def lost_point(modules):
     return lost_point
 
 
-def _lost_point_level1(modules, modules_count):
-    lost_point = 0
+def _lost_point_level1(modules: ModulesType, modules_count: int) -> int:
+    lost_point: int = 0
 
     modules_range = range(modules_count)
     container = [0] * (modules_count + 1)
@@ -241,7 +256,7 @@ def _lost_point_level1(modules, modules_count):
     return lost_point
 
 
-def _lost_point_level2(modules, modules_count):
+def _lost_point_level2(modules: ModulesType, modules_count: int) -> int:
     lost_point = 0
 
     modules_range = range(modules_count - 1)
@@ -268,7 +283,7 @@ def _lost_point_level2(modules, modules_count):
     return lost_point
 
 
-def _lost_point_level3(modules, modules_count):
+def _lost_point_level3(modules: ModulesType, modules_count: int) -> int:
     # 1 : 1 : 3 : 1 : 1 ratio (dark:light:dark:light:dark) pattern in
     # row/column, preceded or followed by light area 4 modules wide. From ISOIEC.
     # pattern1:     10111010000
@@ -344,15 +359,18 @@ def _lost_point_level3(modules, modules_count):
     return lost_point
 
 
-def _lost_point_level4(modules, modules_count):
-    dark_count = sum(map(sum, modules))
+def _lost_point_level4(modules: ModulesType, modules_count: int) -> int:
+    dark_count: int = sum(point or 0 for row in modules for point in row)
     percent = float(dark_count) / (modules_count**2)
     # Every 5% departure from 50%, rating++
     rating = int(abs(percent * 100 - 50) / 5)
     return rating * 10
 
 
-def optimal_data_chunks(data, minimum=4):
+def optimal_data_chunks(
+    data: Union[str, bytes],
+    minimum: int = 4,
+) -> Iterator["QRData"]:
     """
     An iterator returning QRData chunks optimized to the data content.
 
@@ -362,23 +380,26 @@ def optimal_data_chunks(data, minimum=4):
     num_pattern = rb"\d"
     alpha_pattern = b"[" + re.escape(ALPHA_NUM) + b"]"
     if len(data) <= minimum:
-        num_pattern = re.compile(b"^" + num_pattern + b"+$")
-        alpha_pattern = re.compile(b"^" + alpha_pattern + b"+$")
+        num_pattern_regexp = re.compile(b"^" + num_pattern + b"+$")
+        alpha_pattern_regexp = re.compile(b"^" + alpha_pattern + b"+$")
     else:
         re_repeat = b"{" + str(minimum).encode("ascii") + b",}"
-        num_pattern = re.compile(num_pattern + re_repeat)
-        alpha_pattern = re.compile(alpha_pattern + re_repeat)
-    num_bits = _optimal_split(data, num_pattern)
+        num_pattern_regexp = re.compile(num_pattern + re_repeat)
+        alpha_pattern_regexp = re.compile(alpha_pattern + re_repeat)
+    num_bits = _optimal_split(data, num_pattern_regexp)
     for is_num, chunk in num_bits:
         if is_num:
             yield QRData(chunk, mode=MODE_NUMBER, check_data=False)
         else:
-            for is_alpha, sub_chunk in _optimal_split(chunk, alpha_pattern):
+            for is_alpha, sub_chunk in _optimal_split(chunk, alpha_pattern_regexp):
                 mode = MODE_ALPHA_NUM if is_alpha else MODE_8BIT_BYTE
                 yield QRData(sub_chunk, mode=mode, check_data=False)
 
 
-def _optimal_split(data, pattern):
+def _optimal_split(
+    data: bytes,
+    pattern: Pattern[bytes]
+) -> Iterator[Tuple[bool, bytes]]:
     while data:
         match = re.search(pattern, data)
         if not match:
@@ -392,7 +413,7 @@ def _optimal_split(data, pattern):
         yield False, data
 
 
-def to_bytestring(data):
+def to_bytestring(data: Union[str, bytes]) -> bytes:
     """
     Convert data to a (utf-8 encoded) byte-string if it isn't a byte-string
     already.
@@ -402,7 +423,7 @@ def to_bytestring(data):
     return data
 
 
-def optimal_mode(data):
+def optimal_mode(data: bytes) -> int:
     """
     Calculate the optimal mode for this chunk of data.
     """
@@ -420,7 +441,32 @@ class QRData:
     Doesn't currently handle KANJI.
     """
 
-    def __init__(self, data, mode=None, check_data=True):
+    mode: int
+
+    @overload
+    def __init__(
+        self,
+        data: Union[str, bytes],
+        mode: Optional[int] = None,
+        check_data: Literal[True] = True,
+    ) -> None:
+        ...
+
+    @overload
+    def __init__(
+        self,
+        data: bytes,
+        mode: Optional[int] = None,
+        check_data: Literal[False] = False,
+    ) -> None:
+        ...
+
+    def __init__(
+        self,
+        data: Union[str, bytes],
+        mode: Optional[int] = None,
+        check_data: bool = True
+    ) -> None:
         """
         If ``mode`` isn't provided, the most compact QR data type possible is
         chosen.
@@ -428,21 +474,25 @@ class QRData:
         if check_data:
             data = to_bytestring(data)
 
+        # This is a workaround for mypy not being able to infer the type of
+        # data after the if statement above.
+        _data: bytes = cast(bytes, data)
+
         if mode is None:
-            self.mode = optimal_mode(data)
+            self.mode = optimal_mode(_data)
         else:
             self.mode = mode
             if mode not in (MODE_NUMBER, MODE_ALPHA_NUM, MODE_8BIT_BYTE):
                 raise TypeError(f"Invalid mode ({mode})")  # pragma: no cover
-            if check_data and mode < optimal_mode(data):  # pragma: no cover
+            if check_data and mode < optimal_mode(_data):  # pragma: no cover
                 raise ValueError(f"Provided data can not be represented in mode {mode}")
 
-        self.data = data
+        self.data: bytes = _data
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.data)
 
-    def write(self, buffer):
+    def write(self, buffer: "BitBuffer") -> None:
         if self.mode == MODE_NUMBER:
             for i in range(0, len(self.data), 3):
                 chars = self.data[i : i + 3]
@@ -464,30 +514,30 @@ class QRData:
             for c in data:
                 buffer.put(c, 8)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return repr(self.data)
 
 
 class BitBuffer:
-    def __init__(self):
+    def __init__(self) -> None:
         self.buffer: List[int] = []
         self.length = 0
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return ".".join([str(n) for n in self.buffer])
 
-    def get(self, index):
+    def get(self, index: int) -> int:
         buf_index = math.floor(index / 8)
         return ((self.buffer[buf_index] >> (7 - index % 8)) & 1) == 1
 
-    def put(self, num, length):
+    def put(self, num: int, length: int) -> None:
         for i in range(length):
             self.put_bit(((num >> (length - i - 1)) & 1) == 1)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return self.length
 
-    def put_bit(self, bit):
+    def put_bit(self, bit: int) -> None:
         buf_index = self.length // 8
         if len(self.buffer) <= buf_index:
             self.buffer.append(0)
@@ -496,7 +546,7 @@ class BitBuffer:
         self.length += 1
 
 
-def create_bytes(buffer: BitBuffer, rs_blocks: List[RSBlock]):
+def create_bytes(buffer: BitBuffer, rs_blocks: List[RSBlock]) -> List[int]:
     offset = 0
 
     maxDcCount = 0
@@ -548,7 +598,11 @@ def create_bytes(buffer: BitBuffer, rs_blocks: List[RSBlock]):
     return data
 
 
-def create_data(version, error_correction, data_list):
+def create_data(
+    version: int,
+    error_correction: int,
+    data_list: List[QRData],
+) -> List[int]:
 
     buffer = BitBuffer()
     for data in data_list:

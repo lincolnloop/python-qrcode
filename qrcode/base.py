@@ -1,9 +1,10 @@
-from typing import NamedTuple
+from typing import Dict, Iterator, List, NamedTuple, Tuple, Union, overload
+
 from qrcode import constants
 
-EXP_TABLE = list(range(256))
+EXP_TABLE: List[int] = list(range(256))
 
-LOG_TABLE = list(range(256))
+LOG_TABLE: List[int] = list(range(256))
 
 for i in range(8):
     EXP_TABLE[i] = 1 << i
@@ -16,14 +17,14 @@ for i in range(8, 256):
 for i in range(255):
     LOG_TABLE[EXP_TABLE[i]] = i
 
-RS_BLOCK_OFFSET = {
+RS_BLOCK_OFFSET: Dict[int, int] = {
     constants.ERROR_CORRECT_L: 0,
     constants.ERROR_CORRECT_M: 1,
     constants.ERROR_CORRECT_Q: 2,
     constants.ERROR_CORRECT_H: 3,
 }
 
-RS_BLOCK_TABLE = (
+RS_BLOCK_TABLE: Tuple[Tuple[int, ...], ...] = (
     # L
     # M
     # Q
@@ -231,18 +232,18 @@ RS_BLOCK_TABLE = (
 )
 
 
-def glog(n):
+def glog(n: int) -> int:
     if n < 1:  # pragma: no cover
         raise ValueError(f"glog({n})")
     return LOG_TABLE[n]
 
 
-def gexp(n):
+def gexp(n: int) -> int:
     return EXP_TABLE[n % 255]
 
 
 class Polynomial:
-    def __init__(self, num, shift):
+    def __init__(self, num: List[int], shift: int) -> None:
         if not num:  # pragma: no cover
             raise Exception(f"{len(num)}/{shift}")
 
@@ -251,18 +252,26 @@ class Polynomial:
             if num[offset] != 0:
                 break
 
-        self.num = num[offset:] + [0] * shift
+        self.num: List[int] = num[offset:] + [0] * shift
 
-    def __getitem__(self, index):
+    @overload
+    def __getitem__(self, index: int) -> int:
+        ...
+
+    @overload
+    def __getitem__(self, index: slice) -> List[int]:
+        ...
+
+    def __getitem__(self, index: Union[slice, int]) -> Union[List[int], int]:
         return self.num[index]
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[int]:
         return iter(self.num)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.num)
 
-    def __mul__(self, other):
+    def __mul__(self, other: "Polynomial") -> "Polynomial":
         num = [0] * (len(self) + len(other) - 1)
 
         for i, item in enumerate(self):
@@ -271,14 +280,14 @@ class Polynomial:
 
         return Polynomial(num, 0)
 
-    def __mod__(self, other):
+    def __mod__(self, other: "Polynomial") -> "Polynomial":
         difference = len(self) - len(other)
         if difference < 0:
             return self
 
         ratio = glog(self[0]) - glog(other[0])
 
-        num = [
+        num: List[int] = [
             item ^ gexp(glog(other_item) + ratio)
             for item, other_item in zip(self, other)
         ]
@@ -294,7 +303,7 @@ class RSBlock(NamedTuple):
     data_count: int
 
 
-def rs_blocks(version, error_correction):
+def rs_blocks(version: int, error_correction: int) -> List[RSBlock]:
     if error_correction not in RS_BLOCK_OFFSET:  # pragma: no cover
         raise Exception(
             "bad rs block @ version: %s / error_correction: %s"
@@ -303,7 +312,7 @@ def rs_blocks(version, error_correction):
     offset = RS_BLOCK_OFFSET[error_correction]
     rs_block = RS_BLOCK_TABLE[(version - 1) * 4 + offset]
 
-    blocks = []
+    blocks: List[RSBlock] = []
 
     for i in range(0, len(rs_block), 3):
         count, total_count, data_count = rs_block[i : i + 3]
