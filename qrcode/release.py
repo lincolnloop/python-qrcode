@@ -2,12 +2,13 @@
 This file provides zest.releaser entrypoints using when releasing new
 qrcode versions.
 """
+import datetime
 import os
 import re
-import datetime
+from typing import Dict
 
 
-def update_manpage(data):
+def update_manpage(data: Dict[str, str]) -> None:
     """
     Update the version in the manpage document.
     """
