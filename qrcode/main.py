@@ -156,8 +156,8 @@ class QRCode(Generic[GenericImage]):
         :param fit: If ``True`` (or if a size has not been provided), find the
             best fit for the data to avoid data overflow errors.
         """
-        if fit or (self.version is None):
-            self.best_fit(start=self.version)
+        if fit or (self._version is None):
+            self.best_fit(start=self._version)
         if self.mask_pattern is None:
             self.makeImpl(False, self.best_mask_pattern())
         else:
@@ -229,11 +229,12 @@ class QRCode(Generic[GenericImage]):
             data.write(buffer)
 
         needed_bits = len(buffer)
-        self.version = bisect_left(
+        new_version = bisect_left(
             util.BIT_LIMIT_TABLE[self.error_correction], needed_bits, start
         )
-        if self.version == 41:
+        if new_version == 41:
             raise exceptions.DataOverflowError()
+        self.version = new_version
 
         # Now check whether we need more bits for the mode sizes, recursing if
         # our guess was too low

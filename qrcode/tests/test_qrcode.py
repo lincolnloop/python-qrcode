@@ -66,6 +66,12 @@ class QRCodeTests(unittest.TestCase):
         qr.make()
         self.assertEqual(qr.version, 2)
 
+    def test_fit_overflow(self):
+        # Alphanumeric.  Version 40 with ERROR_CORRECT_LOW has max 4296 characters.
+        qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
+        qr.add_data("A" * 4297)
+        self.assertRaises(DataOverflowError, qr.make)
+
     def test_mode_number(self):
         qr = qrcode.QRCode()
         qr.add_data("1234567890123456789012345678901234", optimize=0)
