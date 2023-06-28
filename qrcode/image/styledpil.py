@@ -49,6 +49,8 @@ class StyledPilImage(qrcode.image.base.BaseImageWithDrawer):
         )
         if not self.embeded_image and embeded_image_path:
             self.embeded_image = Image.open(embeded_image_path)
+        self.embeded_image_overwrite = kwargs.get("embeded_image_overwrite", False)
+
 
         # the paint_color is the color the module drawer will use to draw upon
         # a canvas During the color mask process, pixels that are paint_color
@@ -87,7 +89,14 @@ class StyledPilImage(qrcode.image.base.BaseImageWithDrawer):
             return
         total_width, _ = self._img.size
         total_width = int(total_width)
-        logo_width_ish = int(total_width / 4)
+
+        logo_divider = 4
+
+        if self.embeded_image_overwrite:
+            # if we're doing this destructive thing to the QR code, better to make it smaller to increase chances of not breaking it
+            logo_divider = 8
+
+        logo_width_ish = int(total_width / logo_divider)
         logo_offset = (
             int((int(total_width / 2) - int(logo_width_ish / 2)) / self.box_size)
             * self.box_size
@@ -97,8 +106,18 @@ class StyledPilImage(qrcode.image.base.BaseImageWithDrawer):
         region = self.embeded_image
         region = region.resize((logo_width, logo_width), self.embeded_image_resample)
         if "A" in region.getbands():
+            if self.embeded_image_overwrite:
+                # "erase" the logo region using background color and apply the embedded image on top
+                embed_backing_region = Image.new(region.mode, region.size, self.color_mask.back_color)
+                self._img.alpha_composite(embed_backing_region, logo_position)
+
             self._img.alpha_composite(region, logo_position)
         else:
+            if self.embeded_image_overwrite:
+                # "erase" the logo region using background color and apply the embedded image on top
+                embed_backing_region = Image.new(region.mode, region.size, self.color_mask.back_color)
+                self._img.paste(embed_backing_region, logo_position)
+
             self._img.paste(region, logo_position)
 
     def save(self, stream, format=None, **kwargs):
