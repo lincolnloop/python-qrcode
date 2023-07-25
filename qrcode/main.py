@@ -16,7 +16,6 @@ from typing_extensions import Literal
 
 from qrcode import constants, exceptions, util
 from qrcode.image.base import BaseImage
-from qrcode.image.pure import PyPNGImage
 
 ModulesType = List[List[Optional[bool]]]
 # Cache modules generated just based on the QR Code version
@@ -360,7 +359,11 @@ class QRCode(Generic[GenericImage]):
                 from qrcode.image.pil import Image, PilImage
 
                 # Use PIL by default if available, otherwise use PyPNG.
-                image_factory = PilImage if Image else PyPNGImage
+                if Image is not None:
+                    image_factory = PilImage
+                else:
+                    from qrcode.image.pure import PyPNGImage
+                    image_factory = PyPNGImage
 
         im = image_factory(
             self.border,
