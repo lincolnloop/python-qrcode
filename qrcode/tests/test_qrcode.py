@@ -5,17 +5,20 @@ import warnings
 from tempfile import mkdtemp
 from unittest import mock
 
-import png
-
 import qrcode
 import qrcode.util
 from qrcode.compat.pil import Image as pil_Image
 from qrcode.exceptions import DataOverflowError
 from qrcode.image.base import BaseImage
-from qrcode.image.pure import PyPNGImage
 from qrcode.image.styledpil import StyledPilImage
 from qrcode.image.styles import colormasks, moduledrawers
 from qrcode.util import MODE_8BIT_BYTE, MODE_ALPHA_NUM, MODE_NUMBER, QRData
+
+try:
+    import png
+    from qrcode.image.pure import PyPNGImage
+except ImportError:
+    PyPNGImage = None
 
 UNICODE_TEXT = "\u03b1\u03b2\u03b3"
 WHITE = (255, 255, 255)
@@ -175,6 +178,7 @@ class QRCodeTests(unittest.TestCase):
         self.assertTrue(MockFactory.new_image.called)
         self.assertTrue(MockFactory.drawrect.called)
 
+    @unittest.skipIf(not PyPNGImage, "Requires pypng")
     def test_render_pypng(self):
         qr = qrcode.QRCode()
         qr.add_data(UNICODE_TEXT)
@@ -184,6 +188,7 @@ class QRCodeTests(unittest.TestCase):
         print(img.width, img.box_size, img.border)
         img.save(io.BytesIO())
 
+    @unittest.skipIf(not PyPNGImage, "Requires pypng")
     def test_render_pypng_to_str(self):
         qr = qrcode.QRCode()
         qr.add_data(UNICODE_TEXT)
