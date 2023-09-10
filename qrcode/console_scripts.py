@@ -25,6 +25,7 @@ default_factories = {
     "svg": "qrcode.image.svg.SvgImage",
     "svg-fragment": "qrcode.image.svg.SvgFragmentImage",
     "svg-path": "qrcode.image.svg.SvgPathImage",
+    "svg-compressed": "qrcode.image.svg.SvgCompressedImage",
     # Keeping for backwards compatibility:
     "pymaging": "qrcode.image.pure.PymagingImage",
 }
