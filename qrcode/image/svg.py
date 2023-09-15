@@ -197,21 +197,19 @@ class SvgCompressedImage(SvgImage):
             # The +1 -1 allows the path walk logic to not worry about image edges.
             goal[point[0]-self.border+1][point[1]-self.border+1] = 1
 
-        def abs_or_delta(cmds, curr, last, curr_2=None, last_2=None):
+        def abs_or_delta(cmds, curr_x, last_x, curr_y, last_y):
             ''' Use whichever is shorter: the absolute command, or delta command.'''
-            # The +1 -1 allows the path walk logic to not worry about image edges.
-            curr -= 1
-            last -= 1
-            if curr_2 != None: curr_2 -= 1
-            if last_2 != None: last_2 -= 1
-            def opt_join(a, b=None):
+            def opt_join(a, b):
+                if a == None:
+                    return '%d'%b
                 if b == None:
                     return '%d'%a
                 return '%d'%a+('' if b < 0 else ' ')+'%d'%b
-            return min([
-                cmds[0]+opt_join(curr-last, curr_2-last_2 if curr_2 != None else None),
-                cmds[1]+opt_join(curr, curr_2)
-            ], key=len)
+            return ((curr_x, curr_y), min([
+                cmds[0]+opt_join(curr_x-last_x if last_x != None else None, curr_y-last_y if last_y != None else None),
+                # The +1 -1 allows the path walk logic to not worry about image edges.
+                cmds[1]+opt_join(curr_x-1      if last_x != None else None, curr_y-1      if last_y != None else None)
+            ], key=len))
 
         class WD(enum.IntEnum):
             North = 1
@@ -222,14 +220,15 @@ class SvgCompressedImage(SvgImage):
         # Old cursor position allows optimizing with "m" sometimes instead of "M".
         # The +1 -1 allows the path walk logic to not worry about image edges.
         old_cursor = (1,1)
+        fullpath = []
 
         # Go over the grid, creating the paths. This ordering seems to work fairly
         # well, although it's not necessarily optimal. Unfortunately optimal is a
         # traveling salesman problem, and it's not obvious whether there's any
         # significantly better possible ordering in general.
-        for start_y in range(self.width+2):
-         for start_x in range(self.width+2):
-            if goal[start_x][start_y] == curr[start_x][start_y]:
+        for search_y in range(self.width+2):
+         for search_x in range(self.width+2):
+            if goal[search_x][search_y] == curr[search_x][search_y]:
                 continue
 
             # Note, the 'm' here is starting from the old cursor spot, which (as per SVG
@@ -238,8 +237,11 @@ class SvgCompressedImage(SvgImage):
             # opportunity would be a convert of 'm1 100' to 'm1 9', so would require a
             # straight line of 91 pairs of identical pixels. I believe the QR spec allows
             # for that, but it is essentially impossible by chance.
-            path = abs_or_delta('mM', start_x, old_cursor[0], start_y, old_cursor[1])
+            (start_x, start_y) = (search_x, search_y)
+            subpath = [abs_or_delta('mM', start_x, old_cursor[0], start_y, old_cursor[1])]
             path_flips = {}
+            splice_points = set(i[0] for i in fullpath)
+            do_splice = None # The point where we are doing a splice, to save on 'M's.
             paint_on = goal[start_x][start_y]
             path_dir = WD.East if paint_on else WD.South
             (curr_x, curr_y) = (last_x, last_y) = (start_x, start_y)
@@ -254,9 +256,16 @@ class SvgCompressedImage(SvgImage):
                             curr_x += 1
                         assert curr_x != last_x
                         path_dir = WD.North if goal[curr_x][curr_y-1] else WD.South
+                        if do_splice or (curr_x, curr_y) != (start_x, start_y):
+                            subpath.append(abs_or_delta('hH', curr_x, last_x, curr_y, None))
                         if (curr_x, curr_y) == (start_x, start_y):
-                            break # path is done
-                        path += abs_or_delta('hH', curr_x, last_x)
+                            break # subpath is done
+                        if not do_splice and (curr_x, curr_y) in splice_points:
+                            subpath = []
+                            path_flips = {}
+                            do_splice = (start_x, start_y) = (curr_x, curr_y)
+                            continue
+
                     case WD.West:
                         while not goal[curr_x-1][curr_y] and goal[curr_x-1][curr_y-1]:
                             curr_x -= 1
@@ -265,30 +274,55 @@ class SvgCompressedImage(SvgImage):
                             path_flips[curr_x].append(curr_y)
                         assert curr_x != last_x
                         path_dir = WD.South if goal[curr_x-1][curr_y] else WD.North
+                        if do_splice or (curr_x, curr_y) != (start_x, start_y):
+                            subpath.append(abs_or_delta('hH', curr_x, last_x, curr_y, None))
                         if (curr_x, curr_y) == (start_x, start_y):
-                            break # path is done
-                        path += abs_or_delta('hH', curr_x, last_x)
+                            break # subpath is done
+                        if not do_splice and (curr_x, curr_y) in splice_points:
+                            subpath = []
+                            path_flips = {}
+                            do_splice = (start_x, start_y) = (curr_x, curr_y)
+                            continue
+
                     case WD.North:
                         while goal[curr_x][curr_y-1] and not goal[curr_x-1][curr_y-1]:
                             curr_y -= 1
                         assert curr_y != last_y
                         path_dir = WD.West if goal[curr_x-1][curr_y-1] else WD.East
+                        if do_splice or (curr_x, curr_y) != (start_x, start_y):
+                            subpath.append(abs_or_delta('vV', curr_x, None, curr_y, last_y))
                         if (curr_x, curr_y) == (start_x, start_y):
-                            break # path is done
-                        path += abs_or_delta('vV', curr_y, last_y)
+                            break # subpath is done
+                        if not do_splice and (curr_x, curr_y) in splice_points:
+                            subpath = []
+                            path_flips = {}
+                            do_splice = (start_x, start_y) = (curr_x, curr_y)
+                            continue
+
                     case WD.South:
                         while not goal[curr_x][curr_y] and goal[curr_x-1][curr_y]:
                             curr_y += 1
                         assert curr_y != last_y
                         path_dir = WD.East if goal[curr_x][curr_y] else WD.West
+                        if do_splice or (curr_x, curr_y) != (start_x, start_y):
+                            subpath.append(abs_or_delta('vV', curr_x, None, curr_y, last_y))
                         if (curr_x, curr_y) == (start_x, start_y):
-                            break # path is done
-                        path += abs_or_delta('vV', curr_y, last_y)
+                            break # subpath is done
+                        if not do_splice and (curr_x, curr_y) in splice_points:
+                            subpath = []
+                            path_flips = {}
+                            do_splice = (start_x, start_y) = (curr_x, curr_y)
+                            continue
+
                     case _: raise
                 assert (last_x, last_y) != (curr_x, curr_y), goal
                 (last_x, last_y) = (curr_x, curr_y)
-            old_cursor = (last_x, last_y)
-            yield path
+            if do_splice:
+                splice_index = next(index for (index, i) in enumerate(fullpath) if i[0] == (start_x, start_y))+1
+                fullpath[splice_index:splice_index] = subpath
+            else:
+                old_cursor = (last_x, last_y)
+                fullpath += subpath
 
             # Note that only one dimension (which was arbitrary chosen here as
             # horizontal) needs to be evaluated to determine all of the pixel flips.
@@ -297,14 +331,14 @@ class SvgCompressedImage(SvgImage):
                 while len(ys) > 1:
                     for y in range(ys.pop(),ys.pop()):
                         curr[x][y] = paint_on
-
+        return ''.join(i[1] for i in fullpath)
 
     def process(self):
         # Store the path just in case someone wants to use it again or in some
         # unique way.
         self.path = ET.Element(
             ET.QName("path"),  # type: ignore
-            d="".join(self._generate_subpaths()),
+            d=self._generate_subpaths(),
             fill="#000",
         )
         self._img.append(self.path)
