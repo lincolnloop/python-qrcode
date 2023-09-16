@@ -221,6 +221,7 @@ class SvgCompressedImage(SvgImage):
         # The +1 -1 allows the path walk logic to not worry about image edges.
         old_cursor = (1,1)
         fullpath = []
+        fullpath_splice_points = set()
 
         # Go over the grid, creating the paths. This ordering seems to work fairly
         # well, although it's not necessarily optimal. Unfortunately optimal is a
@@ -240,11 +241,23 @@ class SvgCompressedImage(SvgImage):
             (start_x, start_y) = (search_x, search_y)
             subpath = [abs_or_delta('mM', start_x, old_cursor[0], start_y, old_cursor[1])]
             path_flips = {}
-            splice_points = set(i[0] for i in fullpath)
-            do_splice = None # The point where we are doing a splice, to save on 'M's.
+            do_splice = False # The point where we are doing a splice, to save on 'M's.
             paint_on = goal[start_x][start_y]
             path_dir = WD.East if paint_on else WD.South
             (curr_x, curr_y) = (last_x, last_y) = (start_x, start_y)
+
+            def should_switch_to_splicing():
+                nonlocal do_splice, start_x, start_y
+                if not do_splice and (curr_x, curr_y) in fullpath_splice_points:
+                    subpath.clear()
+                    path_flips.clear()
+                    do_splice |= True
+                    (start_x, start_y) = (curr_x, curr_y)
+                    return True
+                return False
+
+            # Immediately check for a need to splice in, right from the starting point.
+            should_switch_to_splicing()
 
             while True:
                 match path_dir:
@@ -260,10 +273,7 @@ class SvgCompressedImage(SvgImage):
                             subpath.append(abs_or_delta('hH', curr_x, last_x, curr_y, None))
                         if (curr_x, curr_y) == (start_x, start_y):
                             break # subpath is done
-                        if not do_splice and (curr_x, curr_y) in splice_points:
-                            subpath = []
-                            path_flips = {}
-                            do_splice = (start_x, start_y) = (curr_x, curr_y)
+                        if should_switch_to_splicing():
                             continue
 
                     case WD.West:
@@ -278,10 +288,7 @@ class SvgCompressedImage(SvgImage):
                             subpath.append(abs_or_delta('hH', curr_x, last_x, curr_y, None))
                         if (curr_x, curr_y) == (start_x, start_y):
                             break # subpath is done
-                        if not do_splice and (curr_x, curr_y) in splice_points:
-                            subpath = []
-                            path_flips = {}
-                            do_splice = (start_x, start_y) = (curr_x, curr_y)
+                        if should_switch_to_splicing():
                             continue
 
                     case WD.North:
@@ -293,10 +300,7 @@ class SvgCompressedImage(SvgImage):
                             subpath.append(abs_or_delta('vV', curr_x, None, curr_y, last_y))
                         if (curr_x, curr_y) == (start_x, start_y):
                             break # subpath is done
-                        if not do_splice and (curr_x, curr_y) in splice_points:
-                            subpath = []
-                            path_flips = {}
-                            do_splice = (start_x, start_y) = (curr_x, curr_y)
+                        if should_switch_to_splicing():
                             continue
 
                     case WD.South:
@@ -308,10 +312,7 @@ class SvgCompressedImage(SvgImage):
                             subpath.append(abs_or_delta('vV', curr_x, None, curr_y, last_y))
                         if (curr_x, curr_y) == (start_x, start_y):
                             break # subpath is done
-                        if not do_splice and (curr_x, curr_y) in splice_points:
-                            subpath = []
-                            path_flips = {}
-                            do_splice = (start_x, start_y) = (curr_x, curr_y)
+                        if should_switch_to_splicing():
                             continue
 
                     case _: raise
@@ -323,6 +324,8 @@ class SvgCompressedImage(SvgImage):
             else:
                 old_cursor = (last_x, last_y)
                 fullpath += subpath
+            for i in subpath:
+                fullpath_splice_points.add(i[0])
 
             # Note that only one dimension (which was arbitrary chosen here as
             # horizontal) needs to be evaluated to determine all of the pixel flips.
