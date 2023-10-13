@@ -110,6 +110,21 @@ class SvgPathQRModuleDrawer(BaseSvgQRModuleDrawer):
         ...
 
 
+class SvgCompressedDrawer(BaseSvgQRModuleDrawer):
+    img: "SvgPathImage"
+
+    def drawrect(self, box, is_active: bool):
+        if not is_active:
+            return
+        coords = self.coords(box)
+        x0 = self.img.units(coords.x0, text=False)
+        y0 = self.img.units(coords.y0, text=False)
+        assert self.img.units(coords.x1, text=False) - 1 == x0
+        assert self.img.units(coords.y1, text=False) - 1 == y0
+        self.img._points.append([int(x0),int(y0)])
+
+
+
 class SvgPathSquareDrawer(SvgPathQRModuleDrawer):
     def subpath(self, box) -> str:
         coords = self.coords(box)
