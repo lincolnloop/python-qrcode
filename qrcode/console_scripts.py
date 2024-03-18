@@ -37,12 +37,20 @@ error_correction = {
 }
 
 
+def get_version() -> str:
+    try:
+        from importlib.metadata import version
+        return version("qrcode")
+    except Exception:
+        from pkg_resources import get_distribution
+        return get_distribution("qrcode").version
+
+
 def main(args=None):
     if args is None:
         args = sys.argv[1:]
-    from pkg_resources import get_distribution
 
-    version = get_distribution("qrcode").version
+    version = get_version()
     parser = optparse.OptionParser(usage=(__doc__ or "").strip(), version=version)
 
     # Wrap parser.error in a typed NoReturn method for better typing.
