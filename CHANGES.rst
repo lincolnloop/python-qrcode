@@ -5,7 +5,7 @@ Change log
 7.5 (unreleased)
 ================
 
-- Nothing changed yet.
+- Add support for Python 3.11 and 3.12
 
 
 7.4.2 (6 February 2023)
