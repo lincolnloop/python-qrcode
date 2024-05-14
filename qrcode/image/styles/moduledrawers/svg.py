@@ -2,8 +2,8 @@ import abc
 from decimal import Decimal
 from typing import TYPE_CHECKING, NamedTuple
 
-from qrcode.image.styles.moduledrawers.base import QRModuleDrawer
 from qrcode.compat.etree import ET
+from qrcode.image.styles.moduledrawers.base import QRModuleDrawer
 
 if TYPE_CHECKING:
     from qrcode.image.svg import SvgFragmentImage, SvgPathImage

@@ -3,10 +3,12 @@ Image = None
 ImageDraw = None
 
 try:
-    from PIL import Image, ImageDraw  # type: ignore  # noqa: F401
+    from PIL import Image, ImageDraw  # type: ignore
 except ImportError:  # pragma: no cover
     try:
-        import Image  # type: ignore  # noqa: F401
-        import ImageDraw  # type: ignore  # noqa: F401
+        import Image  # type: ignore
+        import ImageDraw  # type: ignore
     except ImportError:
         pass
+
+__all__ = ["Image", "ImageDraw"]
