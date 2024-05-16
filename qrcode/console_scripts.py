@@ -110,6 +110,11 @@ def main(args=None):
     else:
         qr.add_data(data, optimize=opts.optimize)
 
+    try:
+        qr.make()
+    except qrcode.exceptions.DataOverflowError:
+        raise_error("too much data to fit in QR code")
+
     if opts.output:
         img = qr.make_image()
         with open(opts.output, "wb") as out:
