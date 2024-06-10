@@ -30,6 +30,8 @@ class ScriptTest(unittest.TestCase):
     @mock.patch("sys.stdout")
     @unittest.skipIf(not Image, "Requires PIL")
     def test_piped(self, mock_stdout):
+        mock_stdout.buffer = io.BytesIO()
+        mock_stdout.fileno = lambda: 999
         main(["testtext"])
 
     @mock.patch("os.isatty", lambda *args: True)
@@ -61,6 +63,7 @@ class ScriptTest(unittest.TestCase):
 
     @mock.patch("sys.stdout")
     def test_factory(self, mock_stdout):
+        mock_stdout.buffer = io.BytesIO()
         main("testtext --factory svg".split())
 
     @mock.patch("sys.stderr")
