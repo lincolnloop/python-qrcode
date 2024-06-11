@@ -25,6 +25,7 @@ default_factories = {
     "svg": "qrcode.image.svg.SvgImage",
     "svg-fragment": "qrcode.image.svg.SvgFragmentImage",
     "svg-path": "qrcode.image.svg.SvgPathImage",
+    "svg-compressed": "qrcode.image.svg.SvgCompressedImage",
     # Keeping for backwards compatibility:
     "pymaging": "qrcode.image.pure.PymagingImage",
 }
@@ -40,9 +41,12 @@ error_correction = {
 def main(args=None):
     if args is None:
         args = sys.argv[1:]
-    from pkg_resources import get_distribution
+    import pkg_resources
 
-    version = get_distribution("qrcode").version
+    try:
+        version = pkg_resources.get_distribution("qrcode").version
+    except pkg_resources.DistributionNotFound:
+        version = 'development'
     parser = optparse.OptionParser(usage=(__doc__ or "").strip(), version=version)
 
     # Wrap parser.error in a typed NoReturn method for better typing.
