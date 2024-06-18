@@ -1,5 +1,5 @@
 import qrcode.image.base
-from qrcode.compat.pil import Image, ImageDraw
+from PIL import Image, ImageDraw
 
 
 class PilImage(qrcode.image.base.BaseImage):

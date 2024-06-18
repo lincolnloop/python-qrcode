@@ -9,7 +9,7 @@ import png
 
 import qrcode
 import qrcode.util
-from qrcode.compat.pil import Image as pil_Image
+from PIL import Image as pil_Image
 from qrcode.exceptions import DataOverflowError
 from qrcode.image.base import BaseImage
 from qrcode.image.pure import PyPNGImage

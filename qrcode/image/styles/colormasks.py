@@ -1,9 +1,6 @@
-# Needed on case-insensitive filesystems
-from __future__ import absolute_import
-
 import math
 
-from qrcode.compat.pil import Image
+from PIL import Image
 
 
 class QRColorMask:
