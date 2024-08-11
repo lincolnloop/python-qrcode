@@ -9,6 +9,7 @@ import optparse
 import os
 import sys
 from typing import Dict, Iterable, NoReturn, Optional, Set, Type
+from importlib import metadata
 
 import qrcode
 from qrcode.image.base import BaseImage, DrawerAliases
@@ -40,9 +41,8 @@ error_correction = {
 def main(args=None):
     if args is None:
         args = sys.argv[1:]
-    from pkg_resources import get_distribution
 
-    version = get_distribution("qrcode").version
+    version = metadata.version("qrcode")
     parser = optparse.OptionParser(usage=(__doc__ or "").strip(), version=version)
 
     # Wrap parser.error in a typed NoReturn method for better typing.

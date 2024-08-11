@@ -1,3 +1,28 @@
 [build-system]
-requires = ["setuptools >= 48"]
-build-backend = "setuptools.build_meta"
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "qrcode"
+version = "7.5.dev0"
+packages = [{include = "qrcode"}]
+description = "QR Code image generator"
+authors = ["Lincoln Loop <info@lincolnloop.com>"]
+license = "BSD"
+readme = "README.rst"
+
+[tool.poetry.dependencies]
+python = "^3.7"
+colorama = {version = "*", platform = "win32"}
+importlib = {version = "*", python = "<3.10"}
+pypng = "*"
+typing-extensions = "*"
+
+[tool.poetry.group.dev.dependencies]
+coverage = "*"
+pytest = "*"
+pytest-cov = "*"
+tox = "*"
+
+[tool.poetry.group.pil.dependencies]
+pillow = ">=9.1.0"
