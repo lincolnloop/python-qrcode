@@ -11,8 +11,15 @@ Change log
 
 - Change local development setup to use Poetry_.
 
+- Testsuite and code quality checks are done through Github Actions.
+
+- Code quality and formatting utilises ruff_.
+
+- Removed ``typing_extensions`` as a dependency, as it's no longer required with
+  having Python 3.9+ as a requirement.
 
 .. _Poetry: https://python-poetry.org
+.. _ruff: https://astral.sh/ruff
 
 
 7.4.2 (6 February 2023)

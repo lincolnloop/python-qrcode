@@ -42,11 +42,12 @@ qr = 'qrcode.console_scripts:main'
 [tool.poetry.dependencies]
 python = "^3.9"
 colorama = {version = "*", platform = "win32"}
-pypng = "*"
+pypng = {version = "*", optional = true}
 pillow = {version = ">=9.1.0", optional = true}
 
 [tool.poetry.extras]
 pil = ["pillow"]
+png = ["pypng"]
 
 [tool.poetry.group.dev.dependencies]
 pytest = {version = "*"}
