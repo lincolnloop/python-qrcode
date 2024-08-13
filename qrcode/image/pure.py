@@ -14,6 +14,9 @@ class PyPNGImage(BaseImage):
     needs_drawrect = False
 
     def new_image(self, **kwargs):
+        if not PngWriter:
+            raise ImportError("PyPNG library not installed.")
+
         return PngWriter(self.pixel_size, self.pixel_size, greyscale=True, bitdepth=1)
 
     def drawrect(self, row, col):
