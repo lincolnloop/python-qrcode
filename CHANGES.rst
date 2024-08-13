@@ -5,7 +5,7 @@ Change log
 7.5 (unreleased)
 ================
 
-- Nothing changed yet.
+* Drop support for Python <=3.8.
 
 
 7.4.2 (6 February 2023)
