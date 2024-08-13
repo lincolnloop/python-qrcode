@@ -1,7 +1,6 @@
 import io
 import os
 import unittest
-import warnings
 from tempfile import mkdtemp
 from unittest import mock
 
