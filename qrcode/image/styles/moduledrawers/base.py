@@ -32,5 +32,4 @@ class QRModuleDrawer(abc.ABC):
         self.img = img
 
     @abc.abstractmethod
-    def drawrect(self, box, is_active) -> None:
-        ...
+    def drawrect(self, box, is_active) -> None: ...

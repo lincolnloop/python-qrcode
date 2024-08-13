@@ -216,7 +216,11 @@ class QRCodeTests(unittest.TestCase):
         embeded_img = pil_Image.new("RGB", (10, 10), color="red")
         qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_L)
         qr.add_data(UNICODE_TEXT)
-        img = qr.make_image(image_factory=StyledPilImage, embeded_image=embeded_img, embeded_image_ratio=0.3)
+        img = qr.make_image(
+            image_factory=StyledPilImage,
+            embeded_image=embeded_img,
+            embeded_image_ratio=0.3,
+        )
         img.save(io.BytesIO())
 
     @unittest.skipIf(not pil_Image, "Requires PIL")

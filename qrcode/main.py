@@ -10,7 +10,7 @@ from typing import (
     TypeVar,
     cast,
     overload,
-    Literal
+    Literal,
 )
 
 from qrcode import constants, exceptions, util
@@ -20,7 +20,6 @@ from qrcode.image.pure import PyPNGImage
 ModulesType = List[List[Optional[bool]]]
 # Cache modules generated just based on the QR Code version
 precomputed_qr_blanks: Dict[int, ModulesType] = {}
-
 
 
 def make(data=None, **kwargs):
@@ -193,12 +192,10 @@ class QRCode(Generic[GenericImage]):
 
     def setup_position_probe_pattern(self, row, col):
         for r in range(-1, 8):
-
             if row + r <= -1 or self.modules_count <= row + r:
                 continue
 
             for c in range(-1, 8):
-
                 if col + c <= -1 or self.modules_count <= col + c:
                     continue
 
@@ -333,14 +330,14 @@ class QRCode(Generic[GenericImage]):
         out.flush()
 
     @overload
-    def make_image(self, image_factory: Literal[None] = None, **kwargs) -> GenericImage:
-        ...
+    def make_image(
+        self, image_factory: Literal[None] = None, **kwargs
+    ) -> GenericImage: ...
 
     @overload
     def make_image(
         self, image_factory: Type[GenericImageLocal] = None, **kwargs
-    ) -> GenericImageLocal:
-        ...
+    ) -> GenericImageLocal: ...
 
     def make_image(self, image_factory=None, **kwargs):
         """
@@ -406,20 +403,16 @@ class QRCode(Generic[GenericImage]):
         pos = util.pattern_position(self.version)
 
         for i in range(len(pos)):
-
             row = pos[i]
 
             for j in range(len(pos)):
-
                 col = pos[j]
 
                 if self.modules[row][col] is not None:
                     continue
 
                 for r in range(-2, 3):
-
                     for c in range(-2, 3):
-
                         if (
                             r == -2
                             or r == 2
@@ -448,7 +441,6 @@ class QRCode(Generic[GenericImage]):
 
         # vertical
         for i in range(15):
-
             mod = not test and ((bits >> i) & 1) == 1
 
             if i < 6:
@@ -460,7 +452,6 @@ class QRCode(Generic[GenericImage]):
 
         # horizontal
         for i in range(15):
-
             mod = not test and ((bits >> i) & 1) == 1
 
             if i < 8:
@@ -484,18 +475,14 @@ class QRCode(Generic[GenericImage]):
         data_len = len(data)
 
         for col in range(self.modules_count - 1, 0, -2):
-
             if col <= 6:
                 col -= 1
 
             col_range = (col, col - 1)
 
             while True:
-
                 for c in col_range:
-
                     if self.modules[row][c] is None:
-
                         dark = False
 
                         if byteIndex < data_len:

@@ -249,7 +249,9 @@ class HorizontalBarsDrawer(StyledPilQRModuleDrawer):
         base_draw = ImageDraw.Draw(base)
         base_draw.ellipse((0, 0, fake_width * 2, fake_height), fill=front_color)
 
-        self.ROUND_LEFT = base.resize((width, shrunken_height), Image.Resampling.LANCZOS)
+        self.ROUND_LEFT = base.resize(
+            (width, shrunken_height), Image.Resampling.LANCZOS
+        )
         self.ROUND_RIGHT = self.ROUND_LEFT.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
 
     def drawrect(self, box, is_active: "ActiveWithNeighbors"):

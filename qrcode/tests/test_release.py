@@ -37,4 +37,6 @@ class UpdateManpageTests(unittest.TestCase):
             .replace("version", "3.11")
             .replace("date", datetime.datetime.now().strftime("%-d %b %Y"))
         )
-        mock_file().write.assert_has_calls([mock.call(line) for line in expected if line != ''], any_order=True)
+        mock_file().write.assert_has_calls(
+            [mock.call(line) for line in expected if line != ""], any_order=True
+        )
