@@ -5,14 +5,21 @@ Change log
 7.5 (unreleased)
 ================
 
-* Drop support for Python <=3.8.
+- Added support for Python 3.11 and 3.12.
+
+- Drop support for Python <=3.8.
+
+- Change local development setup to use Poetry_.
+
+
+.. _Poetry: https://python-poetry.org
 
 
 7.4.2 (6 February 2023)
 =======================
 
 - Allow ``pypng`` factory to allow for saving to a string (like
-  ``qr.save("some_file.png")``) in addition to file-like objects. 
+  ``qr.save("some_file.png")``) in addition to file-like objects.
 
 
 7.4.1 (3 February 2023)
