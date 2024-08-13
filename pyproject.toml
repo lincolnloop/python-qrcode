@@ -9,10 +9,38 @@ packages = [{include = "qrcode"}]
 description = "QR Code image generator"
 authors = ["Lincoln Loop <info@lincolnloop.com>"]
 license = "BSD"
-readme = "README.rst"
+readme = ["README.rst", "CHANGES.rst"]
+homepage = "https://github.com/lincolnloop/python-qrcode"
+keywords = ["qr", "denso-wave", "IEC18004"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Multimedia :: Graphics",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+# There is no support for data files yet.
+# https://github.com/python-poetry/poetry/issues/9519
+#
+# data_files = [
+#     { destination = "share/man/man1", from = [ "doc/qr.1" ] },
+# ]
+
+[tool.poetry.scripts]
+qr = 'qrcode.console_scripts:main'
+
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.9"
 colorama = {version = "*", platform = "win32"}
 pypng = "*"
 pillow = {version = ">=9.1.0", optional = true}
@@ -23,3 +51,16 @@ pil = ["pillow"]
 [tool.poetry.group.dev.dependencies]
 pytest = {version = "*"}
 pytest-cov = {version = "*"}
+docutils = "^0.21.2"
+zest-releaser = {extras = ["recommended"], version = "^9.2.0"}
+
+[tool.zest-releaser]
+less-zeros = "yes"
+version-levels = 2
+tag-format = "v{version}"
+tag-message = "Version {version}"
+tag-signing = "yes"
+date-format =" %%-d %%B %%Y"
+prereleaser.middle = [
+    "qrcode.release.update_manpage"
+]
