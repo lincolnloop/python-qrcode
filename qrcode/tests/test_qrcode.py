@@ -4,11 +4,11 @@ import unittest
 from tempfile import mkdtemp
 from unittest import mock
 
-import png
 
 import qrcode
 import qrcode.util
 from qrcode.compat.pil import Image as pil_Image
+from qrcode.compat.png import PngWriter
 from qrcode.exceptions import DataOverflowError
 from qrcode.image.base import BaseImage
 from qrcode.image.pure import PyPNGImage
@@ -174,20 +174,22 @@ class QRCodeTests(unittest.TestCase):
         self.assertTrue(MockFactory.new_image.called)
         self.assertTrue(MockFactory.drawrect.called)
 
+    @unittest.skipIf(not PngWriter, "Requires PNG")
     def test_render_pypng(self):
         qr = qrcode.QRCode()
         qr.add_data(UNICODE_TEXT)
         img = qr.make_image(image_factory=PyPNGImage)
-        self.assertIsInstance(img.get_image(), png.Writer)
+        self.assertIsInstance(img.get_image(), PngWriter)
 
         print(img.width, img.box_size, img.border)
         img.save(io.BytesIO())
 
+    @unittest.skipIf(not PngWriter, "Requires PNG")
     def test_render_pypng_to_str(self):
         qr = qrcode.QRCode()
         qr.add_data(UNICODE_TEXT)
         img = qr.make_image(image_factory=PyPNGImage)
-        self.assertIsInstance(img.get_image(), png.Writer)
+        self.assertIsInstance(img.get_image(), PngWriter)
 
         mock_open = mock.mock_open()
         with mock.patch("qrcode.image.pure.open", mock_open, create=True):
