@@ -1,8 +1,6 @@
 import decimal
 from decimal import Decimal
-from typing import List, Optional, Type, Union, overload
-
-from typing_extensions import Literal
+from typing import List, Optional, Type, Union, overload, Literal
 
 import qrcode.image.base
 from qrcode.compat.etree import ET

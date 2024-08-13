@@ -10,9 +10,8 @@ from typing import (
     TypeVar,
     cast,
     overload,
+    Literal
 )
-
-from typing_extensions import Literal
 
 from qrcode import constants, exceptions, util
 from qrcode.image.base import BaseImage
@@ -21,6 +20,7 @@ from qrcode.image.pure import PyPNGImage
 ModulesType = List[List[Optional[bool]]]
 # Cache modules generated just based on the QR Code version
 precomputed_qr_blanks: Dict[int, ModulesType] = {}
+
 
 
 def make(data=None, **kwargs):
