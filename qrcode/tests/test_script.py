@@ -30,6 +30,8 @@ class ScriptTest(unittest.TestCase):
     @mock.patch("sys.stdout")
     @unittest.skipIf(not Image, "Requires PIL")
     def test_piped(self, mock_stdout):
+        mock_stdout.buffer = io.BytesIO()
+        mock_stdout.fileno = lambda: 1
         main(["testtext"])
 
     @mock.patch("os.isatty", lambda *args: True)
