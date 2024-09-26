@@ -212,17 +212,15 @@ def test_print_ascii():
     printed = f.getvalue()
     f.close()
     expected = "\u2588\u2580\u2580\u2580\u2580\u2580\u2588"
-    assert printed[:len(expected)] == expected
+    assert printed[: len(expected)] == expected
 
     f = io.StringIO()
     f.isatty = lambda: True
     qr.print_ascii(out=f, tty=True)
     printed = f.getvalue()
     f.close()
-    expected = (
-        "\x1b[48;5;232m\x1b[38;5;255m" + "\xa0\u2584\u2584\u2584\u2584\u2584\xa0"
-    )
-    assert printed[:len(expected)] == expected
+    expected = "\x1b[48;5;232m\x1b[38;5;255m" + "\xa0\u2584\u2584\u2584\u2584\u2584\xa0"
+    assert printed[: len(expected)] == expected
 
 
 def test_print_tty_stdout():
@@ -244,10 +242,8 @@ def test_print_tty():
     BLACK_BG = "\x1b[40m"
     WHITE_BLOCK = BOLD_WHITE_BG + "  " + BLACK_BG
     EOL = "\x1b[0m\n"
-    expected = (
-        BOLD_WHITE_BG + "  " * 23 + EOL + WHITE_BLOCK + "  " * 7 + WHITE_BLOCK
-    )
-    assert printed[:len(expected)] == expected
+    expected = BOLD_WHITE_BG + "  " * 23 + EOL + WHITE_BLOCK + "  " * 7 + WHITE_BLOCK
+    assert printed[: len(expected)] == expected
 
 
 def test_get_matrix():

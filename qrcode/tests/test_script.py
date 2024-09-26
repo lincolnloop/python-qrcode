@@ -75,13 +75,13 @@ def test_factory_drawer_none(capsys):
     pytest.importorskip("PIL", reason="Requires PIL")
     with pytest.raises(SystemExit):
         main("testtext --factory pil --factory-drawer nope".split())
-    assert 'The selected factory has no drawer aliases' in capsys.readouterr()[1]
+    assert "The selected factory has no drawer aliases" in capsys.readouterr()[1]
 
 
 def test_factory_drawer_bad(capsys):
     with pytest.raises(SystemExit):
         main("testtext --factory svg --factory-drawer sobad".split())
-    assert 'sobad factory drawer not found' in capsys.readouterr()[1]
+    assert "sobad factory drawer not found" in capsys.readouterr()[1]
 
 
 def test_factory_drawer(capsys):
@@ -89,8 +89,8 @@ def test_factory_drawer(capsys):
 
 
 def test_commas():
-    assert commas([]) == ''
-    assert commas(['A']) == 'A'
-    assert commas('AB') == 'A or B'
-    assert commas('ABC') == 'A, B or C'
-    assert commas('ABC', joiner='and') == 'A, B and C'
+    assert commas([]) == ""
+    assert commas(["A"]) == "A"
+    assert commas("AB") == "A or B"
+    assert commas("ABC") == "A, B or C"
+    assert commas("ABC", joiner="and") == "A, B and C"

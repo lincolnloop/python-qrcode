@@ -1,0 +1,23 @@
+name: Code Quality Checks
+
+on:
+  push:
+
+jobs:
+  linting:
+    name: Code Quality Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: pip install ruff
+
+      - name: Code Linting
+        if: always()
+        run: ruff check qrcode
+
+      - name: Code Formatting
+        if: always()
+        run: ruff format --check qrcode

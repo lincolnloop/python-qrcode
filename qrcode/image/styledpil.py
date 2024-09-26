@@ -32,6 +32,8 @@ class StyledPilImage(qrcode.image.base.BaseImageWithDrawer):
     data integrity A resampling filter can be specified (defaulting to
     PIL.Image.Resampling.LANCZOS) for resizing; see PIL.Image.resize() for possible
     options for this parameter.
+    The image size can be controlled by `embeded_image_ratio` which is a ratio
+    between 0 and 1 that's set in relation to the overall width of the QR code.
     """
 
     kind = "PNG"
@@ -44,6 +46,7 @@ class StyledPilImage(qrcode.image.base.BaseImageWithDrawer):
         self.color_mask = kwargs.get("color_mask", SolidFillColorMask())
         embeded_image_path = kwargs.get("embeded_image_path", None)
         self.embeded_image = kwargs.get("embeded_image", None)
+        self.embeded_image_ratio = kwargs.get("embeded_image_ratio", 0.25)
         self.embeded_image_resample = kwargs.get(
             "embeded_image_resample", Image.Resampling.LANCZOS
         )
@@ -87,7 +90,7 @@ class StyledPilImage(qrcode.image.base.BaseImageWithDrawer):
             return
         total_width, _ = self._img.size
         total_width = int(total_width)
-        logo_width_ish = int(total_width / 4)
+        logo_width_ish = int(total_width * self.embeded_image_ratio)
         logo_offset = (
             int((int(total_width / 2) - int(logo_width_ish / 2)) / self.box_size)
             * self.box_size
