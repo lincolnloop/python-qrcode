@@ -206,7 +206,7 @@ class QRCodeTests(unittest.TestCase):
     @unittest.skipIf(not pil_Image, "Requires PIL")
     def test_render_styled_with_embeded_image(self):
         embeded_img = pil_Image.new("RGB", (10, 10), color="red")
-        qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_L)
+        qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_H)
         qr.add_data(UNICODE_TEXT)
         img = qr.make_image(image_factory=StyledPilImage, embeded_image=embeded_img)
         img.save(io.BytesIO())
@@ -214,7 +214,7 @@ class QRCodeTests(unittest.TestCase):
     @unittest.skipIf(not pil_Image, "Requires PIL")
     def test_render_styled_with_embeded_image_and_ratio(self):
         embeded_img = pil_Image.new("RGB", (10, 10), color="red")
-        qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_L)
+        qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_H)
         qr.add_data(UNICODE_TEXT)
         img = qr.make_image(image_factory=StyledPilImage, embeded_image=embeded_img, embeded_image_ratio=0.3)
         img.save(io.BytesIO())
@@ -224,7 +224,7 @@ class QRCodeTests(unittest.TestCase):
         tmpfile = os.path.join(self.tmpdir, "test.png")
         embeded_img = pil_Image.new("RGB", (10, 10), color="red")
         embeded_img.save(tmpfile)
-        qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_L)
+        qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_H)
         qr.add_data(UNICODE_TEXT)
         img = qr.make_image(image_factory=StyledPilImage, embeded_image_path=tmpfile)
         img.save(io.BytesIO())
