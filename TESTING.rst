@@ -26,6 +26,6 @@ If you want, you can test against a specific version like this: ``tox -e py312-p
 Linting
 -------
 
-Run `ruff` to check linting::
+Run `ruff` to check formatting::
 
-    ruff check
+    ruff format qrcode

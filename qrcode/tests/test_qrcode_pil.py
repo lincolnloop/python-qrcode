@@ -66,14 +66,17 @@ def test_render_styled_with_embeded_image_path(tmp_path):
     img.save(io.BytesIO())
 
 
-@pytest.mark.parametrize("drawer", [
-    moduledrawers.CircleModuleDrawer,
-    moduledrawers.GappedSquareModuleDrawer,
-    moduledrawers.HorizontalBarsDrawer,
-    moduledrawers.RoundedModuleDrawer,
-    moduledrawers.SquareModuleDrawer,
-    moduledrawers.VerticalBarsDrawer,
-])
+@pytest.mark.parametrize(
+    "drawer",
+    [
+        moduledrawers.CircleModuleDrawer,
+        moduledrawers.GappedSquareModuleDrawer,
+        moduledrawers.HorizontalBarsDrawer,
+        moduledrawers.RoundedModuleDrawer,
+        moduledrawers.SquareModuleDrawer,
+        moduledrawers.VerticalBarsDrawer,
+    ],
+)
 def test_render_styled_with_drawer(drawer):
     qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_L)
     qr.add_data(UNICODE_TEXT)
@@ -84,28 +87,29 @@ def test_render_styled_with_drawer(drawer):
     img.save(io.BytesIO())
 
 
-@pytest.mark.parametrize("mask", [
-    colormasks.SolidFillColorMask(),
-    colormasks.SolidFillColorMask(back_color=WHITE, front_color=RED),
-    colormasks.SolidFillColorMask(
-        back_color=(255, 0, 255, 255), front_color=RED
-    ),
-    colormasks.RadialGradiantColorMask(
-        back_color=WHITE, center_color=BLACK, edge_color=RED
-    ),
-    colormasks.SquareGradiantColorMask(
-        back_color=WHITE, center_color=BLACK, edge_color=RED
-    ),
-    colormasks.HorizontalGradiantColorMask(
-        back_color=WHITE, left_color=RED, right_color=BLACK
-    ),
-    colormasks.VerticalGradiantColorMask(
-        back_color=WHITE, top_color=RED, bottom_color=BLACK
-    ),
-    colormasks.ImageColorMask(
-        back_color=WHITE, color_mask_image=Image.new("RGB", (10, 10), color="red")
-    ),
-])
+@pytest.mark.parametrize(
+    "mask",
+    [
+        colormasks.SolidFillColorMask(),
+        colormasks.SolidFillColorMask(back_color=WHITE, front_color=RED),
+        colormasks.SolidFillColorMask(back_color=(255, 0, 255, 255), front_color=RED),
+        colormasks.RadialGradiantColorMask(
+            back_color=WHITE, center_color=BLACK, edge_color=RED
+        ),
+        colormasks.SquareGradiantColorMask(
+            back_color=WHITE, center_color=BLACK, edge_color=RED
+        ),
+        colormasks.HorizontalGradiantColorMask(
+            back_color=WHITE, left_color=RED, right_color=BLACK
+        ),
+        colormasks.VerticalGradiantColorMask(
+            back_color=WHITE, top_color=RED, bottom_color=BLACK
+        ),
+        colormasks.ImageColorMask(
+            back_color=WHITE, color_mask_image=Image.new("RGB", (10, 10), color="red")
+        ),
+    ],
+)
 def test_render_styled_with_mask(mask):
     qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_L)
     qr.add_data(UNICODE_TEXT)
