@@ -5,10 +5,12 @@ qr - Convert stdin (or the first argument) to a QR Code.
 When stdout is a tty the QR Code is printed to the terminal and when stdout is
 a pipe to a file an image is written. The default image format is PNG.
 """
+
 import optparse
 import os
 import sys
 from typing import Dict, Iterable, NoReturn, Optional, Set, Type
+from importlib import metadata
 
 import qrcode
 from qrcode.image.base import BaseImage, DrawerAliases
@@ -40,9 +42,8 @@ error_correction = {
 def main(args=None):
     if args is None:
         args = sys.argv[1:]
-    from pkg_resources import get_distribution
 
-    version = get_distribution("qrcode").version
+    version = metadata.version("qrcode")
     parser = optparse.OptionParser(usage=(__doc__ or "").strip(), version=version)
 
     # Wrap parser.error in a typed NoReturn method for better typing.
