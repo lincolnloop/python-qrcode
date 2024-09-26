@@ -1,12 +1,15 @@
 import io
 from unittest import mock
 
-import png
+import pytest
+
 
 import qrcode
 import qrcode.util
 from qrcode.image.pure import PyPNGImage
 from qrcode.tests.consts import UNICODE_TEXT
+
+png = pytest.importorskip("png", reason="png is not installed")
 
 
 def test_render_pypng():
