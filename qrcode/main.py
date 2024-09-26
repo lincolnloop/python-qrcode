@@ -348,6 +348,8 @@ class QRCode(Generic[GenericImage]):
 
         If the data has not been compiled yet, make it first.
         """
+        if kwargs.get("embeded_image_path") and self.error_correction != constants.ERROR_CORRECT_H:
+            raise ValueError("Error correction level must be ERROR_CORRECT_H if an embedded image is provided")
         _check_box_size(self.box_size)
         if self.data_cache is None:
             self.make()

@@ -231,6 +231,35 @@ class QRCodeTests(unittest.TestCase):
         os.remove(tmpfile)
 
     @unittest.skipIf(not pil_Image, "Requires PIL")
+    def test_embedded_image_and_error_correction(self):
+        "If an embedded image is specified, error correction must be the highest so the QR code is readable"
+        tmpfile = os.path.join(self.tmpdir, "test.png")
+        embedded_img = pil_Image.new("RGB", (10, 10), color="red")
+        embedded_img.save(tmpfile)
+
+        qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_L)
+        qr.add_data(UNICODE_TEXT)
+        with self.assertRaises(ValueError):
+            qr.make_image(embeded_image_path=tmpfile)
+
+        qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_M)
+        qr.add_data(UNICODE_TEXT)
+        with self.assertRaises(ValueError):
+            qr.make_image(embeded_image_path=tmpfile)
+
+        qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_Q)
+        qr.add_data(UNICODE_TEXT)
+        with self.assertRaises(ValueError):
+            qr.make_image(embeded_image_path=tmpfile)
+
+        # The only accepted correction level when an embedded image is provided
+        qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_H)
+        qr.add_data(UNICODE_TEXT)
+        qr.make_image(embeded_image_path=tmpfile)
+
+        os.remove(tmpfile)
+
+    @unittest.skipIf(not pil_Image, "Requires PIL")
     def test_render_styled_with_square_module_drawer(self):
         qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_L)
         qr.add_data(UNICODE_TEXT)
