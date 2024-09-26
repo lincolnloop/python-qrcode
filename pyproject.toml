@@ -52,6 +52,8 @@ png = ["pypng"]
 [tool.poetry.group.dev.dependencies]
 pytest = {version = "*"}
 pytest-cov = {version = "*"}
+tox = {version = "*"}
+ruff = {version = "*"}
 docutils = "^0.21.2"
 zest-releaser = {extras = ["recommended"], version = "^9.2.0"}
 

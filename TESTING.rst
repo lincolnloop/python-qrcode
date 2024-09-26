@@ -1,9 +1,9 @@
 Testing
 =======
 
-First, install tox into your virtualenv::
+First, install dev dependencies::
 
-    pip install --upgrade tox
+    poetry install --with dev
 
 To run all tests, you'll need to install multiple Python interpreters. On a
 modern Ubuntu distribution you can use ``add-apt-repository
@@ -21,3 +21,11 @@ Here's the OSX Homebrew command:
 
 Finally, just run ``tox``!
 If you want, you can test against a specific version like this: ``tox -e py312-pil``
+
+
+Linting
+-------
+
+Run `ruff` to check linting::
+
+    ruff check
