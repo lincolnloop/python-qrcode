@@ -19,7 +19,13 @@ Here's the OSX Homebrew command:
 
     brew install libjpeg libtiff little-cms2 openjpeg webp
 
-Finally, just run ``tox``!
+Finally, just run ``tox``::
+
+    poetry run tox
+    # or
+    poetry shell
+    tox
+
 If you want, you can test against a specific version like this: ``tox -e py312-pil``
 
 

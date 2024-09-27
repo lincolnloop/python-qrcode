@@ -48,7 +48,7 @@ def test_stdin_py3_unicodedecodeerror():
 
 
 def test_optimize():
-    pytest.importorskip("PyPNG", reason="Requires PyPNG")
+    pytest.importorskip("PIL", reason="Requires PIL")
     main("testtext --optimize 0".split())
 
 
