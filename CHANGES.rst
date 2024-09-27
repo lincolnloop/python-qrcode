@@ -2,8 +2,8 @@
 Change log
 ==========
 
-7.5 (unreleased)
-================
+8.0 ( 27 September 2024)
+========================
 
 - Added support for Python 3.11 and 3.12.
 
