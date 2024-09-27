@@ -52,7 +52,7 @@ def test_render_styled_Image():
 
 def test_render_styled_with_embeded_image():
     embeded_img = Image.new("RGB", (10, 10), color="red")
-    qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_L)
+    qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_H)
     qr.add_data(UNICODE_TEXT)
     img = qr.make_image(image_factory=StyledPilImage, embeded_image=embeded_img)
     img.save(io.BytesIO())
@@ -129,21 +129,28 @@ def test_embedded_image_and_error_correction(tmp_path):
     qr.add_data(UNICODE_TEXT)
     with pytest.raises(ValueError):
         qr.make_image(embeded_image_path=tmpfile)
+    with pytest.raises(ValueError):
+        qr.make_image(embeded_image=embedded_img)
 
     qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_M)
     qr.add_data(UNICODE_TEXT)
     with pytest.raises(ValueError):
         qr.make_image(embeded_image_path=tmpfile)
+    with pytest.raises(ValueError):
+        qr.make_image(embeded_image=embedded_img)
 
     qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_Q)
     qr.add_data(UNICODE_TEXT)
     with pytest.raises(ValueError):
         qr.make_image(embeded_image_path=tmpfile)
+    with pytest.raises(ValueError):
+        qr.make_image(embeded_image=embedded_img)
 
     # The only accepted correction level when an embedded image is provided
     qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_H)
     qr.add_data(UNICODE_TEXT)
     qr.make_image(embeded_image_path=tmpfile)
+    qr.make_image(embeded_image=embedded_img)
 
 
 def test_shortcut():
