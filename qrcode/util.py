@@ -549,7 +549,6 @@ def create_bytes(buffer: BitBuffer, rs_blocks: List[RSBlock]):
 
 
 def create_data(version, error_correction, data_list):
-
     buffer = BitBuffer()
     for data in data_list:
         buffer.put(data.mode, 4)
