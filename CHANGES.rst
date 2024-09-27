@@ -18,6 +18,9 @@ Change log
 - Removed ``typing_extensions`` as a dependency, as it's no longer required with
   having Python 3.9+ as a requirement.
 
+- Only allow high error correction rate (`qrcode.ERROR_CORRECT_H`) when generating
+  QR codes with embedded images to ensure content is readable
+
 .. _Poetry: https://python-poetry.org
 .. _ruff: https://astral.sh/ruff
 
