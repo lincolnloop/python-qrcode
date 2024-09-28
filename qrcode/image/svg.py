@@ -298,9 +298,7 @@ class SvgCompressedImage(SvgImage):
                             path_flips[curr_x].append(curr_y)
                             curr_x += 1
                         assert curr_x != last_x
-                        path_dir = (
-                            WD.North if goal[curr_x][curr_y - 1] else WD.South
-                        )
+                        path_dir = WD.North if goal[curr_x][curr_y - 1] else WD.South
                         if do_splice or (curr_x, curr_y) != (start_x, start_y):
                             subpath_tail.cmds += abs_or_delta("hH", curr_x, last_x)
 
@@ -322,17 +320,12 @@ class SvgCompressedImage(SvgImage):
                                 path_flips[curr_x] = []
                             path_flips[curr_x].append(curr_y)
                         assert curr_x != last_x
-                        path_dir = (
-                            WD.South if goal[curr_x - 1][curr_y] else WD.North
-                        )
+                        path_dir = WD.South if goal[curr_x - 1][curr_y] else WD.North
                         if do_splice or (curr_x, curr_y) != (start_x, start_y):
                             subpath_tail.cmds += abs_or_delta("hH", curr_x, last_x)
 
                         # only a left turn with a hole coming up on the right is spliceable
-                        if (
-                            path_dir == WD.South
-                            and not goal[curr_x - 1][curr_y - 1]
-                        ):
+                        if path_dir == WD.South and not goal[curr_x - 1][curr_y - 1]:
                             add_to_splice_points()
 
                         if (curr_x, curr_y) == (start_x, start_y):
@@ -346,9 +339,7 @@ class SvgCompressedImage(SvgImage):
                         ):
                             curr_y -= 1
                         assert curr_y != last_y
-                        path_dir = (
-                            WD.West if goal[curr_x - 1][curr_y - 1] else WD.East
-                        )
+                        path_dir = WD.West if goal[curr_x - 1][curr_y - 1] else WD.East
                         if do_splice or (curr_x, curr_y) != (start_x, start_y):
                             subpath_tail.cmds += abs_or_delta("vV", curr_y, last_y)
 
