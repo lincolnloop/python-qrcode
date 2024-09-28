@@ -227,7 +227,7 @@ and an embedded image:
     from qrcode.image.styles.moduledrawers.pil import RoundedModuleDrawer
     from qrcode.image.styles.colormasks import RadialGradiantColorMask
 
-    qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
+    qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_H)
     qr.add_data('Some data')
 
     img_1 = qr.make_image(image_factory=StyledPilImage, module_drawer=RoundedModuleDrawer())

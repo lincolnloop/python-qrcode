@@ -2,17 +2,34 @@
 Change log
 ==========
 
-7.5 (unreleased)
-================
+8.0 ( 27 September 2024)
+========================
 
-- Nothing changed yet.
+- Added support for Python 3.11 and 3.12.
+
+- Drop support for Python <=3.8.
+
+- Change local development setup to use Poetry_.
+
+- Testsuite and code quality checks are done through Github Actions.
+
+- Code quality and formatting utilises ruff_.
+
+- Removed ``typing_extensions`` as a dependency, as it's no longer required with
+  having Python 3.9+ as a requirement.
+
+- Only allow high error correction rate (`qrcode.ERROR_CORRECT_H`) when generating
+  QR codes with embedded images to ensure content is readable
+
+.. _Poetry: https://python-poetry.org
+.. _ruff: https://astral.sh/ruff
 
 
 7.4.2 (6 February 2023)
 =======================
 
 - Allow ``pypng`` factory to allow for saving to a string (like
-  ``qr.save("some_file.png")``) in addition to file-like objects. 
+  ``qr.save("some_file.png")``) in addition to file-like objects.
 
 
 7.4.1 (3 February 2023)
