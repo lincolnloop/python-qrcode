@@ -119,8 +119,7 @@ class SvgCompressedDrawer(BaseSvgQRModuleDrawer):
         y0 = self.img.units(coords.y0, text=False)
         assert self.img.units(coords.x1, text=False) - 1 == x0
         assert self.img.units(coords.y1, text=False) - 1 == y0
-        self.img._points.append([int(x0),int(y0)])
-
+        self.img._points.append([int(x0), int(y0)])
 
 
 class SvgPathSquareDrawer(SvgPathQRModuleDrawer):

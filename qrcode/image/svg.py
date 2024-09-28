@@ -1,4 +1,5 @@
-import decimal, enum
+import decimal
+import enum
 from decimal import Decimal
 from typing import List, Optional, Type, Union, overload, Literal
 
@@ -187,23 +188,32 @@ class SvgCompressedImage(SvgImage):
         and also drawing reverse transparency holes, to complete the SVG.
         """
         # what we should make, juxtaposed against what we currently have
-        goal = [ [0]*(self.width+2) for i in range(self.width+2) ]
-        curr = [ [0]*(self.width+2) for i in range(self.width+2) ]
+        goal = [[0] * (self.width + 2) for i in range(self.width + 2)]
+        curr = [[0] * (self.width + 2) for i in range(self.width + 2)]
         for point in self._points:
             # The +1 -1 allows the path walk logic to not worry about image edges.
-            goal[point[0]-self.border+1][point[1]-self.border+1] = 1
+            goal[point[0] - self.border + 1][point[1] - self.border + 1] = 1
 
         def abs_or_delta(cmds, curr_1, last_1, curr_2=None, last_2=None):
-            ''' Use whichever is shorter: the absolute command, or delta command.'''
+            """Use whichever is shorter: the absolute command, or delta command."""
+
             def opt_join(a, b):
-                if b == None:
-                    return '%d'%a
-                return '%d'%a+('' if b < 0 else ' ')+'%d'%b
-            return min([
-                cmds[0]+opt_join(curr_1-last_1, curr_2-last_2 if curr_2 != None else None),
-                # The +1 -1 allows the path walk logic to not worry about image edges.
-                cmds[1]+opt_join(curr_1-1     , curr_2-1      if curr_2 != None else None)
-            ], key=len)
+                if b is None:
+                    return "%d" % a
+                return "%d" % a + ("" if b < 0 else " ") + "%d" % b
+
+            return min(
+                [
+                    cmds[0]
+                    + opt_join(
+                        curr_1 - last_1, curr_2 - last_2 if curr_2 is not None else None
+                    ),
+                    # The +1 -1 allows the path walk logic to not worry about image edges.
+                    cmds[1]
+                    + opt_join(curr_1 - 1, curr_2 - 1 if curr_2 is not None else None),
+                ],
+                key=len,
+            )
 
         class WD(enum.IntEnum):
             North = 1
@@ -211,18 +221,20 @@ class SvgCompressedImage(SvgImage):
             East = 3
             West = 4
 
-        class PathChain():
-            __slots__ = ['cmds','next']
+        class PathChain:
+            __slots__ = ["cmds", "next"]
+
             def __init__(self):
-                self.cmds = ''
+                self.cmds = ""
                 self.next = None
+
             def create_next(self):
                 self.next = PathChain()
                 return self.next
 
         # Old cursor position allows optimizing with "m" sometimes instead of "M".
         # The +1 -1 allows the path walk logic to not worry about image edges.
-        old_cursor = (1,1)
+        old_cursor = (1, 1)
         fullpath_head = fullpath_tail = None
         fullpath_splice_points = {}
 
@@ -230,156 +242,176 @@ class SvgCompressedImage(SvgImage):
         # well, although it's not necessarily optimal. Unfortunately optimal is a
         # traveling salesman problem, and it's not obvious whether there's any
         # significantly better possible ordering in general.
-        for search_y in range(self.width+2):
-         for search_x in range(self.width+2):
-            if goal[search_x][search_y] == curr[search_x][search_y]:
-                continue
+        for search_y in range(self.width + 2):
+            for search_x in range(self.width + 2):
+                if goal[search_x][search_y] == curr[search_x][search_y]:
+                    continue
 
-            # Note, the 'm' here is starting from the old cursor spot, which (as per SVG
-            # spec) is not the close path spot. We could test for both, trying a 'z' to
-            # to save characters for the next 'm'. However, the mathematically first
-            # opportunity would be a convert of 'm1 100' to 'm1 9', so would require a
-            # straight line of 91 pairs of identical pixels. I believe the QR spec allows
-            # for that, but it is essentially impossible by chance.
-            (start_x, start_y) = (search_x, search_y)
-            subpath_head = subpath_tail = PathChain()
-            subpath_head.cmds = abs_or_delta('mM', start_x, old_cursor[0], start_y, old_cursor[1])
-            path_flips = {}
-            do_splice = False # The point where we are doing a splice, to save on 'M's.
-            subpath_splice_points = {}
-            paint_on = goal[start_x][start_y]
-            path_dir = WD.East if paint_on else WD.South
-            (curr_x, curr_y) = (last_x, last_y) = (start_x, start_y)
+                # Note, the 'm' here is starting from the old cursor spot, which (as per SVG
+                # spec) is not the close path spot. We could test for both, trying a 'z' to
+                # to save characters for the next 'm'. However, the mathematically first
+                # opportunity would be a convert of 'm1 100' to 'm1 9', so would require a
+                # straight line of 91 pairs of identical pixels. I believe the QR spec allows
+                # for that, but it is essentially impossible by chance.
+                (start_x, start_y) = (search_x, search_y)
+                subpath_head = subpath_tail = PathChain()
+                subpath_head.cmds = abs_or_delta(
+                    "mM", start_x, old_cursor[0], start_y, old_cursor[1]
+                )
+                path_flips = {}
+                do_splice = (
+                    False  # The point where we are doing a splice, to save on 'M's.
+                )
+                subpath_splice_points = {}
+                paint_on = goal[start_x][start_y]
+                path_dir = WD.East if paint_on else WD.South
+                (curr_x, curr_y) = (last_x, last_y) = (start_x, start_y)
 
-            def should_switch_to_splicing():
-                nonlocal do_splice, start_x, start_y, subpath_head, subpath_tail
-                if not do_splice and (curr_x, curr_y) in fullpath_splice_points:
-                    subpath_head = subpath_tail = PathChain()
-                    path_flips.clear()
-                    subpath_splice_points.clear()
-                    do_splice |= True
-                    (start_x, start_y) = (curr_x, curr_y)
-                    return True
-                return False
+                def should_switch_to_splicing():
+                    nonlocal do_splice, start_x, start_y, subpath_head, subpath_tail
+                    if not do_splice and (curr_x, curr_y) in fullpath_splice_points:
+                        subpath_head = subpath_tail = PathChain()
+                        path_flips.clear()
+                        subpath_splice_points.clear()
+                        do_splice |= True
+                        (start_x, start_y) = (curr_x, curr_y)
+                        return True
+                    return False
 
-            def add_to_splice_points():
-                nonlocal subpath_tail
-                if (curr_x, curr_y) in subpath_splice_points:
-                    # we hit a splice point a second time, so topology dictates it's done
-                    subpath_splice_points.pop((curr_x, curr_y))
+                def add_to_splice_points():
+                    nonlocal subpath_tail
+                    if (curr_x, curr_y) in subpath_splice_points:
+                        # we hit a splice point a second time, so topology dictates it's done
+                        subpath_splice_points.pop((curr_x, curr_y))
+                    else:
+                        subpath_splice_points[curr_x, curr_y] = subpath_tail
+                        subpath_tail = subpath_tail.create_next()
+
+                # Immediately check for a need to splice in, right from the starting point.
+                should_switch_to_splicing()
+
+                while True:
+                    match path_dir:
+                        case WD.East:
+                            while goal[curr_x][curr_y] and not goal[curr_x][curr_y - 1]:
+                                if curr_x not in path_flips:
+                                    path_flips[curr_x] = []
+                                path_flips[curr_x].append(curr_y)
+                                curr_x += 1
+                            assert curr_x != last_x
+                            path_dir = (
+                                WD.North if goal[curr_x][curr_y - 1] else WD.South
+                            )
+                            if do_splice or (curr_x, curr_y) != (start_x, start_y):
+                                subpath_tail.cmds += abs_or_delta("hH", curr_x, last_x)
+
+                            # only a left turn with a hole coming up on the right is spliceable
+                            if path_dir == WD.North and not goal[curr_x][curr_y]:
+                                add_to_splice_points()
+
+                            if (curr_x, curr_y) == (start_x, start_y):
+                                break  # subpath is done
+                            if should_switch_to_splicing():
+                                continue
+
+                        case WD.West:
+                            while (
+                                not goal[curr_x - 1][curr_y]
+                                and goal[curr_x - 1][curr_y - 1]
+                            ):
+                                curr_x -= 1
+                                if curr_x not in path_flips:
+                                    path_flips[curr_x] = []
+                                path_flips[curr_x].append(curr_y)
+                            assert curr_x != last_x
+                            path_dir = (
+                                WD.South if goal[curr_x - 1][curr_y] else WD.North
+                            )
+                            if do_splice or (curr_x, curr_y) != (start_x, start_y):
+                                subpath_tail.cmds += abs_or_delta("hH", curr_x, last_x)
+
+                            # only a left turn with a hole coming up on the right is spliceable
+                            if (
+                                path_dir == WD.South
+                                and not goal[curr_x - 1][curr_y - 1]
+                            ):
+                                add_to_splice_points()
+
+                            if (curr_x, curr_y) == (start_x, start_y):
+                                break  # subpath is done
+                            if should_switch_to_splicing():
+                                continue
+
+                        case WD.North:
+                            while (
+                                goal[curr_x][curr_y - 1]
+                                and not goal[curr_x - 1][curr_y - 1]
+                            ):
+                                curr_y -= 1
+                            assert curr_y != last_y
+                            path_dir = (
+                                WD.West if goal[curr_x - 1][curr_y - 1] else WD.East
+                            )
+                            if do_splice or (curr_x, curr_y) != (start_x, start_y):
+                                subpath_tail.cmds += abs_or_delta("vV", curr_y, last_y)
+
+                            # only a left turn with a hole coming up on the right is spliceable
+                            if path_dir == WD.West and not goal[curr_x][curr_y - 1]:
+                                add_to_splice_points()
+
+                            if (curr_x, curr_y) == (start_x, start_y):
+                                break  # subpath is done
+                            if should_switch_to_splicing():
+                                continue
+
+                        case WD.South:
+                            while not goal[curr_x][curr_y] and goal[curr_x - 1][curr_y]:
+                                curr_y += 1
+                            assert curr_y != last_y
+                            path_dir = WD.East if goal[curr_x][curr_y] else WD.West
+                            if do_splice or (curr_x, curr_y) != (start_x, start_y):
+                                subpath_tail.cmds += abs_or_delta("vV", curr_y, last_y)
+
+                            # only a left turn with a hole coming up on the right is spliceable
+                            if path_dir == WD.East and not goal[curr_x - 1][curr_y]:
+                                add_to_splice_points()
+
+                            if (curr_x, curr_y) == (start_x, start_y):
+                                break  # subpath is done
+                            if should_switch_to_splicing():
+                                continue
+
+                        case _:
+                            raise
+                    assert (last_x, last_y) != (curr_x, curr_y), goal
+                    (last_x, last_y) = (curr_x, curr_y)
+
+                if do_splice:
+                    subpath_tail.next = fullpath_splice_points[start_x, start_y].next
+                    fullpath_splice_points[start_x, start_y].next = subpath_head
                 else:
-                    subpath_splice_points[curr_x, curr_y] = subpath_tail
-                    subpath_tail = subpath_tail.create_next()
+                    if not fullpath_head:
+                        fullpath_head = subpath_head
+                    else:
+                        fullpath_tail.next = subpath_head
+                    fullpath_tail = subpath_tail
+                    old_cursor = (last_x, last_y)
 
-            # Immediately check for a need to splice in, right from the starting point.
-            should_switch_to_splicing()
+                for k, v in subpath_splice_points.items():
+                    if k in fullpath_splice_points:
+                        # we hit a splice point a second time, so topology dictates it's done
+                        fullpath_splice_points.pop(k)
+                    else:
+                        # merge new splice point
+                        fullpath_splice_points[k] = v
 
-            while True:
-                match path_dir:
-                    case WD.East:
-                        while goal[curr_x][curr_y] and not goal[curr_x  ][curr_y-1]:
-                            if curr_x not in path_flips:
-                                path_flips[curr_x] = []
-                            path_flips[curr_x].append(curr_y)
-                            curr_x += 1
-                        assert curr_x != last_x
-                        path_dir = WD.North if goal[curr_x][curr_y-1] else WD.South
-                        if do_splice or (curr_x, curr_y) != (start_x, start_y):
-                            subpath_tail.cmds += abs_or_delta('hH', curr_x, last_x)
-
-                        # only a left turn with a hole coming up on the right is spliceable
-                        if path_dir == WD.North and not goal[curr_x][curr_y]:
-                            add_to_splice_points()
-
-                        if (curr_x, curr_y) == (start_x, start_y):
-                            break # subpath is done
-                        if should_switch_to_splicing():
-                            continue
-
-                    case WD.West:
-                        while not goal[curr_x-1][curr_y] and goal[curr_x-1][curr_y-1]:
-                            curr_x -= 1
-                            if curr_x not in path_flips:
-                                path_flips[curr_x] = []
-                            path_flips[curr_x].append(curr_y)
-                        assert curr_x != last_x
-                        path_dir = WD.South if goal[curr_x-1][curr_y] else WD.North
-                        if do_splice or (curr_x, curr_y) != (start_x, start_y):
-                            subpath_tail.cmds += abs_or_delta('hH', curr_x, last_x)
-
-                        # only a left turn with a hole coming up on the right is spliceable
-                        if path_dir == WD.South and not goal[curr_x-1][curr_y-1]:
-                            add_to_splice_points()
-
-                        if (curr_x, curr_y) == (start_x, start_y):
-                            break # subpath is done
-                        if should_switch_to_splicing():
-                            continue
-
-                    case WD.North:
-                        while goal[curr_x][curr_y-1] and not goal[curr_x-1][curr_y-1]:
-                            curr_y -= 1
-                        assert curr_y != last_y
-                        path_dir = WD.West if goal[curr_x-1][curr_y-1] else WD.East
-                        if do_splice or (curr_x, curr_y) != (start_x, start_y):
-                            subpath_tail.cmds += abs_or_delta('vV', curr_y, last_y)
-
-                        # only a left turn with a hole coming up on the right is spliceable
-                        if path_dir == WD.West and not goal[curr_x][curr_y-1]:
-                            add_to_splice_points()
-
-                        if (curr_x, curr_y) == (start_x, start_y):
-                            break # subpath is done
-                        if should_switch_to_splicing():
-                            continue
-
-                    case WD.South:
-                        while not goal[curr_x][curr_y] and goal[curr_x-1][curr_y]:
-                            curr_y += 1
-                        assert curr_y != last_y
-                        path_dir = WD.East if goal[curr_x][curr_y] else WD.West
-                        if do_splice or (curr_x, curr_y) != (start_x, start_y):
-                            subpath_tail.cmds += abs_or_delta('vV', curr_y, last_y)
-
-                        # only a left turn with a hole coming up on the right is spliceable
-                        if path_dir == WD.East and not goal[curr_x-1][curr_y]:
-                            add_to_splice_points()
-
-                        if (curr_x, curr_y) == (start_x, start_y):
-                            break # subpath is done
-                        if should_switch_to_splicing():
-                            continue
-
-                    case _: raise
-                assert (last_x, last_y) != (curr_x, curr_y), goal
-                (last_x, last_y) = (curr_x, curr_y)
-
-            if do_splice:
-                subpath_tail.next = fullpath_splice_points[start_x, start_y].next
-                fullpath_splice_points[start_x, start_y].next = subpath_head
-            else:
-                if not fullpath_head:
-                    fullpath_head = subpath_head
-                else:
-                    fullpath_tail.next = subpath_head
-                fullpath_tail = subpath_tail
-                old_cursor = (last_x, last_y)
-
-            for k,v in subpath_splice_points.items():
-                if k in fullpath_splice_points:
-                    # we hit a splice point a second time, so topology dictates it's done
-                    fullpath_splice_points.pop(k)
-                else:
-                    # merge new splice point
-                    fullpath_splice_points[k] = v
-
-            # Note that only one dimension (which was arbitrary chosen here as
-            # horizontal) needs to be evaluated to determine all of the pixel flips.
-            for x,ys in path_flips.items():
-                ys = sorted(ys, reverse=True)
-                while len(ys) > 1:
-                    for y in range(ys.pop(),ys.pop()):
-                        curr[x][y] = paint_on
+                # Note that only one dimension (which was arbitrary chosen here as
+                # horizontal) needs to be evaluated to determine all of the pixel flips.
+                for x, ys in path_flips.items():
+                    ys = sorted(ys, reverse=True)
+                    while len(ys) > 1:
+                        for y in range(ys.pop(), ys.pop()):
+                            curr[x][y] = paint_on
         assert fullpath_splice_points == {}, fullpath_splice_points
         while fullpath_head:
             yield fullpath_head.cmds
@@ -390,7 +422,7 @@ class SvgCompressedImage(SvgImage):
         # unique way.
         self.path = ET.Element(
             ET.QName("path"),  # type: ignore
-            d=''.join(self._generate_subpaths()),
+            d="".join(self._generate_subpaths()),
             fill="#000",
         )
         self._img.append(self.path)

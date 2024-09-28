@@ -47,7 +47,7 @@ def main(args=None):
     try:
         version = metadata.version("qrcode")
     except metadata.PackageNotFoundError:
-        version = 'development'
+        version = "development"
 
     parser = optparse.OptionParser(usage=(__doc__ or "").strip(), version=version)
 
