@@ -1,6 +1,9 @@
 import qrcode.image.base
-from PIL import Image, ImageDraw
 
+try:
+    from PIL import Image, ImageDraw
+except ImportError:
+    Image, ImageDraw = None, None
 
 class PilImage(qrcode.image.base.BaseImage):
     """

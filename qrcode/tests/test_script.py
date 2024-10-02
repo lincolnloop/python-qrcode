@@ -19,7 +19,6 @@ def test_isatty(mock_print_ascii):
 
 @mock.patch("os.isatty", lambda *args: False)
 def test_piped():
-    pytest.importorskip("PIL", reason="Requires PIL")
     main(["testtext"])
 
 
@@ -48,7 +47,6 @@ def test_stdin_py3_unicodedecodeerror():
 
 
 def test_optimize():
-    pytest.importorskip("PIL", reason="Requires PIL")
     main("testtext --optimize 0".split())
 
 
@@ -63,13 +61,11 @@ def test_bad_factory():
 
 @mock.patch.object(sys, "argv", "qr testtext output".split())
 def test_sys_argv():
-    pytest.importorskip("PIL", reason="Requires PIL")
     main()
 
 
 def test_output(tmp_path):
-    pytest.importorskip("PIL", reason="Requires PIL")
-    main(["testtext", "--output", str(tmp_path / "test.png")])
+    main(["testtext", "--output", str(tmp_path / "test.svg")])
 
 
 def test_factory_drawer_none(capsys):
