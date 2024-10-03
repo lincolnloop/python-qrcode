@@ -5,6 +5,7 @@ try:
 except ImportError:
     Image, ImageDraw = None, None
 
+
 class PilImage(qrcode.image.base.BaseImage):
     """
     PIL image builder, default format is PNG.
