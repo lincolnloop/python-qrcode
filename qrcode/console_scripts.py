@@ -3,7 +3,8 @@
 qr - Convert stdin (or the first argument) to a QR Code.
 
 When stdout is a tty the QR Code is printed to the terminal and when stdout is
-a pipe to a file an image is written. The default image format is PNG.
+a pipe to a file an image is written. The default image format is PNG if pil or
+png optional dependencies are installed, otherwise SVG.
 """
 
 import optparse
@@ -110,6 +111,11 @@ def main(args=None):
         qr.add_data(data)
     else:
         qr.add_data(data, optimize=opts.optimize)
+
+    try:
+        qr.make()
+    except qrcode.exceptions.DataOverflowError:
+        raise_error("too much data to fit in QR code")
 
     if opts.output:
         img = qr.make_image()

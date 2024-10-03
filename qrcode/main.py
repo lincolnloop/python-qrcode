@@ -4,18 +4,17 @@ from typing import (
     Dict,
     Generic,
     List,
+    Literal,
     NamedTuple,
     Optional,
     Type,
     TypeVar,
     cast,
     overload,
-    Literal,
 )
 
 from qrcode import constants, exceptions, util
 from qrcode.image.base import BaseImage
-from qrcode.image.pure import PyPNGImage
 
 ModulesType = List[List[Optional[bool]]]
 # Cache modules generated just based on the QR Code version
@@ -155,8 +154,8 @@ class QRCode(Generic[GenericImage]):
         :param fit: If ``True`` (or if a size has not been provided), find the
             best fit for the data to avoid data overflow errors.
         """
-        if fit or (self.version is None):
-            self.best_fit(start=self.version)
+        if fit or (self._version is None):
+            self.best_fit(start=self._version)
         if self.mask_pattern is None:
             self.makeImpl(False, self.best_mask_pattern())
         else:
@@ -226,11 +225,12 @@ class QRCode(Generic[GenericImage]):
             data.write(buffer)
 
         needed_bits = len(buffer)
-        self.version = bisect_left(
+        new_version = bisect_left(
             util.BIT_LIMIT_TABLE[self.error_correction], needed_bits, start
         )
-        if self.version == 41:
+        if new_version == 41:
             raise exceptions.DataOverflowError()
+        self.version = new_version
 
         # Now check whether we need more bits for the mode sizes, recursing if
         # our guess was too low
@@ -361,9 +361,13 @@ class QRCode(Generic[GenericImage]):
             image_factory = self.image_factory
             if image_factory is None:
                 from qrcode.image.pil import Image, PilImage
+                from qrcode.image.pure import PngWriter, PyPNGImage
+                from qrcode.image.svg import SvgImage
 
-                # Use PIL by default if available, otherwise use PyPNG.
-                image_factory = PilImage if Image else PyPNGImage
+                # Use PIL by default if available, otherwise use PyPNG or SVG
+                image_factory = (
+                    PilImage if Image else PyPNGImage if PngWriter else SvgImage
+                )
 
         im = image_factory(
             self.border,
