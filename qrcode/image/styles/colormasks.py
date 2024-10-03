@@ -39,12 +39,14 @@ class QRColorMask:
                 if current_color in fg_color_cache:
                     pixels[x, y] = fg_color_cache[current_color]
                     continue
-                norm = self.extrap_color(self.back_color, self.paint_color, current_color)
+                norm = self.extrap_color(
+                    self.back_color, self.paint_color, current_color
+                )
                 if norm is not None:
                     new_color = self.interp_color(
                         self.get_bg_pixel(image, x, y),
                         self.get_fg_pixel(image, x, y),
-                        norm
+                        norm,
                     )
                     pixels[x, y] = new_color
                     fg_color_cache[current_color] = new_color
