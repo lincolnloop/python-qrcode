@@ -65,6 +65,14 @@ def test_mode_number():
     assert qr.data_list[0].mode == MODE_NUMBER
 
 
+def test_fit_overflow():
+    # Alphanumeric. Version 40 with ERROR_CORRECT_L has max 4296 characters.
+    qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
+    qr.add_data("A" * 4297)
+    with pytest.raises(DataOverflowError):
+        qr.make()
+
+
 def test_mode_alpha():
     qr = qrcode.QRCode()
     qr.add_data("ABCDEFGHIJ1234567890", optimize=0)
