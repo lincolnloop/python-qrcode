@@ -6,6 +6,7 @@ build-backend = "poetry.core.masonry.api"
 name = "qrcode"
 version = "8.1.dev0"
 packages = [{include = "qrcode"}]
+include = [{ path = "doc", format = "sdist" }]
 description = "QR Code image generator"
 authors = ["Lincoln Loop <info@lincolnloop.com>"]
 license = "BSD"
