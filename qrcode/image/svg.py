@@ -1,8 +1,6 @@
 import decimal
 from decimal import Decimal
-from typing import List, Optional, Type, Union, overload
-
-from typing_extensions import Literal
+from typing import List, Optional, Type, Union, overload, Literal
 
 import qrcode.image.base
 from qrcode.compat.etree import ET
@@ -29,12 +27,10 @@ class SvgFragmentImage(qrcode.image.base.BaseImageWithDrawer):
         self.unit_size = self.units(self.box_size)
 
     @overload
-    def units(self, pixels: Union[int, Decimal], text: Literal[False]) -> Decimal:
-        ...
+    def units(self, pixels: Union[int, Decimal], text: Literal[False]) -> Decimal: ...
 
     @overload
-    def units(self, pixels: Union[int, Decimal], text: Literal[True] = True) -> str:
-        ...
+    def units(self, pixels: Union[int, Decimal], text: Literal[True] = True) -> str: ...
 
     def units(self, pixels, text=True):
         """

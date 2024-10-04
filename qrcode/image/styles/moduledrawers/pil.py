@@ -1,9 +1,6 @@
-# Needed on case-insensitive filesystems
-from __future__ import absolute_import
-
 from typing import TYPE_CHECKING, List
 
-from qrcode.compat.pil import Image, ImageDraw
+from PIL import Image, ImageDraw
 from qrcode.image.styles.moduledrawers.base import QRModuleDrawer
 
 if TYPE_CHECKING:
@@ -249,7 +246,9 @@ class HorizontalBarsDrawer(StyledPilQRModuleDrawer):
         base_draw = ImageDraw.Draw(base)
         base_draw.ellipse((0, 0, fake_width * 2, fake_height), fill=front_color)
 
-        self.ROUND_LEFT = base.resize((width, shrunken_height), Image.Resampling.LANCZOS)
+        self.ROUND_LEFT = base.resize(
+            (width, shrunken_height), Image.Resampling.LANCZOS
+        )
         self.ROUND_RIGHT = self.ROUND_LEFT.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
 
     def drawrect(self, box, is_active: "ActiveWithNeighbors"):

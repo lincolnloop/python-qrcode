@@ -60,8 +60,7 @@ class SvgQRModuleDrawer(BaseSvgQRModuleDrawer):
         self.img._img.append(self.el(box))
 
     @abc.abstractmethod
-    def el(self, box):
-        ...
+    def el(self, box): ...
 
 
 class SvgSquareDrawer(SvgQRModuleDrawer):
@@ -106,8 +105,7 @@ class SvgPathQRModuleDrawer(BaseSvgQRModuleDrawer):
         self.img._subpaths.append(self.subpath(box))
 
     @abc.abstractmethod
-    def subpath(self, box) -> str:
-        ...
+    def subpath(self, box) -> str: ...
 
 
 class SvgPathSquareDrawer(SvgPathQRModuleDrawer):
