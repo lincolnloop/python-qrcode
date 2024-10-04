@@ -27,16 +27,16 @@ class QRColorMask:
     def initialize(self, styledPilImage, image):
         self.paint_color = styledPilImage.paint_color
 
-    def apply_mask(self, image):
+    def apply_mask(self, image, use_cache=False):
         width, height = image.size
         pixels = image.load()
-        fg_color_cache = {}
+        fg_color_cache = {} if use_cache else None
         for x in range(width):
             for y in range(height):
                 current_color = pixels[x, y]
                 if current_color == self.back_color:
                     continue
-                if current_color in fg_color_cache:
+                if use_cache and current_color in fg_color_cache:
                     pixels[x, y] = fg_color_cache[current_color]
                     continue
                 norm = self.extrap_color(self.back_color, self.paint_color, current_color)
@@ -47,7 +47,9 @@ class QRColorMask:
                         norm
                     )
                     pixels[x, y] = new_color
-                    fg_color_cache[current_color] = new_color
+
+                    if use_cache:
+                        fg_color_cache[current_color] = new_color
                 else:
                     pixels[x, y] = self.get_bg_pixel(image, x, y)
 
@@ -108,7 +110,7 @@ class SolidFillColorMask(QRColorMask):
             # the individual pixel comparisons that the base class uses, which
             # would be a lot faster. (In fact doing this would probably remove
             # the need for the B&W optimization above.)
-            QRColorMask.apply_mask(self, image)
+            QRColorMask.apply_mask(self, image, use_cache=True)
 
     def get_fg_pixel(self, image, x, y):
         return self.front_color
