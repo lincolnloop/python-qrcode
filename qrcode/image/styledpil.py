@@ -41,11 +41,18 @@ class StyledPilImage(qrcode.image.base.BaseImageWithDrawer):
 
     def __init__(self, *args, **kwargs):
         self.color_mask = kwargs.get("color_mask", SolidFillColorMask())
-        embeded_image_path = kwargs.get("embeded_image_path", None)
-        self.embeded_image = kwargs.get("embeded_image", None)
-        self.embeded_image_ratio = kwargs.get("embeded_image_ratio", 0.25)
+        embeded_image_path = kwargs.get(
+            "embeded_image_path",
+            kwargs.get("embedded_image_path", None))
+        self.embeded_image = kwargs.get(
+            "embeded_image",
+            kwargs.get("embedded_image", None))
+        self.embeded_image_ratio = kwargs.get(
+            "embeded_image_ratio",
+            kwargs.get("embedded_image_ratio", 0.25))
         self.embeded_image_resample = kwargs.get(
-            "embeded_image_resample", Image.Resampling.LANCZOS
+            "embeded_image_resample",
+            kwargs.get("embedded_image_resample", Image.Resampling.LANCZOS)
         )
         if not self.embeded_image and embeded_image_path:
             self.embeded_image = Image.open(embeded_image_path)
