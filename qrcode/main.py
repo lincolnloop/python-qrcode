@@ -158,11 +158,11 @@ class QRCode(Generic[GenericImage]):
         if fit or (self.version is None):
             self.best_fit(start=self.version)
         if self.mask_pattern is None:
-            self.makeImpl(False, self.best_mask_pattern())
+            self.makeImpl(self.best_mask_pattern())
         else:
-            self.makeImpl(False, self.mask_pattern)
+            self.makeImpl(self.mask_pattern)
 
-    def makeImpl(self, test, mask_pattern):
+    def makeImpl(self, mask_pattern):
         self.modules_count = self.version * 4 + 17
 
         if self.version in precomputed_qr_blanks:
@@ -179,10 +179,10 @@ class QRCode(Generic[GenericImage]):
 
             precomputed_qr_blanks[self.version] = copy_2d_array(self.modules)
 
-        self.setup_type_info(test, mask_pattern)
+        self.setup_type_info(mask_pattern)
 
         if self.version >= 7:
-            self.setup_type_number(test)
+            self.setup_type_number()
 
         if self.data_cache is None:
             self.data_cache = util.create_data(
@@ -246,7 +246,7 @@ class QRCode(Generic[GenericImage]):
         pattern = 0
 
         for i in range(8):
-            self.makeImpl(True, i)
+            self.makeImpl(i)
 
             lost_point = util.lost_point(self.modules)
 
@@ -430,24 +430,24 @@ class QRCode(Generic[GenericImage]):
                         else:
                             self.modules[row + r][col + c] = False
 
-    def setup_type_number(self, test):
+    def setup_type_number(self):
         bits = util.BCH_type_number(self.version)
 
         for i in range(18):
-            mod = not test and ((bits >> i) & 1) == 1
+            mod = ((bits >> i) & 1) == 1
             self.modules[i // 3][i % 3 + self.modules_count - 8 - 3] = mod
 
         for i in range(18):
-            mod = not test and ((bits >> i) & 1) == 1
+            mod = ((bits >> i) & 1) == 1
             self.modules[i % 3 + self.modules_count - 8 - 3][i // 3] = mod
 
-    def setup_type_info(self, test, mask_pattern):
+    def setup_type_info(self, mask_pattern):
         data = (self.error_correction << 3) | mask_pattern
         bits = util.BCH_type_info(data)
 
         # vertical
         for i in range(15):
-            mod = not test and ((bits >> i) & 1) == 1
+            mod = ((bits >> i) & 1) == 1
 
             if i < 6:
                 self.modules[i][8] = mod
@@ -458,7 +458,7 @@ class QRCode(Generic[GenericImage]):
 
         # horizontal
         for i in range(15):
-            mod = not test and ((bits >> i) & 1) == 1
+            mod = ((bits >> i) & 1) == 1
 
             if i < 8:
                 self.modules[8][self.modules_count - i - 1] = mod
@@ -468,7 +468,7 @@ class QRCode(Generic[GenericImage]):
                 self.modules[8][15 - i - 1] = mod
 
         # fixed module
-        self.modules[self.modules_count - 8][8] = not test
+        self.modules[self.modules_count - 8][8] = 1
 
     def map_data(self, data, mask_pattern):
         inc = -1
