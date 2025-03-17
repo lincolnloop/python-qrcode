@@ -42,3 +42,10 @@ Controls how much errors can be corrected during scanning of the QR Code.
 [Check out the example code here](./examples/error_correction.py)
 
 ![](./examples/error_correction.png)
+
+
+### `box_size`
+Controls how many pixels each "box" of the QR code is.
+
+### `border`
+Controls how many boxes thick the border should be. The default is 4, which is the minimum according to the specs.
