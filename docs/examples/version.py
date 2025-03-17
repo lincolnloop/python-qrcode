@@ -6,7 +6,6 @@ Usage:
 
 import sys
 import qrcode
-import qrcode.image.styles
 
 assert len(sys.argv) == 3, 'Usage: python version.py [data] [version]'
 
