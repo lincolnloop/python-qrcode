@@ -11,8 +11,10 @@ class QRCode(
 )
 ```
 
-### version
-An integer from 1 to 40, that controlls the size of QR Code. Set to `None` and use the `fit` parameter when making the code to determine this automatically.
+## Parameters of `QRCode`
+
+### `version`
+Any integer from 1 to 40. It controlls the size of QR Code. Set to `None` and use the `fit` parameter when making the code to determine this automatically.
 |version|size|max content length|
 |:-:|:-:|:-:|
 |1|21x21|4 ASCII chars|
@@ -23,11 +25,12 @@ An integer from 1 to 40, that controlls the size of QR Code. Set to `None` and u
 |25|117x117|1269 ASCII chars|
 |40|177x177|1852 ASCII chars|
 
-![](./examples/version.png)
-
 [Check out the example code here](./examples/version.py)
 
-### error_correction
+![](./examples/version.png)
+
+
+### `error_correction`
 Controls how much errors can be corrected during scanning of the QR Code.
 |value|percentage of errors corrected|
 |:-:|:-:|
@@ -36,6 +39,6 @@ Controls how much errors can be corrected during scanning of the QR Code.
 |ERROR_CORRECT_Q|25%|
 |ERROR_CORRECT_H|30%|
 
-![](./examples/error_correction.png)
-
 [Check out the example code here](./examples/error_correction.py)
+
+![](./examples/error_correction.png)
