@@ -5,8 +5,10 @@ Usage:
 '''
 
 import os
+import io
 import math
 import argparse
+import cairosvg
 import matplotlib.pyplot as plt
 from PIL import Image
 
@@ -27,8 +29,12 @@ def generate_images(example_filename: str, params: list[str]):
         status = os.system(f'python {example_filename} {DATA} {param}')
         if status != 0:
             raise RuntimeError(f'Error creating image for {param}')
-        images.append(Image.open('example.png'))
-        os.system('find example.png -delete')
+        if os.path.exists('example.png'):
+            images.append(Image.open('example.png'))
+        if os.path.exists('example.svg'):
+            png_bytes = cairosvg.svg2png(url='example.svg')
+            images.append(Image.open(io.BytesIO(png_bytes)))
+        os.system('find example.png example.svg -delete 2>/dev/null')
     return images
 
 
@@ -42,12 +48,6 @@ def create_comparison_image(images: list[Image.Image], params: list[str], output
         ax.axis('off')
     fig.tight_layout()
     plt.savefig(output_filename)
-
-
-
-
-    # for i, im in enumerate(images):
-    #     im.save(f'{output_filename}_{i}.png')
 
 
 if __name__ == '__main__':
