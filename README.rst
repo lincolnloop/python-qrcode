@@ -43,7 +43,7 @@ Or in Python, use the ``make`` shortcut function:
     type(img)  # qrcode.image.pil.PilImage
     img.save("some_file.png")
 
-For more info check `Advanced Usage <docs/advanced_usage.md>`_.
+For more info check `Advanced Usage <docs/advanced_usage.rst>`_.
 
 Features
 ========
@@ -89,4 +89,4 @@ Alternative to piping output to file to avoid PowerShell issues::
     # qr "Some data" > test.png
     qr --output=test.png "Some data"
 
-More examples in `Advanced Usage <docs/advanced_usage.md>`_.
+More examples in `Advanced Usage <docs/advanced_usage.rst>`_.
