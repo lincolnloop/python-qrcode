@@ -6,9 +6,6 @@ Usage:
 
 import sys
 import qrcode
-import qrcode.image.svg
-import qrcode.image.pure
-import qrcode.image.styledpil
 
 assert len(sys.argv) == 3, 'Usage: python mask_pattern.py [data] [mask_pattern]'
 
