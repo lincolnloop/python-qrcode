@@ -88,3 +88,5 @@ Alternative to piping output to file to avoid PowerShell issues::
 
     # qr "Some data" > test.png
     qr --output=test.png "Some data"
+
+More examples in `Advanced Usage <docs/advanced_usage.md>`_.
