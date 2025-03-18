@@ -1,7 +1,7 @@
 Advanced Usage
 ==============
 
-Using the python ```QRCode`` <../qrcode/main.py#L77>`__ class.
+Using the python `QRCode <../qrcode/main.py#L77>`__ class.
 
 .. code:: python
 
@@ -20,18 +20,27 @@ Parameters of ``QRCode``
 ``version``
 ~~~~~~~~~~~
 
-Any integer from 1 to 40. Controlls the size of QR Code. Set to ``None``
+Any integer from 1 to 40. Controls the size of the QR Code. Set to ``None``
 and use the ``fit`` parameter when making the code to determine this
 automatically.
-\|version|size|max content length\|
-\|:-:|:-:|:-:\|
-\|\ ``1``\ \|21x21|4 ASCII chars\|
-\|\ ``2``\ \|25x25|9 ASCII chars\|
-\|\ ``3``\ \|29x29|17 ASCII chars\|
-\|\ ``4``\ \|33x33|50 ASCII chars\|
-\|\ ``10``\ \|57x57|174 ASCII chars\|
-\|\ ``25``\ \|117x117|1269 ASCII chars\|
-\|\ ``40``\ \|177x177|1852 ASCII chars\|
+
++---------+---------+--------------------+
+| version | size    | max content length |
++=========+=========+====================+
+| `1`     | 21x21   | 4 ASCII chars      |
++---------+---------+--------------------+
+| `2`     | 25x25   | 9 ASCII chars      |
++---------+---------+--------------------+
+| `3`     | 29x29   | 17 ASCII chars     |
++---------+---------+--------------------+
+| `4`     | 33x33   | 50 ASCII chars     |
++---------+---------+--------------------+
+| `10`    | 57x57   | 174 ASCII chars    |
++---------+---------+--------------------+
+| `25`    | 117x117 | 1269 ASCII chars   |
++---------+--------+---------------------+
+| `40`    | 177x177 | 1852 ASCII chars   |
++---------+--------+---------------------+
 
 `Check out the example code here <./examples/version.py>`__
 
@@ -40,14 +49,20 @@ automatically.
 ``error_correction``
 ~~~~~~~~~~~~~~~~~~~~
 
-Controls how much errors can be corrected during scanning of the QR
-Code.
-\|value|percentage of errors corrected\|
-\|:-:|:-:\|
-\|\ ``ERROR_CORRECT_L``\ \|7%\|
-\|\ ``ERROR_CORRECT_M``\ \|15%\|
-\|\ ``ERROR_CORRECT_Q``\ \|25%\|
-\|\ ``ERROR_CORRECT_H``\ \|30%\|
+Controls how many errors can be corrected during scanning of the QR Code.
+
++---------------------+--------------------------------+
+| value               | percentage of errors corrected |
++=====================+================================+
+| ``ERROR_CORRECT_L`` | 7%                             |
++---------------------+--------------------------------+
+| ``ERROR_CORRECT_M`` | 15%                            |
++---------------------+--------------------------------+
+| ``ERROR_CORRECT_Q`` | 25%                            |
++---------------------+--------------------------------+
+| ``ERROR_CORRECT_H`` | 30%                            |
++---------------------+--------------------------------+
+
 
 `Check out the example code here <./examples/error_correction.py>`__
 
@@ -56,7 +71,7 @@ Code.
 ``box_size``
 ~~~~~~~~~~~~
 
-Controls how many pixels each “box” of the QR code is.
+Controls how many pixels each _box of the QR code is.
 
 ``border``
 ~~~~~~~~~~
@@ -67,66 +82,33 @@ which is the minimum according to the specs.
 ``image_factory``
 ~~~~~~~~~~~~~~~~~
 
-You can encode as SVG, or use a new pure Python image processor to
+You can encode it as SVG, or use a new pure Python image processor to
 encode to PNG images.
 
 To apply styles to the QRCode, use the StyledPilImage or one of the
 standard SVG image factories. These accept an optional ``module_drawer``
 parameter.
 
-To apply color mask to the QRCode, use the StyledPilImage. It accepts an
+To apply a colour mask to the QRCode, use the StyledPilImage. It accepts an
 optional ``color_mask`` and ``embeded_image_path``.
 
-+------------------+------------+------------------+------------------+
-| value            | usage      | edit style       | edit color mask  |
-+==================+============+==================+==================+
-| ``SvgImage``     | Simple     | ✓                |                  |
-|                  | factory,   |                  |                  |
-|                  | just a set |                  |                  |
-|                  | of rects   |                  |                  |
-+------------------+------------+------------------+------------------+
-| ``Sv             | Fragment   | ✓                |                  |
-| gFragmentImage`` | factory    |                  |                  |
-|                  | (also just |                  |                  |
-|                  | a set of   |                  |                  |
-|                  | rects)     |                  |                  |
-+------------------+------------+------------------+------------------+
-| ``SvgPathImage`` | Combined   | ✓                |                  |
-|                  | path       |                  |                  |
-|                  | factory,   |                  |                  |
-|                  | fixes      |                  |                  |
-|                  | white      |                  |                  |
-|                  | space that |                  |                  |
-|                  | may occur  |                  |                  |
-|                  | when       |                  |                  |
-|                  | zooming    |                  |                  |
-+------------------+------------+------------------+------------------+
-| ``SvgFillImage`` | Similar to | ✓                |                  |
-|                  | ``S        |                  |                  |
-|                  | vgImage``, |                  |                  |
-|                  | but also   |                  |                  |
-|                  | fill the   |                  |                  |
-|                  | background |                  |                  |
-|                  | with white |                  |                  |
-+------------------+------------+------------------+------------------+
-| ``Sv             | Similar to | ✓                |                  |
-| gPathFillImage`` | ``SvgPa    |                  |                  |
-|                  | thImage``, |                  |                  |
-|                  | but also   |                  |                  |
-|                  | fill the   |                  |                  |
-|                  | background |                  |                  |
-|                  | with white |                  |                  |
-+------------------+------------+------------------+------------------+
-| ``PyPNGImage``   | PNG        |                  |                  |
-|                  | encoder    |                  |                  |
-|                  | that uses  |                  |                  |
-|                  | pypng      |                  |                  |
-+------------------+------------+------------------+------------------+
-| `                | PNG        | ✓                | ✓                |
-| `StyledPilImag`` | encoder    |                  |                  |
-|                  | that uses  |                  |                  |
-|                  | Pillow     |                  |                  |
-+------------------+------------+------------------+------------------+
++----------------------+-----------------------------------------------------------------------+------------+-----------------+
+| value                | usage                                                                 | edit style | edit color mask |
++======================+=======================================================================+============+=================+
+| ``SvgImage``         | Simple factory, just a set of rects                                   | ✓          |                 |
++----------------------+-----------------------------------------------------------------------+------------+-----------------+
+| ``SvgFragmentImage`` | Fragment factory (also just a set of rects)                           | ✓          |                 |
++----------------------+-----------------------------------------------------------------------+------------+-----------------+
+| ``SvgPathImage``     | Combined path factory, fixes white space that may occur when zooming  | ✓          |                 |
++----------------------+-----------------------------------------------------------------------+------------+-----------------+
+| ``SvgFillImage``     | Similar to ``SvgImage``, but also fills the background with white     | ✓          |                 |
++----------------------+-----------------------------------------------------------------------+------------+-----------------+
+| ``SvgPathFillImage`` | Similar to ``SvgPathImage``, but also fills the background with white | ✓          |                 |
++----------------------+-----------------------------------------------------------------------+------------+-----------------+
+| ``PyPNGImage``       | PNG encoder that uses pypng                                           |            |                 |
++----------------------+-----------------------------------------------------------------------+------------+-----------------+
+| ``StyledPilImage``   | PNG encoder that uses Pillow                                          | ✓          | ✓               |
++----------------------+-----------------------------------------------------------------------+------------+-----------------+
 
 `Check out the example code here <./examples/image_factory.py>`__
 
@@ -136,7 +118,7 @@ optional ``color_mask`` and ``embeded_image_path``.
 ~~~~~~~~~~~~~~~~
 
 Any integer from 0 to 7. Controls which mask to use. QR Codes don’t work
-good with large areas of black and white, so XOR masks are aplied to
+good with large areas of black and white, so XOR masks are applied to
 make them easier to scan.
 
 `Check out the example code here <./examples/mask_pattern.py>`__
@@ -149,7 +131,7 @@ Parameters of ``make_image()``
 ``back_color``
 ~~~~~~~~~~~~~~
 
-Controls the color of the background. Can be a name, hex string or rgb
+Controls the colour of the background. It can be a name, hex string or rgb
 tuple.
 
 `Check out the example code here <./examples/back_color.py>`__
@@ -159,8 +141,8 @@ tuple.
 ``fill_color``
 ~~~~~~~~~~~~~~
 
-Controls the color of the QR Code pattern. Can be a name, hex string or
-rgb tuple.
+Controls the colour of the QR Code pattern. It can be a name, hex string or
+RGB tuple.
 
 `Check out the example code here <./examples/fill_color.py>`__
 
@@ -170,7 +152,7 @@ rgb tuple.
 ~~~~~~~~~~~~~~
 
 Controls the shading of the QR Code pattern. Only works with
-``StyledPilImage`` image_factory. The colors have to be defined as
+``StyledPilImage`` image_factory. The colours have to be defined as
 tuples of ints. The image has to be PNG.
 
 `Check out the example code here <./examples/color_mask.py>`__
@@ -182,29 +164,21 @@ tuples of ints. The image has to be PNG.
 
 Controls the style of drawn “boxes” of the QR Code.
 
-+----------------------+----------------------+----------------------+
-| style                | png                  | svg                  |
-+======================+======================+======================+
-| squares              | ``                   | ``SvgSquareDrawer``  |
-|                      | SquareModuleDrawer`` | ``S                  |
-|                      |                      | vgPathSquareDrawer`` |
-+----------------------+----------------------+----------------------+
-| gapped squares       | ``Gapped             |                      |
-|                      | SquareModuleDrawer`` |                      |
-+----------------------+----------------------+----------------------+
-| circles              | ``                   | ``SvgCircleDrawer``  |
-|                      | CircleModuleDrawer`` | ``S                  |
-|                      |                      | vgPathCircleDrawer`` |
-+----------------------+----------------------+----------------------+
-| rounded and          | ``R                  |                      |
-| connected blobs      | oundedModuleDrawer`` |                      |
-+----------------------+----------------------+----------------------+
-| vertical bars        | ``                   |                      |
-|                      | VerticalBarsDrawer`` |                      |
-+----------------------+----------------------+----------------------+
-| horizontal bars      | ``Ho                 |                      |
-|                      | rizontalBarsDrawer`` |                      |
-+----------------------+----------------------+----------------------+
++------------------------------+------------------------------+---------------------------------------------+
+| style                        | png                          | svg                                         |
++==============================+==============================+=============================================+
+| squares                      | ``SquareModuleDrawer``       | ``SvgSquareDrawer`` ``SvgPathSquareDrawer`` |
++------------------------------+------------------------------+---------------------------------------------+
+| gapped squares               | ``GappedSquareModuleDrawer`` |                                             |
++------------------------------+------------------------------+---------------------------------------------+
+| circles                      | ``CircleModuleDrawer``       | ``SvgCircleDrawer`` ``SvgPathCircleDrawer`` |
++------------------------------+------------------------------+---------------------------------------------+
+| rounded and connected blobs  | ``RoundedModuleDrawer``      |                                             |
++------------------------------+------------------------------+---------------------------------------------+
+| vertical bars                | ``VerticalBarsDrawer``       |                                             |
++------------------------------+------------------------------+---------------------------------------------+
+| horizontal bars              | ``HorizontalBarsDrawer``     |                                             |
++------------------------------+------------------------------+---------------------------------------------+
 
 `Check out the example code here <./examples/modue_drawer.py>`__
 
@@ -213,7 +187,7 @@ Controls the style of drawn “boxes” of the QR Code.
 ``embeded_image_path``
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Allows to embed PNG image in the center of QR Code. Only works with
+Allows the embedding of PNG images in the centre of the QR code. Only works with
 ``StyledPilImage`` image_factory.
 
 `Check out the example code here <./examples/embeded_image_path.py>`__
