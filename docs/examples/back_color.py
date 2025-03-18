@@ -1,5 +1,5 @@
 '''
-Create a QR Code with a specific QRCode class parameter: back_color.
+Create a QR Code with a specific QRCode make() function parameter: back_color.
 Usage:
     python back_color.py [data] [back_color]
 '''

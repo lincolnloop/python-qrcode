@@ -1,5 +1,5 @@
 '''
-Create a QR Code with a specific QRCode class parameter: fill_color.
+Create a QR Code with a specific QRCode make() function parameter: fill_color.
 Usage:
     python fill_color.py [data] [fill_color]
 '''
