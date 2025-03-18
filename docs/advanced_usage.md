@@ -100,6 +100,14 @@ Controls the color of the QR Code pattern. Can be a name, hex string or rgb tupl
 ![](./examples/fill_color.png)
 
 
+### `color_mask`
+Controls the shading of the QR Code pattern. Only works with `StyledPilImage` image_factory. The colors have to be defined as tuples of ints. The image has to be PNG.
+
+[Check out the example code here](./examples/color_mask.py)
+
+![](./examples/color_mask.png)
+
+
 ### `modue_drawer`
 Controls the style of drawn "boxes" of the QR Code.
 
