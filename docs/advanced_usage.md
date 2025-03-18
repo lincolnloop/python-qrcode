@@ -6,15 +6,15 @@ class QRCode(
     error_correction: int = ERROR_CORRECT_M,
     box_size: int = 10,
     border: int = 4,
-    image_factory: Any | None = None,
-    mask_pattern: Any | None = None
+    image_factory: BaseImageWithDrawer | None = None,
+    mask_pattern: int | None = None
 )
 ```
 
 ## Parameters of `QRCode`
 
 ### `version`
-Any integer from 1 to 40. It controlls the size of QR Code. Set to `None` and use the `fit` parameter when making the code to determine this automatically.
+Any integer from 1 to 40. Controlls the size of QR Code. Set to `None` and use the `fit` parameter when making the code to determine this automatically.
 |version|size|max content length|
 |:-:|:-:|:-:|
 |`1`|21x21|4 ASCII chars|
@@ -72,3 +72,11 @@ To apply color mask to the QRCode, use the StyledPilImage. It accepts an optiona
 [Check out the example code here](./examples/image_factory.py)
 
 ![](./examples/image_factory.png)
+
+
+### `mask_pattern`
+Any integer from 0 to 7. Controls which mask to use. QR Codes don't work good with large areas of black and white, so XOR masks are aplied to make them easier to scan.
+
+[Check out the example code here](./examples/mask_pattern.py)
+
+![](./examples/mask_pattern.png)
