@@ -115,3 +115,12 @@ Controls the style of drawn "boxes" of the QR Code.
 [Check out the example code here](./examples/modue_drawer.py)
 
 ![](./examples/module_drawer.png)
+
+
+### `embeded_image_path`
+Allows to embed PNG image in the center of QR Code. Only works with `StyledPilImage` image_factory.
+
+[Check out the example code here](./examples/embeded_image_path.py)
+
+![](./examples/embeded_image_path.png)
+
