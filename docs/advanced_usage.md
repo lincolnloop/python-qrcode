@@ -80,3 +80,21 @@ Any integer from 0 to 7. Controls which mask to use. QR Codes don't work good wi
 [Check out the example code here](./examples/mask_pattern.py)
 
 ![](./examples/mask_pattern.png)
+
+
+## Parameters of `make_image()`
+
+### `back_color`
+Controls the color of the background. Can be a name, hex string or rgb tuple.
+
+[Check out the example code here](./examples/back_color.py)
+
+![](./examples/back_color.png)
+
+
+### `fill_color`
+Controls the color of the QR Code pattern. Can be a name, hex string or rgb tuple.
+
+[Check out the example code here](./examples/fill_color.py)
+
+![](./examples/fill_color.png)
