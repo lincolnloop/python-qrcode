@@ -43,8 +43,7 @@ Or in Python, use the ``make`` shortcut function:
     type(img)  # qrcode.image.pil.PilImage
     img.save("some_file.png")
 
-For advanced usage check more docs_.
-.. _docs: ./docs/advanced_usage.md
+For more info check `Advanced Usage <docs/advanced_usage.md>`_.
 
 Features
 ========
