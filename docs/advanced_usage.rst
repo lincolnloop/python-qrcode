@@ -159,7 +159,7 @@ tuples of ints. The image has to be PNG.
 
 .. image:: ./examples/color_mask.png
 
-``modue_drawer``
+``module_drawer``
 ~~~~~~~~~~~~~~~~
 
 Controls the style of drawn “boxes” of the QR Code.
@@ -180,7 +180,7 @@ Controls the style of drawn “boxes” of the QR Code.
 | horizontal bars              | ``HorizontalBarsDrawer``     |                                             |
 +------------------------------+------------------------------+---------------------------------------------+
 
-`Check out the example code here <./examples/modue_drawer.py>`__
+`Check out the example code here <./examples/module_drawer.py>`__
 
 .. image:: ./examples/module_drawer.png
 
