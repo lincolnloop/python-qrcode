@@ -26,7 +26,7 @@ def parse_args():
 def generate_images(example_filename: str, params: list[str]):
     images = []
     for param in params:
-        status = os.system(f'python {example_filename} {DATA} {param}')
+        status = os.system(f'python {example_filename} "{DATA}" "{param}"')
         if status != 0:
             raise RuntimeError(f'Error creating image for {param}')
         if os.path.exists('example.png'):
