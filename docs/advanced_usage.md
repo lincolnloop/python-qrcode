@@ -1,5 +1,5 @@
 # Advanced Usage
-Using the [`QRCode`](../qrcode/main.py#L77) class.
+Using the python [`QRCode`](../qrcode/main.py#L77) class.
 ```python
 class QRCode(
     version: Any | None = None,
