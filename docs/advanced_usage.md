@@ -98,3 +98,20 @@ Controls the color of the QR Code pattern. Can be a name, hex string or rgb tupl
 [Check out the example code here](./examples/fill_color.py)
 
 ![](./examples/fill_color.png)
+
+
+### `modue_drawer`
+Controls the style of drawn "boxes" of the QR Code.
+
+|style|png|svg|
+|:-:|:-:|:-:|
+|squares|`SquareModuleDrawer`|`SvgSquareDrawer` `SvgPathSquareDrawer`|
+|gapped squares|`GappedSquareModuleDrawer`||
+|circles|`CircleModuleDrawer`|`SvgCircleDrawer` `SvgPathCircleDrawer`|
+|rounded and connected blobs|`RoundedModuleDrawer`||
+|vertical bars|`VerticalBarsDrawer`||
+|horizontal bars|`HorizontalBarsDrawer`||
+
+[Check out the example code here](./examples/modue_drawer.py)
+
+![](./examples/module_drawer.png)
