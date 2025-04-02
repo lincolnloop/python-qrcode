@@ -1,5 +1,5 @@
 import abc
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Type, Union
+from typing import TYPE_CHECKING, Any, Optional, Union
 
 from qrcode.image.styles.moduledrawers.base import QRModuleDrawer
 
@@ -7,7 +7,7 @@ if TYPE_CHECKING:
     from qrcode.main import ActiveWithNeighbors, QRCode
 
 
-DrawerAliases = Dict[str, Tuple[Type[QRModuleDrawer], Dict[str, Any]]]
+DrawerAliases = dict[str, tuple[type[QRModuleDrawer], dict[str, Any]]]
 
 
 class BaseImage:
@@ -16,7 +16,7 @@ class BaseImage:
     """
 
     kind: Optional[str] = None
-    allowed_kinds: Optional[Tuple[str]] = None
+    allowed_kinds: Optional[tuple[str]] = None
     needs_context = False
     needs_processing = False
     needs_drawrect = True
@@ -108,7 +108,7 @@ class BaseImage:
 
 
 class BaseImageWithDrawer(BaseImage):
-    default_drawer_class: Type[QRModuleDrawer]
+    default_drawer_class: type[QRModuleDrawer]
     drawer_aliases: DrawerAliases = {}
 
     def get_default_module_drawer(self) -> QRModuleDrawer:
