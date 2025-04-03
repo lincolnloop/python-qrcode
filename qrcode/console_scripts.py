@@ -112,7 +112,7 @@ def main(args=None):
     else:
         qr.add_data(data, optimize=opts.optimize)
 
-    if image_factory is None and (os.isatty(sys.stdout.fileno()) or opts.ascii):
+    if opts.ascii:
         qr.print_ascii(tty=not opts.ascii)
         return
 
