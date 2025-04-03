@@ -112,29 +112,28 @@ def main(args=None):
     else:
         qr.add_data(data, optimize=opts.optimize)
 
+    if image_factory is None and (os.isatty(sys.stdout.fileno()) or opts.ascii):
+        qr.print_ascii(tty=not opts.ascii)
+        return
+
+    kwargs = {}
+    aliases: Optional[DrawerAliases] = getattr(qr.image_factory, "drawer_aliases", None)
+    if opts.factory_drawer:
+        if not aliases:
+            raise_error("The selected factory has no drawer aliases.")
+        if opts.factory_drawer not in aliases:
+            raise_error(
+                f"{opts.factory_drawer} factory drawer not found."
+                f" Expected {commas(aliases)}"
+            )
+        drawer_cls, drawer_kwargs = aliases[opts.factory_drawer]
+        kwargs["module_drawer"] = drawer_cls(**drawer_kwargs)
+
     if opts.output:
-        img = qr.make_image()
+        img = qr.make_image(**kwargs)
         with open(opts.output, "wb") as out:
             img.save(out)
     else:
-        if image_factory is None and (os.isatty(sys.stdout.fileno()) or opts.ascii):
-            qr.print_ascii(tty=not opts.ascii)
-            return
-
-        kwargs = {}
-        aliases: Optional[DrawerAliases] = getattr(
-            qr.image_factory, "drawer_aliases", None
-        )
-        if opts.factory_drawer:
-            if not aliases:
-                raise_error("The selected factory has no drawer aliases.")
-            if opts.factory_drawer not in aliases:
-                raise_error(
-                    f"{opts.factory_drawer} factory drawer not found."
-                    f" Expected {commas(aliases)}"
-                )
-            drawer_cls, drawer_kwargs = aliases[opts.factory_drawer]
-            kwargs["module_drawer"] = drawer_cls(**drawer_kwargs)
         img = qr.make_image(**kwargs)
 
         sys.stdout.flush()
