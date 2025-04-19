@@ -97,13 +97,15 @@ class SolidFillColorMask(QRColorMask):
             # black and white, so if these are also our mask colors we don't
             # need to do anything. This is much faster than actually applying a
             # mask.
-            pass
-        else:
-            # TODO there's probably a way to use PIL.ImageMath instead of doing
-            # the individual pixel comparisons that the base class uses, which
-            # would be a lot faster. (In fact doing this would probably remove
-            # the need for the B&W optimization above.)
-            QRColorMask.apply_mask(self, image)
+            return
+
+        image.paste(
+            Image.composite(
+                Image.new("RGB", image.size, self.front_color),
+                Image.new("RGB", image.size, self.back_color),
+                image.convert("L").point(lambda p: 255 if p < 128 else 0),
+            )
+        )
 
     def get_fg_pixel(self, image, x, y):
         return self.front_color
