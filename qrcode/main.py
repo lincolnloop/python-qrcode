@@ -342,8 +342,12 @@ class QRCode(Generic[GenericImage]):
 
         If the data has not been compiled yet, make it first.
         """
+        # allow embeded_ parameters with typos for backwards compatibility
         if (
-            kwargs.get("embeded_image_path") or kwargs.get("embeded_image")
+            kwargs.get("embedded_image_path")
+            or kwargs.get("embedded_image")
+            or kwargs.get("embeded_image_path")
+            or kwargs.get("embeded_image")
         ) and self.error_correction != constants.ERROR_CORRECT_H:
             raise ValueError(
                 "Error correction level must be ERROR_CORRECT_H if an embedded image is provided"

@@ -50,21 +50,21 @@ def test_render_styled_Image():
     img.save(io.BytesIO())
 
 
-def test_render_styled_with_embeded_image():
-    embeded_img = Image.new("RGB", (10, 10), color="red")
+def test_render_styled_with_embedded_image():
+    embedded_img = Image.new("RGB", (10, 10), color="red")
     qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_H)
     qr.add_data(UNICODE_TEXT)
-    img = qr.make_image(image_factory=StyledPilImage, embeded_image=embeded_img)
+    img = qr.make_image(image_factory=StyledPilImage, embedded_image=embedded_img)
     img.save(io.BytesIO())
 
 
-def test_render_styled_with_embeded_image_path(tmp_path):
+def test_render_styled_with_embedded_image_path(tmp_path):
     tmpfile = str(tmp_path / "test.png")
-    embeded_img = Image.new("RGB", (10, 10), color="red")
-    embeded_img.save(tmpfile)
+    embedded_img = Image.new("RGB", (10, 10), color="red")
+    embedded_img.save(tmpfile)
     qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_H)
     qr.add_data(UNICODE_TEXT)
-    img = qr.make_image(image_factory=StyledPilImage, embeded_image_path=tmpfile)
+    img = qr.make_image(image_factory=StyledPilImage, embedded_image_path=tmpfile)
     img.save(io.BytesIO())
 
 
@@ -128,29 +128,29 @@ def test_embedded_image_and_error_correction(tmp_path):
     qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_L)
     qr.add_data(UNICODE_TEXT)
     with pytest.raises(ValueError):
-        qr.make_image(embeded_image_path=tmpfile)
+        qr.make_image(embedded_image_path=tmpfile)
     with pytest.raises(ValueError):
-        qr.make_image(embeded_image=embedded_img)
+        qr.make_image(embedded_image=embedded_img)
 
     qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_M)
     qr.add_data(UNICODE_TEXT)
     with pytest.raises(ValueError):
-        qr.make_image(embeded_image_path=tmpfile)
+        qr.make_image(embedded_image_path=tmpfile)
     with pytest.raises(ValueError):
-        qr.make_image(embeded_image=embedded_img)
+        qr.make_image(embedded_image=embedded_img)
 
     qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_Q)
     qr.add_data(UNICODE_TEXT)
     with pytest.raises(ValueError):
-        qr.make_image(embeded_image_path=tmpfile)
+        qr.make_image(embedded_image_path=tmpfile)
     with pytest.raises(ValueError):
-        qr.make_image(embeded_image=embedded_img)
+        qr.make_image(embedded_image=embedded_img)
 
     # The only accepted correction level when an embedded image is provided
     qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_H)
     qr.add_data(UNICODE_TEXT)
-    qr.make_image(embeded_image_path=tmpfile)
-    qr.make_image(embeded_image=embedded_img)
+    qr.make_image(embedded_image_path=tmpfile)
+    qr.make_image(embedded_image=embedded_img)
 
 
 def test_shortcut():
