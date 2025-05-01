@@ -2,12 +2,21 @@
 Change log
 ==========
 
-8.1 ( 02 April 2025)
+8.2 (01 May 2025)
+=================
+
+- Optimize QRColorMask apply_mask method for enhanced performance
+- Fix typos on StyledPilImage embeded_* parameters.
+  The old parameters with the typos are still accepted
+  for backward compatibility.
+
+
+8.1 (02 April 2025)
 ====================
 
 - Added support for Python 3.13.
 
-8.0 ( 27 September 2024)
+8.0 (27 September 2024)
 ========================
 
 - Added support for Python 3.11 and 3.12.
@@ -20,10 +29,12 @@ Change log
 
 - Code quality and formatting utilises ruff_.
 
-- Removed ``typing_extensions`` as a dependency, as it's no longer required with
+- Removed ``typing_extensions`` as a dependency, as it's no longer required
+  with having Python 3.9+ as a requirement.
   having Python 3.9+ as a requirement.
 
-- Only allow high error correction rate (`qrcode.ERROR_CORRECT_H`) when generating
+- Only allow high error correction rate (`qrcode.ERROR_CORRECT_H`)
+  when generating
   QR codes with embedded images to ensure content is readable
 
 .. _Poetry: https://python-poetry.org
