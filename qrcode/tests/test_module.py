@@ -3,6 +3,15 @@ import sys
 import tempfile
 from pathlib import Path
 
+import pytest
+
+try:
+    from PIL import Image, ImageDraw
+
+    PIL_NOT_INSTALLED = False
+except ImportError:
+    PIL_NOT_INSTALLED = True
+
 
 def test_module_help():
     """Test that the module can be executed with the help flag."""
@@ -22,6 +31,7 @@ def test_module_help():
     assert "--factory" in result.stdout
 
 
+@pytest.mark.skipif(PIL_NOT_INSTALLED, reason="PIL is not installed")
 def test_module_generate_qrcode():
     """Test that the module can generate a QR code image."""
     with tempfile.TemporaryDirectory() as temp_dir:
