@@ -94,6 +94,10 @@ class SvgImage(SvgFragmentImage):
         "circle": (svg_drawers.SvgCircleDrawer, {}),
         "gapped-circle": (svg_drawers.SvgCircleDrawer, {"size_ratio": Decimal(0.8)}),
         "gapped-square": (svg_drawers.SvgSquareDrawer, {"size_ratio": Decimal(0.8)}),
+        "rounded-module": (
+            svg_drawers.SvgRoundedModuleDrawer,
+            {"size_ratio": Decimal(0.8)},
+        ),
     }
 
     def _svg(self, tag="svg", **kwargs):
@@ -140,6 +144,10 @@ class SvgPathImage(SvgImage):
         ),
         "gapped-square": (
             svg_drawers.SvgPathSquareDrawer,
+            {"size_ratio": Decimal(0.8)},
+        ),
+        "rounded-module": (
+            svg_drawers.SvgRoundedModuleDrawer,
             {"size_ratio": Decimal(0.8)},
         ),
     }
