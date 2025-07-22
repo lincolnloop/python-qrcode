@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import decimal
 from decimal import Decimal
-from typing import Optional, Union, overload, Literal
+from typing import Union, overload, Literal
 
 import qrcode.image.base
 from qrcode.compat.etree import ET
@@ -81,7 +83,7 @@ class SvgImage(SvgFragmentImage):
     Creates a QR-code image as a standalone SVG document.
     """
 
-    background: Optional[str] = None
+    background: str | None = None
     drawer_aliases: qrcode.image.base.DrawerAliases = {
         "circle": (svg_drawers.SvgCircleDrawer, {}),
         "gapped-circle": (svg_drawers.SvgCircleDrawer, {"size_ratio": Decimal(0.8)}),
@@ -121,8 +123,8 @@ class SvgPathImage(SvgImage):
         "stroke": "none",
     }
 
-    needs_processing = True
-    path: Optional[ET.Element] = None
+    needs_processing: bool = True
+    path: ET.Element | None = None
     default_drawer_class: type[QRModuleDrawer] = svg_drawers.SvgPathSquareDrawer
     drawer_aliases = {
         "circle": (svg_drawers.SvgPathCircleDrawer, {}),

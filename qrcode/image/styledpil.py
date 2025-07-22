@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import qrcode.image.base
 from PIL import Image
 from qrcode.image.styles.colormasks import QRColorMask, SolidFillColorMask

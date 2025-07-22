@@ -1,9 +1,10 @@
+from __future__ import annotations
+
 import sys
 from bisect import bisect_left
 from typing import (
     Generic,
     NamedTuple,
-    Optional,
     TypeVar,
     cast,
     overload,
@@ -14,7 +15,7 @@ from qrcode import constants, exceptions, util
 from qrcode.image.base import BaseImage
 from qrcode.image.pure import PyPNGImage
 
-ModulesType = list[list[Optional[bool]]]
+ModulesType = list[list[bool | None]]
 # Cache modules generated just based on the QR Code version
 precomputed_qr_blanks: dict[int, ModulesType] = {}
 
@@ -73,7 +74,7 @@ GenericImageLocal = TypeVar("GenericImageLocal", bound=BaseImage)
 
 class QRCode(Generic[GenericImage]):
     modules: ModulesType
-    _version: Optional[int] = None
+    _version: int | None = None
 
     def __init__(
         self,
@@ -81,7 +82,7 @@ class QRCode(Generic[GenericImage]):
         error_correction=constants.ERROR_CORRECT_M,
         box_size=10,
         border=4,
-        image_factory: Optional[type[GenericImage]] = None,
+        image_factory: type[GenericImage] | None = None,
         mask_pattern=None,
     ):
         _check_box_size(box_size)
