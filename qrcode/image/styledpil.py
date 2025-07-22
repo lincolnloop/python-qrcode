@@ -29,7 +29,7 @@ class StyledPilImage(qrcode.image.base.BaseImageWithDrawer):
     data integrity A resampling filter can be specified (defaulting to
     PIL.Image.Resampling.LANCZOS) for resizing; see PIL.Image.resize() for possible
     options for this parameter.
-    The image size can be controlled by `embeded_image_ratio` which is a ratio
+    The image size can be controlled by `embedded_image_ratio` which is a ratio
     between 0 and 1 that's set in relation to the overall width of the QR code.
     """
 
@@ -41,14 +41,22 @@ class StyledPilImage(qrcode.image.base.BaseImageWithDrawer):
 
     def __init__(self, *args, **kwargs):
         self.color_mask = kwargs.get("color_mask", SolidFillColorMask())
-        embeded_image_path = kwargs.get("embeded_image_path", None)
-        self.embeded_image = kwargs.get("embeded_image", None)
-        self.embeded_image_ratio = kwargs.get("embeded_image_ratio", 0.25)
-        self.embeded_image_resample = kwargs.get(
-            "embeded_image_resample", Image.Resampling.LANCZOS
+        # allow embeded_ parameters with typos for backwards compatibility
+        embedded_image_path = kwargs.get(
+            "embedded_image_path", kwargs.get("embeded_image_path", None)
         )
-        if not self.embeded_image and embeded_image_path:
-            self.embeded_image = Image.open(embeded_image_path)
+        self.embedded_image = kwargs.get(
+            "embedded_image", kwargs.get("embeded_image", None)
+        )
+        self.embedded_image_ratio = kwargs.get(
+            "embedded_image_ratio", kwargs.get("embeded_image_ratio", 0.25)
+        )
+        self.embedded_image_resample = kwargs.get(
+            "embedded_image_resample",
+            kwargs.get("embeded_image_resample", Image.Resampling.LANCZOS),
+        )
+        if not self.embedded_image and embedded_image_path:
+            self.embedded_image = Image.open(embedded_image_path)
 
         # the paint_color is the color the module drawer will use to draw upon
         # a canvas During the color mask process, pixels that are paint_color
@@ -64,7 +72,7 @@ class StyledPilImage(qrcode.image.base.BaseImageWithDrawer):
             "RGBA"
             if (
                 self.color_mask.has_transparency
-                or (self.embeded_image and "A" in self.embeded_image.getbands())
+                or (self.embedded_image and "A" in self.embedded_image.getbands())
             )
             else "RGB"
         )
@@ -79,23 +87,23 @@ class StyledPilImage(qrcode.image.base.BaseImageWithDrawer):
 
     def process(self):
         self.color_mask.apply_mask(self._img)
-        if self.embeded_image:
-            self.draw_embeded_image()
+        if self.embedded_image:
+            self.draw_embedded_image()
 
-    def draw_embeded_image(self):
-        if not self.embeded_image:
+    def draw_embedded_image(self):
+        if not self.embedded_image:
             return
         total_width, _ = self._img.size
         total_width = int(total_width)
-        logo_width_ish = int(total_width * self.embeded_image_ratio)
+        logo_width_ish = int(total_width * self.embedded_image_ratio)
         logo_offset = (
             int((int(total_width / 2) - int(logo_width_ish / 2)) / self.box_size)
             * self.box_size
         )  # round the offset to the nearest module
         logo_position = (logo_offset, logo_offset)
         logo_width = total_width - logo_offset * 2
-        region = self.embeded_image
-        region = region.resize((logo_width, logo_width), self.embeded_image_resample)
+        region = self.embedded_image
+        region = region.resize((logo_width, logo_width), self.embedded_image_resample)
         if "A" in region.getbands():
             self._img.alpha_composite(region, logo_position)
         else:
