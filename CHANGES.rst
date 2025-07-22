@@ -5,10 +5,15 @@ Change log
 WIP
 ===
 
-- Allow execution as a Python module (@stefansjs in `#400`_)::
+- Migrate pyproject.toml to PEP 621-compliant [project] metadata format.
+  (hroncok in `#399`_)
+- Allow execution as a Python module. (stefansjs in `#400`_)
+
+  ::
 
     python -m qrcode --output qrcode.png "hello world"
 
+.. _#399: https://github.com/lincolnloop/python-qrcode/pull/399
 .. _#400: https://github.com/lincolnloop/python-qrcode/pull/400
 
 8.2 (01 May 2025)
