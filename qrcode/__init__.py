@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from qrcode.main import QRCode
 from qrcode.main import make  # noqa
 from qrcode.constants import (  # noqa
