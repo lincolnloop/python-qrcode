@@ -1,10 +1,10 @@
-"""
-Store all kinds of lookup table.
-"""
+# Store all kinds of lookup table.
+
+
 # # generate rsPoly lookup table.
 
 # from qrcode import base
-#
+
 # def create_bytes(rs_blocks):
 #     for r in range(len(rs_blocks)):
 #         dcCount = rs_blocks[r].data_count
@@ -13,7 +13,7 @@ Store all kinds of lookup table.
 #         for i in range(ecCount):
 #             rsPoly = rsPoly * base.Polynomial([1, base.gexp(i)], 0)
 #         return ecCount, rsPoly
-#
+
 # rsPoly_LUT = {}
 # for version in range(1,41):
 #     for error_correction in range(4):
