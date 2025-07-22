@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import abc
-from typing import TYPE_CHECKING, Any, Optional, Union
+from typing import TYPE_CHECKING, Any, Union
 
 from qrcode.image.styles.moduledrawers.base import QRModuleDrawer
 
@@ -15,8 +17,8 @@ class BaseImage:
     Base QRCode image output class.
     """
 
-    kind: Optional[str] = None
-    allowed_kinds: Optional[tuple[str]] = None
+    kind: str | None = None
+    allowed_kinds: tuple[str, ...] | None = None
     needs_context = False
     needs_processing = False
     needs_drawrect = True
@@ -140,7 +142,7 @@ class BaseImageWithDrawer(BaseImage):
 
     def get_drawer(
         self, drawer: Union[QRModuleDrawer, str, None]
-    ) -> Optional[QRModuleDrawer]:
+    ) -> QRModuleDrawer | None:
         if not isinstance(drawer, str):
             return drawer
         drawer_cls, kwargs = self.drawer_aliases[drawer]

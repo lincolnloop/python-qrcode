@@ -6,10 +6,12 @@ When stdout is a tty the QR Code is printed to the terminal and when stdout is
 a pipe to a file an image is written. The default image format is PNG.
 """
 
+from __future__ import annotations
+
 import optparse
 import os
 import sys
-from typing import NoReturn, Optional
+from typing import NoReturn
 from collections.abc import Iterable
 from importlib import metadata
 
@@ -122,7 +124,7 @@ def main(args=None):
             return
 
         kwargs = {}
-        aliases: Optional[DrawerAliases] = getattr(
+        aliases: DrawerAliases | None = getattr(
             qr.image_factory, "drawer_aliases", None
         )
         if opts.factory_drawer:
@@ -156,7 +158,7 @@ def get_drawer_help() -> str:
             image = get_factory(module)
         except ImportError:  # pragma: no cover
             continue
-        aliases: Optional[DrawerAliases] = getattr(image, "drawer_aliases", None)
+        aliases: DrawerAliases | None = getattr(image, "drawer_aliases", None)
         if not aliases:
             continue
         factories = help.setdefault(commas(aliases), set())
