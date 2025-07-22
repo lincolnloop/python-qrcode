@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 try:
-    from PIL import Image, ImageDraw
+    from PIL import Image, ImageDraw  # noqa: F401
 
     PIL_NOT_INSTALLED = False
 except ImportError:
