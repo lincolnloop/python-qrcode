@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import overload
+
 import qrcode.image.base
 from PIL import Image
 from qrcode.image.styles.colormasks import QRColorMask, SolidFillColorMask
@@ -68,6 +70,12 @@ class StyledPilImage(qrcode.image.base.BaseImageWithDrawer):
             self.paint_color = tuple([*self.color_mask.back_color[:3], 255])
 
         super().__init__(*args, **kwargs)
+
+    @overload
+    def drawrect(self, row, col):
+        """
+        Not used.
+        """
 
     def new_image(self, **kwargs):
         mode = (

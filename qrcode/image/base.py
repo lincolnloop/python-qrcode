@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 DrawerAliases = dict[str, tuple[type[QRModuleDrawer], dict[str, Any]]]
 
 
-class BaseImage:
+class BaseImage(abc.ABC):
     """
     Base QRCode image output class.
     """
