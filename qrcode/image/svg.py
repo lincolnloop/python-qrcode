@@ -167,9 +167,16 @@ class SvgPathImage(SvgImage):
 
 class SvgCompressedImage(SvgImage):
     """
-    SVG image builder with goal of smallest possible output, at least among
+    SVG image builder with goal of the smallest possible output, at least among
     algorithms with predictable fast run time.
     """
+
+    QR_PATH_STYLE = {
+        "fill": "#000000",
+        "fill-opacity": "1",
+        "fill-rule": "nonzero",
+        "stroke": "none",
+    }
 
     needs_processing = True
     path: Optional[ET.Element] = None
@@ -414,7 +421,7 @@ class SvgCompressedImage(SvgImage):
         self.path = ET.Element(
             ET.QName("path"),  # type: ignore
             d="".join(self._generate_subpaths()),
-            fill="#000",
+            **self.QR_PATH_STYLE,
         )
         self._img.append(self.path)
 
