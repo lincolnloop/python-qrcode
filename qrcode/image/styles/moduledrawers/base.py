@@ -23,7 +23,7 @@ class QRModuleDrawer(abc.ABC):
 
     needs_neighbors = False
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs):  # noqa: B027
         pass
 
     def initialize(self, img: "BaseImage") -> None:

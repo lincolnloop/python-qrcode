@@ -1,4 +1,5 @@
 from itertools import chain
+from pathlib import Path
 
 from qrcode.compat.png import PngWriter
 from qrcode.image.base import BaseImage
@@ -15,7 +16,8 @@ class PyPNGImage(BaseImage):
 
     def new_image(self, **kwargs):
         if not PngWriter:
-            raise ImportError("PyPNG library not installed.")
+            msg = "PyPNG library not installed."
+            raise ImportError(msg)
 
         return PngWriter(self.pixel_size, self.pixel_size, greyscale=True, bitdepth=1)
 
@@ -26,7 +28,7 @@ class PyPNGImage(BaseImage):
 
     def save(self, stream, kind=None):
         if isinstance(stream, str):
-            stream = open(stream, "wb")
+            stream = Path(stream).open("wb")  # noqa: SIM115
         self._img.write(stream, self.rows_iter())
 
     def rows_iter(self):

@@ -1,11 +1,10 @@
-import builtins
 import datetime
 import re
 from unittest import mock
 
 from qrcode.release import update_manpage
 
-OPEN = f"{builtins.__name__}.open"
+OPEN = "pathlib.Path.open"
 DATA = 'test\n.TH "date" "version" "description"\nthis'
 
 
@@ -36,7 +35,10 @@ def test_change(mock_file):
     expected[1] = (
         expected[1]
         .replace("version", "3.11")
-        .replace("date", datetime.datetime.now().strftime("%-d %b %Y"))
+        .replace(
+            "date",
+            datetime.datetime.now(tz=datetime.timezone.utc).strftime("%-d %b %Y"),
+        )
     )
     mock_file().write.assert_has_calls(
         [mock.call(line) for line in expected if line != ""], any_order=True

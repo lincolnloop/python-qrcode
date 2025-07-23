@@ -6,7 +6,6 @@ from pathlib import Path
 
 import pytest
 
-
 PIL_NOT_AVAILABLE = find_spec("PIL") is None
 
 

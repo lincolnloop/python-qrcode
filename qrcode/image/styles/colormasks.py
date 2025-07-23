@@ -56,7 +56,8 @@ class QRColorMask:
                     pixels[x, y] = self.get_bg_pixel(image, x, y)
 
     def get_fg_pixel(self, image, x, y):
-        raise NotImplementedError("QRModuleDrawer.paint_fg_pixel")
+        msg = "QRModuleDrawer.paint_fg_pixel"
+        raise NotImplementedError(msg)
 
     def get_bg_pixel(self, image, x, y):
         return self.back_color
@@ -75,8 +76,7 @@ class QRColorMask:
     def extrap_num(self, n1, n2, interped_num):
         if n2 == n1:
             return None
-        else:
-            return (interped_num - n1) / (n2 - n1)
+        return (interped_num - n1) / (n2 - n1)
 
     # find the interpolation coefficient between two numbers
     def extrap_color(self, col1, col2, interped_color):
@@ -108,7 +108,7 @@ class SolidFillColorMask(QRColorMask):
             # mask.
             pass
         else:
-            # TODO there's probably a way to use PIL.ImageMath instead of doing
+            # There's probably a way to use PIL.ImageMath instead of doing
             # the individual pixel comparisons that the base class uses, which
             # would be a lot faster. (In fact doing this would probably remove
             # the need for the B&W optimization above.)
