@@ -1,16 +1,13 @@
 import subprocess
 import sys
 import tempfile
+from importlib.util import find_spec
 from pathlib import Path
 
 import pytest
 
-try:
-    from PIL import Image, ImageDraw  # noqa: F401
 
-    PIL_NOT_INSTALLED = False
-except ImportError:
-    PIL_NOT_INSTALLED = True
+PIL_NOT_AVAILABLE = find_spec("PIL") is None
 
 
 def test_module_help():
@@ -31,7 +28,7 @@ def test_module_help():
     assert "--factory" in result.stdout
 
 
-@pytest.mark.skipif(PIL_NOT_INSTALLED, reason="PIL is not installed")
+@pytest.mark.skipif(PIL_NOT_AVAILABLE, reason="PIL is not installed")
 def test_module_generate_qrcode():
     """Test that the module can generate a QR code image."""
     with tempfile.TemporaryDirectory() as temp_dir:
