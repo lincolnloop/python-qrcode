@@ -8,6 +8,7 @@ WIP
 - **Added** ``GappedCircleModuleDrawer`` (PIL) to render QR code modules as non-contiguous circles. (BenwestGate in `#373`_)
 - **Added** ability to execute as a Python module: ``python -m qrcode --output qrcode.png "hello world"`` (stefansjs in `#400`_)
 - **Removed** the hardcoded 'id' argument from SVG elements. The fixed element ID caused conflicts when embedding multiple QR codes in a single document. (m000 in `#385`_)
+- **Removed** backwards-compatible imports for PIL drawers in ``qrcode.image.styles.moduledrawers``; users are required to import drawers directly from ``qrcode.image.styles.moduledrawers.pil``."
 - Improved test coveraged (akx in `#315`_)
 - Fixed typos in code that used ``embeded`` instead of ``embedded``. For backwards compatibility, the misspelled parameter names are still accepted but now emit deprecation warnings. These deprecated parameter names will be removed in v9.0. (benjnicholls in `#349`_)
 - Migrate pyproject.toml to PEP 621-compliant [project] metadata format. (hroncok in `#399`_)
