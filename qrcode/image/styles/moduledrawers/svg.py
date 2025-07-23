@@ -148,6 +148,7 @@ class SvgRoundedModuleDrawer(SvgPathQRModuleDrawer):
     means that the radius of the rounded edge will be 0 (and thus back to 90
     degrees again).
     """
+
     needs_neighbors = True
 
     def __init__(self, radius_ratio: Decimal = Decimal(1), **kwargs):
@@ -161,9 +162,9 @@ class SvgRoundedModuleDrawer(SvgPathQRModuleDrawer):
     def drawrect(self, box, is_active):
         if not is_active:
             return
-        
+
         # Check if is_active has neighbor information (ActiveWithNeighbors object)
-        if hasattr(is_active, 'N'):
+        if hasattr(is_active, "N"):
             # Neighbor information is available
             self.img._subpaths.append(self.subpath(box, is_active))
         else:
@@ -178,36 +179,36 @@ class SvgRoundedModuleDrawer(SvgPathQRModuleDrawer):
         x1 = self.img.units(coords.x1, text=False)
         y1 = self.img.units(coords.y1, text=False)
         r = self.img.units(self.corner_radius, text=False)
-        
+
         # Build the path with all corners rounded
         path = []
-        
+
         # Start at top-left after the rounded part
         path.append(f"M{x0 + r},{y0}")
-        
+
         # Top edge to top-right corner
         path.append(f"H{x1 - r}")
         # Top-right rounded corner
         path.append(f"A{r},{r} 0 0 1 {x1},{y0 + r}")
-        
+
         # Right edge to bottom-right corner
         path.append(f"V{y1 - r}")
         # Bottom-right rounded corner
         path.append(f"A{r},{r} 0 0 1 {x1 - r},{y1}")
-        
+
         # Bottom edge to bottom-left corner
         path.append(f"H{x0 + r}")
         # Bottom-left rounded corner
         path.append(f"A{r},{r} 0 0 1 {x0},{y1 - r}")
-        
+
         # Left edge to top-left corner
         path.append(f"V{y0 + r}")
         # Top-left rounded corner
         path.append(f"A{r},{r} 0 0 1 {x0 + r},{y0}")
-        
+
         # Close the path
         path.append("z")
-        
+
         return "".join(path)
 
     def subpath(self, box, is_active) -> str:
@@ -217,17 +218,17 @@ class SvgRoundedModuleDrawer(SvgPathQRModuleDrawer):
         ne_rounded = not is_active.N and not is_active.E
         se_rounded = not is_active.E and not is_active.S
         sw_rounded = not is_active.S and not is_active.W
-        
+
         coords = self.coords(box)
         x0 = self.img.units(coords.x0, text=False)
         y0 = self.img.units(coords.y0, text=False)
         x1 = self.img.units(coords.x1, text=False)
         y1 = self.img.units(coords.y1, text=False)
         r = self.img.units(self.corner_radius, text=False)
-        
+
         # Build the path
         path = []
-        
+
         # Start at top-left and move clockwise
         if nw_rounded:
             # Start at top-left corner, after the rounded part
@@ -235,7 +236,7 @@ class SvgRoundedModuleDrawer(SvgPathQRModuleDrawer):
         else:
             # Start at the top-left corner
             path.append(f"M{x0},{y0}")
-        
+
         # Top edge to top-right corner
         if ne_rounded:
             path.append(f"H{x1 - r}")
@@ -243,7 +244,7 @@ class SvgRoundedModuleDrawer(SvgPathQRModuleDrawer):
             path.append(f"A{r},{r} 0 0 1 {x1},{y0 + r}")
         else:
             path.append(f"H{x1}")
-        
+
         # Right edge to bottom-right corner
         if se_rounded:
             path.append(f"V{y1 - r}")
@@ -251,7 +252,7 @@ class SvgRoundedModuleDrawer(SvgPathQRModuleDrawer):
             path.append(f"A{r},{r} 0 0 1 {x1 - r},{y1}")
         else:
             path.append(f"V{y1}")
-        
+
         # Bottom edge to bottom-left corner
         if sw_rounded:
             path.append(f"H{x0 + r}")
@@ -259,7 +260,7 @@ class SvgRoundedModuleDrawer(SvgPathQRModuleDrawer):
             path.append(f"A{r},{r} 0 0 1 {x0},{y1 - r}")
         else:
             path.append(f"H{x0}")
-        
+
         # Left edge back to start
         if nw_rounded:
             path.append(f"V{y0 + r}")
@@ -267,8 +268,8 @@ class SvgRoundedModuleDrawer(SvgPathQRModuleDrawer):
             path.append(f"A{r},{r} 0 0 1 {x0 + r},{y0}")
         else:
             path.append(f"V{y0}")
-        
+
         # Close the path
         path.append("z")
-        
+
         return "".join(path)
