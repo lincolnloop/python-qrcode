@@ -3,15 +3,7 @@ from __future__ import annotations
 import sys
 import warnings
 from bisect import bisect_left
-from typing import (
-    Generic,
-    Literal,
-    NamedTuple,
-    Optional,
-    TypeVar,
-    cast,
-    overload,
-)
+from typing import Generic, Literal, NamedTuple, Optional, TypeVar, cast, overload
 
 from qrcode import constants, exceptions, util
 from qrcode.image.base import BaseImage
