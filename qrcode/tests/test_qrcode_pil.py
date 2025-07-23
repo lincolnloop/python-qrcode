@@ -72,6 +72,7 @@ def test_render_styled_with_embedded_image_path(tmp_path):
     "drawer",
     [
         moduledrawers.CircleModuleDrawer,
+        moduledrawers.GappedCircleModuleDrawer,
         moduledrawers.GappedSquareModuleDrawer,
         moduledrawers.HorizontalBarsDrawer,
         moduledrawers.RoundedModuleDrawer,
