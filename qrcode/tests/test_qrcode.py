@@ -131,6 +131,7 @@ def test_qrcode_factory():
     class MockFactory(BaseImage):
         drawrect = mock.Mock()
         new_image = mock.Mock()
+        save = mock.Mock()
 
     qr = qrcode.QRCode(image_factory=MockFactory)
     qr.add_data(UNICODE_TEXT)

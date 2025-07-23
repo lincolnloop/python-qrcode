@@ -27,6 +27,12 @@ class SvgFragmentImage(qrcode.image.base.BaseImageWithDrawer):
         self.unit_size = self.units(self.box_size)
 
     @overload
+    def drawrect(self, row, col):
+        """
+        Not used.
+        """
+
+    @overload
     def units(self, pixels: Union[int, Decimal], text: Literal[False]) -> Decimal: ...
 
     @overload
