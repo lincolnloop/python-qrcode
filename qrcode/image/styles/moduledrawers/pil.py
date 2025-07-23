@@ -117,7 +117,9 @@ class GappedCircleModuleDrawer(StyledPilQRModuleDrawer):
             (0, 0, fake_size, fake_size), fill=self.img.paint_color
         )
         smaller_size = int(self.size_ratio * box_size)
-        self.circle = self.circle.resize((smaller_size, smaller_size), Image.Resampling.LANCZOS)
+        self.circle = self.circle.resize(
+            (smaller_size, smaller_size), Image.Resampling.LANCZOS
+        )
 
     def drawrect(self, box, is_active: bool):
         if is_active:
