@@ -1,8 +1,6 @@
 import decimal
 from decimal import Decimal
-from typing import List, Optional, Type, Union, overload
-
-from typing_extensions import Literal
+from typing import Optional, Union, overload, Literal
 
 import qrcode.image.base
 from qrcode.compat.etree import ET
@@ -20,7 +18,7 @@ class SvgFragmentImage(qrcode.image.base.BaseImageWithDrawer):
     _SVG_namespace = "http://www.w3.org/2000/svg"
     kind = "SVG"
     allowed_kinds = ("SVG",)
-    default_drawer_class: Type[QRModuleDrawer] = svg_drawers.SvgSquareDrawer
+    default_drawer_class: type[QRModuleDrawer] = svg_drawers.SvgSquareDrawer
 
     def __init__(self, *args, **kwargs):
         ET.register_namespace("svg", self._SVG_namespace)
@@ -29,12 +27,16 @@ class SvgFragmentImage(qrcode.image.base.BaseImageWithDrawer):
         self.unit_size = self.units(self.box_size)
 
     @overload
-    def units(self, pixels: Union[int, Decimal], text: Literal[False]) -> Decimal:
-        ...
+    def drawrect(self, row, col):
+        """
+        Not used.
+        """
 
     @overload
-    def units(self, pixels: Union[int, Decimal], text: Literal[True] = True) -> str:
-        ...
+    def units(self, pixels: Union[int, Decimal], text: Literal[False]) -> Decimal: ...
+
+    @overload
+    def units(self, pixels: Union[int, Decimal], text: Literal[True] = True) -> str: ...
 
     def units(self, pixels, text=True):
         """
@@ -127,7 +129,7 @@ class SvgPathImage(SvgImage):
 
     needs_processing = True
     path: Optional[ET.Element] = None
-    default_drawer_class: Type[QRModuleDrawer] = svg_drawers.SvgPathSquareDrawer
+    default_drawer_class: type[QRModuleDrawer] = svg_drawers.SvgPathSquareDrawer
     drawer_aliases = {
         "circle": (svg_drawers.SvgPathCircleDrawer, {}),
         "gapped-circle": (
@@ -141,7 +143,7 @@ class SvgPathImage(SvgImage):
     }
 
     def __init__(self, *args, **kwargs):
-        self._subpaths: List[str] = []
+        self._subpaths: list[str] = []
         super().__init__(*args, **kwargs)
 
     def _svg(self, viewBox=None, **kwargs):

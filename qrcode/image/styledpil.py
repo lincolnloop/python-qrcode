@@ -1,8 +1,9 @@
-# Needed on case-insensitive filesystems
-from __future__ import absolute_import
+from __future__ import annotations
+
+from typing import overload
 
 import qrcode.image.base
-from qrcode.compat.pil import Image
+from PIL import Image
 from qrcode.image.styles.colormasks import QRColorMask, SolidFillColorMask
 from qrcode.image.styles.moduledrawers import SquareModuleDrawer
 
@@ -32,6 +33,8 @@ class StyledPilImage(qrcode.image.base.BaseImageWithDrawer):
     data integrity A resampling filter can be specified (defaulting to
     PIL.Image.Resampling.LANCZOS) for resizing; see PIL.Image.resize() for possible
     options for this parameter.
+    The image size can be controlled by `embedded_image_ratio` which is a ratio
+    between 0 and 1 that's set in relation to the overall width of the QR code.
     """
 
     kind = "PNG"
@@ -42,10 +45,19 @@ class StyledPilImage(qrcode.image.base.BaseImageWithDrawer):
 
     def __init__(self, *args, **kwargs):
         self.color_mask = kwargs.get("color_mask", SolidFillColorMask())
-        embedded_image_path = kwargs.get("embedded_image_path", None)
-        self.embedded_image = kwargs.get("embedded_image", None)
+        # allow embeded_ parameters with typos for backwards compatibility
+        embedded_image_path = kwargs.get(
+            "embedded_image_path", kwargs.get("embeded_image_path", None)
+        )
+        self.embedded_image = kwargs.get(
+            "embedded_image", kwargs.get("embeded_image", None)
+        )
+        self.embedded_image_ratio = kwargs.get(
+            "embedded_image_ratio", kwargs.get("embeded_image_ratio", 0.25)
+        )
         self.embedded_image_resample = kwargs.get(
-            "embedded_image_resample", Image.Resampling.LANCZOS
+            "embedded_image_resample",
+            kwargs.get("embeded_image_resample", Image.Resampling.LANCZOS),
         )
         if not self.embedded_image and embedded_image_path:
             self.embedded_image = Image.open(embedded_image_path)
@@ -58,6 +70,12 @@ class StyledPilImage(qrcode.image.base.BaseImageWithDrawer):
             self.paint_color = tuple([*self.color_mask.back_color[:3], 255])
 
         super().__init__(*args, **kwargs)
+
+    @overload
+    def drawrect(self, row, col):
+        """
+        Not used.
+        """
 
     def new_image(self, **kwargs):
         mode = (
@@ -87,7 +105,7 @@ class StyledPilImage(qrcode.image.base.BaseImageWithDrawer):
             return
         total_width, _ = self._img.size
         total_width = int(total_width)
-        logo_width_ish = int(total_width / 4)
+        logo_width_ish = int(total_width * self.embedded_image_ratio)
         logo_offset = (
             int((int(total_width / 2) - int(logo_width_ish / 2)) / self.box_size)
             * self.box_size

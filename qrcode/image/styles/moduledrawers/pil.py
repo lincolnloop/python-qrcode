@@ -1,9 +1,6 @@
-# Needed on case-insensitive filesystems
-from __future__ import absolute_import
+from typing import TYPE_CHECKING
 
-from typing import TYPE_CHECKING, List
-
-from qrcode.compat.pil import Image, ImageDraw
+from PIL import Image, ImageDraw
 from qrcode.image.styles.moduledrawers.base import QRModuleDrawer
 
 if TYPE_CHECKING:
@@ -94,6 +91,39 @@ class CircleModuleDrawer(StyledPilQRModuleDrawer):
             self.img._img.paste(self.circle, (box[0][0], box[0][1]))
 
 
+class GappedCircleModuleDrawer(StyledPilQRModuleDrawer):
+    """
+    Draws the modules as circles that are not contiguous.
+
+    The size_ratio determines how wide the circles are relative to the width of
+    the space they are printed in
+    """
+
+    circle = None
+
+    def __init__(self, size_ratio=0.9):
+        self.size_ratio = size_ratio
+
+    def initialize(self, *args, **kwargs):
+        super().initialize(*args, **kwargs)
+        box_size = self.img.box_size
+        fake_size = box_size * ANTIALIASING_FACTOR
+        self.circle = Image.new(
+            self.img.mode,
+            (fake_size, fake_size),
+            self.img.color_mask.back_color,
+        )
+        ImageDraw.Draw(self.circle).ellipse(
+            (0, 0, fake_size, fake_size), fill=self.img.paint_color
+        )
+        smaller_size = int(self.size_ratio * box_size)
+        self.circle = self.circle.resize((smaller_size, smaller_size), Image.Resampling.LANCZOS)
+
+    def drawrect(self, box, is_active: bool):
+        if is_active:
+            self.img._img.paste(self.circle, (box[0][0], box[0][1]))
+
+
 class RoundedModuleDrawer(StyledPilQRModuleDrawer):
     """
     Draws the modules with all 90 degree corners replaced with rounded edges.
@@ -139,7 +169,7 @@ class RoundedModuleDrawer(StyledPilQRModuleDrawer):
         self.SE_ROUND = self.NW_ROUND.transpose(Image.Transpose.ROTATE_180)
         self.NE_ROUND = self.NW_ROUND.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
 
-    def drawrect(self, box: List[List[int]], is_active: "ActiveWithNeighbors"):
+    def drawrect(self, box: list[list[int]], is_active: "ActiveWithNeighbors"):
         if not is_active:
             return
         # find rounded edges
@@ -249,7 +279,9 @@ class HorizontalBarsDrawer(StyledPilQRModuleDrawer):
         base_draw = ImageDraw.Draw(base)
         base_draw.ellipse((0, 0, fake_width * 2, fake_height), fill=front_color)
 
-        self.ROUND_LEFT = base.resize((width, shrunken_height), Image.Resampling.LANCZOS)
+        self.ROUND_LEFT = base.resize(
+            (width, shrunken_height), Image.Resampling.LANCZOS
+        )
         self.ROUND_RIGHT = self.ROUND_LEFT.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
 
     def drawrect(self, box, is_active: "ActiveWithNeighbors"):
