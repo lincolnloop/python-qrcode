@@ -173,7 +173,7 @@ class SvgCompressedImage(SvgImage):
 
     needs_processing = True
     path: Optional[ET.Element] = None
-    default_drawer_class: Type[QRModuleDrawer] = svg_drawers.SvgCompressedDrawer
+    default_drawer_class: type[QRModuleDrawer] = svg_drawers.SvgCompressedDrawer
 
     def __init__(self, *args, **kwargs):
         self._points = []
