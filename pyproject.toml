@@ -80,3 +80,17 @@ date-format =" %%-d %%B %%Y"
 prereleaser.middle = [
     "qrcode.release.update_manpage"
 ]
+
+[tool.coverage.run]
+source = ["qrcode"]
+parallel = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "@abc.abstractmethod",
+    "@overload",
+    "if (typing\\.)?TYPE_CHECKING:",
+    "pragma: no cover",
+    "raise NotImplementedError"
+]
+skip_covered = true
