@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import abc
 from decimal import Decimal
 from typing import TYPE_CHECKING, NamedTuple
@@ -21,7 +23,7 @@ class Coords(NamedTuple):
 
 
 class BaseSvgQRModuleDrawer(QRModuleDrawer):
-    img: "SvgFragmentImage"
+    img: SvgFragmentImage
 
     def __init__(self, *, size_ratio: Decimal = Decimal(1), **kwargs):
         self.size_ratio = size_ratio
@@ -97,7 +99,7 @@ class SvgCircleDrawer(SvgQRModuleDrawer):
 
 
 class SvgPathQRModuleDrawer(BaseSvgQRModuleDrawer):
-    img: "SvgPathImage"
+    img: SvgPathImage
 
     def drawrect(self, box, is_active: bool):
         if not is_active:
@@ -109,7 +111,7 @@ class SvgPathQRModuleDrawer(BaseSvgQRModuleDrawer):
 
 
 class SvgCompressedDrawer(BaseSvgQRModuleDrawer):
-    img: "SvgPathImage"
+    img: SvgPathImage
 
     def drawrect(self, box, is_active: bool):
         if not is_active:
