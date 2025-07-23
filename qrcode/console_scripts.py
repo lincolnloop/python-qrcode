@@ -45,11 +45,7 @@ def main(args=None):
     if args is None:
         args = sys.argv[1:]
 
-    try:
-        version = metadata.version("qrcode")
-    except metadata.PackageNotFoundError:
-        version = "development"
-
+    version = metadata.version("qrcode")
     parser = optparse.OptionParser(usage=(__doc__ or "").strip(), version=version)
 
     # Wrap parser.error in a typed NoReturn method for better typing.
