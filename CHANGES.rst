@@ -7,6 +7,7 @@ WIP
 
 - Added ``GappedCircleModuleDrawer`` (PIL) to render QR code modules as non-contiguous circles. (BenwestGate in `#373`_)
 - Improved test coveraged (akx in `#315`_)
+- Fixed typos in code that used ``embeded`` instead of ``embedded``. For backwards compatibility, the misspelled parameter names are still accepted but now emit deprecation warnings. These deprecated parameter names will be removed in v9.0. (benjnicholls in `#349`_)
 - Migrate pyproject.toml to PEP 621-compliant [project] metadata format. (hroncok in `#399`_)
 - Allow execution as a Python module. (stefansjs in `#400`_)
 
@@ -15,6 +16,7 @@ WIP
     python -m qrcode --output qrcode.png "hello world"
 
 .. _#315: https://github.com/lincolnloop/python-qrcode/pull/315
+.. _#349: https://github.com/lincolnloop/python-qrcode/pull/349
 .. _#373: https://github.com/lincolnloop/python-qrcode/pull/373
 .. _#399: https://github.com/lincolnloop/python-qrcode/pull/399
 .. _#400: https://github.com/lincolnloop/python-qrcode/pull/400
