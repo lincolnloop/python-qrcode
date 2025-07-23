@@ -1,6 +1,7 @@
 # For backwards compatibility, importing the PIL drawers here.
 try:
     from .pil import CircleModuleDrawer  # noqa: F401
+    from .pil import GappedCircleModuleDrawer # noqa: F401
     from .pil import GappedSquareModuleDrawer  # noqa: F401
     from .pil import HorizontalBarsDrawer  # noqa: F401
     from .pil import RoundedModuleDrawer  # noqa: F401

@@ -211,7 +211,7 @@ circles by reducing this less than the default of ``Decimal(1)``.
 
 The ``StyledPilImage`` additionally accepts an optional ``color_mask``
 parameter to change the colors of the QR Code, and an optional
-``embeded_image_path`` to embed an image in the center of the code.
+``embedded_image_path`` to embed an image in the center of the code.
 
 Other color masks:
 
@@ -227,12 +227,12 @@ and an embedded image:
     from qrcode.image.styles.moduledrawers.pil import RoundedModuleDrawer
     from qrcode.image.styles.colormasks import RadialGradiantColorMask
 
-    qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
+    qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_H)
     qr.add_data('Some data')
 
     img_1 = qr.make_image(image_factory=StyledPilImage, module_drawer=RoundedModuleDrawer())
     img_2 = qr.make_image(image_factory=StyledPilImage, color_mask=RadialGradiantColorMask())
-    img_3 = qr.make_image(image_factory=StyledPilImage, embeded_image_path="/path/to/image.png")
+    img_3 = qr.make_image(image_factory=StyledPilImage, embedded_image_path="/path/to/image.png")
 
 Examples
 ========

@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 import abc
 from typing import TYPE_CHECKING
 
@@ -32,5 +30,4 @@ class QRModuleDrawer(abc.ABC):
         self.img = img
 
     @abc.abstractmethod
-    def drawrect(self, box, is_active) -> None:
-        ...
+    def drawrect(self, box, is_active) -> None: ...
