@@ -7,7 +7,6 @@ a pipe to a file an image is written. The default image format is PNG.
 """
 
 import optparse
-import os
 import sys
 from typing import NoReturn, Optional
 from collections.abc import Iterable
