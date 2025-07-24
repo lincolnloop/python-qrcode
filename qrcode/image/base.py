@@ -18,7 +18,7 @@ class BaseImage(abc.ABC):
     """
 
     kind: str | None = None
-    allowed_kinds: tuple[str] | None = None
+    allowed_kinds: tuple[str, ...] | None = None
     needs_context = False
     needs_processing = False
     needs_drawrect = True
