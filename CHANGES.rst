@@ -2,6 +2,33 @@
 Change log
 ==========
 
+Deprecation Warnings
+====================
+
+Removed in v9.0:
+----------------
+
+- Importing a PIL drawer from ``qrcode.image.styles.moduledrawers`` has been deprecated.
+  Update your code to import directly from the ``pil`` module instead:
+
+  .. code-block:: python
+
+     from qrcode.image.styles.moduledrawers import SquareModuleDrawer  # Old
+     from qrcode.image.styles.moduledrawers.pil import SquareModuleDrawer  # New
+
+- Calling ``QRCode.make_image`` or ``StyledPilImage`` with the arguments ``embeded_image``
+  or ``embeded_image_path`` have been deprecated due to typographical errors. Update
+  your code to use the correct arguments ``embedded_image`` and ``embededd_image_path``:
+
+  .. code-block:: python
+
+     qr = QRCode()
+     qr.make_image(embeded_image=..., embeded_image_path=...)  # Old
+     qr.make_image(embedded_image=..., embedded_image_path=...)  # New
+
+     StyledPilImage(embeded_image=..., embeded_image_path=...)  # Old
+     StyledPilImage(embedded_image=..., embedded_image_path=...)  # New
+
 WIP
 ===
 
