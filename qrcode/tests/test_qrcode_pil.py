@@ -71,13 +71,13 @@ def test_render_styled_with_embedded_image_path(tmp_path):
 @pytest.mark.parametrize(
     "drawer",
     [
-        moduledrawers.pil.CircleModuleDrawer,
-        moduledrawers.pil.GappedCircleModuleDrawer,
-        moduledrawers.pil.GappedSquareModuleDrawer,
-        moduledrawers.pil.HorizontalBarsDrawer,
-        moduledrawers.pil.RoundedModuleDrawer,
-        moduledrawers.pil.SquareModuleDrawer,
-        moduledrawers.pil.VerticalBarsDrawer,
+        moduledrawers.CircleModuleDrawer,
+        moduledrawers.GappedCircleModuleDrawer,
+        moduledrawers.GappedSquareModuleDrawer,
+        moduledrawers.HorizontalBarsDrawer,
+        moduledrawers.RoundedModuleDrawer,
+        moduledrawers.SquareModuleDrawer,
+        moduledrawers.VerticalBarsDrawer,
     ],
 )
 def test_render_styled_with_drawer(drawer):
