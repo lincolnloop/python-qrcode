@@ -134,7 +134,9 @@ lint.ignore = [
 
 [tool.ruff.lint.extend-per-file-ignores]
 "qrcode/tests/*.py" = [
+  "F401",  # Unused import
+  "PLC0415", # Import not at top of a file
+  "PT011", # pytest.raises is too broad
   "S101", # Use of 'assert' detected
   "S603", # `subprocess` call: check for execution of untrusted input
-  "PT011", # pytest.raises is too broad
 ]
