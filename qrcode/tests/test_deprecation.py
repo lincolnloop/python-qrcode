@@ -27,7 +27,9 @@ def test_moduledrawer_import() -> None:
         DeprecationWarning,
         match="Importing 'SquareModuleDrawer' directly from this module is deprecated.",
     ):
-        from qrcode.image.styles.moduledrawers import SquareModuleDrawer
+        from qrcode.image.styles.moduledrawers import (
+            SquareModuleDrawer,
+        )
 
 
 @pytest.mark.skipif(PIL_AVAILABLE, reason="PIL is installed")
@@ -94,21 +96,16 @@ def test_styledpilimage_embeded_parameters(dummy_image: NamedTemporaryFile) -> N
         "qrcode_modules": 1,
     }
 
-    try:
-        # Test with embeded_image_path parameter
-        with pytest.warns(
-            DeprecationWarning, match="The 'embeded_\\*' parameters are deprecated."
-        ):
-            StyledPilImage(embeded_image_path=dummy_image.name, **styled_kwargs)
+    # Test with embeded_image_path parameter
+    with pytest.warns(
+        DeprecationWarning, match="The 'embeded_\\*' parameters are deprecated."
+    ):
+        StyledPilImage(embeded_image_path=dummy_image.name, **styled_kwargs)
 
-        # Test with embeded_image parameter
-        embedded_img = Image.open(dummy_image.name)
+    # Test with embeded_image parameter
+    embedded_img = Image.open(dummy_image.name)
 
-        with pytest.warns(
-            DeprecationWarning, match="The 'embeded_\\*' parameters are deprecated."
-        ):
-            StyledPilImage(embeded_image=embedded_img, **styled_kwargs)
-
-    # Make sure the temporary image is always deleted after the testrun.
-    finally:
-        Path(dummy_image.name).unlink(missing_ok=True)
+    with pytest.warns(
+        DeprecationWarning, match="The 'embeded_\\*' parameters are deprecated."
+    ):
+        StyledPilImage(embeded_image=embedded_img, **styled_kwargs)

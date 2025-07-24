@@ -19,7 +19,6 @@ def dummy_image() -> tempfile.NamedTemporaryFile:
     dummy_image = Image.new("RGBA", (1, 1), (255, 0, 0, 255))
 
     # Save the image to a temporary file
-    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file:
+    with tempfile.NamedTemporaryFile(suffix=".png", delete=True) as temp_file:
         dummy_image.save(temp_file.name)
-
-    return temp_file
+        yield temp_file
