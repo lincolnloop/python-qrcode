@@ -117,6 +117,7 @@ lint.ignore = [
   "PLR091", # Too many statements/branches/arguments
   "PLR2004", # Magic value used in comparison, consider replacing <int> with a constant variable
   "RUF012", # Mutable class attributes https://github.com/astral-sh/ruff/issues/5243
+  "SIM105", # Use contextlib.suppress(ImportError) instead of try-except-pass
   "SLF001", # private-member-access
 
   # Should be fixed later

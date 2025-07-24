@@ -1,7 +1,7 @@
-import contextlib
-
 # Try to import png library.
 PngWriter = None
 
-with contextlib.suppress(ImportError):
+try:
     from png import Writer as PngWriter  # noqa: F401
+except ImportError:
+    pass
