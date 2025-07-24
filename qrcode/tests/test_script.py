@@ -7,8 +7,7 @@ from qrcode.console_scripts import commas, main
 
 
 def bad_read():
-    msg = "utf-8"
-    raise UnicodeDecodeError(msg, b"0x80", 0, 1, "invalid start byte")
+    raise UnicodeDecodeError("utf-8", b"0x80", 0, 1, "invalid start byte")
 
 
 @mock.patch("os.isatty", return_value=True)

@@ -14,8 +14,7 @@ class PilImage(qrcode.image.base.BaseImage):
 
     def new_image(self, **kwargs):
         if not Image:
-            msg = "PIL library not found."
-            raise ImportError(msg)
+            raise ImportError("PIL library not found.")
 
         back_color = kwargs.get("back_color", "white")
         fill_color = kwargs.get("fill_color", "black")

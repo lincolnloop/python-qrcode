@@ -16,8 +16,7 @@ class PyPNGImage(BaseImage):
 
     def new_image(self, **kwargs):
         if not PngWriter:
-            msg = "PyPNG library not installed."
-            raise ImportError(msg)
+            raise ImportError("PyPNG library not installed.")
 
         return PngWriter(self.pixel_size, self.pixel_size, greyscale=True, bitdepth=1)
 

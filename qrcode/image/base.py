@@ -42,15 +42,13 @@ class BaseImage(abc.ABC):
         """
         Draw a single rectangle of the QR code given the surrounding context
         """
-        msg = "BaseImage.drawrect_context"
-        raise NotImplementedError(msg)  # pragma: no cover
+        raise NotImplementedError("BaseImage.drawrect_context")  # pragma: no cover
 
     def process(self):
         """
         Processes QR code after completion
         """
-        msg = "BaseImage.drawimage"
-        raise NotImplementedError(msg)  # pragma: no cover
+        raise NotImplementedError("BaseImage.drawimage")  # pragma: no cover
 
     @abc.abstractmethod
     def save(self, stream, kind=None):
@@ -97,8 +95,7 @@ class BaseImage(abc.ABC):
             if not allowed:
                 allowed = kind in self.allowed_kinds
         if not allowed:
-            msg = f"Cannot set {type(self).__name__} type to {kind}"
-            raise ValueError(msg)
+            raise ValueError(f"Cannot set {type(self).__name__} type to {kind}")
         return kind
 
     def is_eye(self, row: int, col: int):

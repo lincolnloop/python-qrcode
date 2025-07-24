@@ -149,8 +149,7 @@ def main(args=None):
 
 def get_factory(module: str) -> type[BaseImage]:
     if "." not in module:
-        msg = "The image factory is not a full python path"
-        raise ValueError(msg)
+        raise ValueError("The image factory is not a full python path")
     module, name = module.rsplit(".", 1)
     imp = __import__(module, {}, {}, [name])
     return getattr(imp, name)

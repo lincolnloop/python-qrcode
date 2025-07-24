@@ -22,25 +22,25 @@ def make(data=None, **kwargs):
 
 def _check_box_size(size):
     if int(size) <= 0:
-        msg = f"Invalid box size (was {size}, expected larger than 0)"
-        raise ValueError(msg)
+        raise ValueError(f"Invalid box size (was {size}, expected larger than 0)")
 
 
 def _check_border(size):
     if int(size) < 0:
-        msg = f"Invalid border value (was {size}, expected 0 or larger than that)"
-        raise ValueError(msg)
+        raise ValueError(
+            f"Invalid border value (was {size}, expected 0 or larger than that)"
+        )
 
 
 def _check_mask_pattern(mask_pattern):
     if mask_pattern is None:
         return
     if not isinstance(mask_pattern, int):
-        msg = f"Invalid mask pattern (was {type(mask_pattern)}, expected int)"
-        raise TypeError(msg)
+        raise TypeError(
+            f"Invalid mask pattern (was {type(mask_pattern)}, expected int)"
+        )
     if mask_pattern < 0 or mask_pattern > 7:
-        msg = f"Mask pattern should be in range(8) (got {mask_pattern})"
-        raise ValueError(msg)
+        raise ValueError(f"Mask pattern should be in range(8) (got {mask_pattern})")
 
 
 def copy_2d_array(x):
@@ -258,8 +258,7 @@ class QRCode(Generic[GenericImage]):
             out = sys.stdout
 
         if not out.isatty():
-            msg = "Not a tty"
-            raise OSError(msg)
+            raise OSError("Not a tty")
 
         if self.data_cache is None:
             self.make()
@@ -288,8 +287,7 @@ class QRCode(Generic[GenericImage]):
             out = sys.stdout
 
         if tty and not out.isatty():
-            msg = "Not a tty"
-            raise OSError(msg)
+            raise OSError("Not a tty")
 
         if self.data_cache is None:
             self.make()
@@ -354,8 +352,9 @@ class QRCode(Generic[GenericImage]):
             or kwargs.get("embeded_image_path")
             or kwargs.get("embeded_image")
         ) and self.error_correction != constants.ERROR_CORRECT_H:
-            msg = "Error correction level must be ERROR_CORRECT_H if an embedded image is provided"
-            raise ValueError(msg)
+            raise ValueError(
+                "Error correction level must be ERROR_CORRECT_H if an embedded image is provided"
+            )
 
         _check_box_size(self.box_size)
         if self.data_cache is None:

@@ -171,8 +171,7 @@ def mode_sizes_for_version(version):
 
 def length_in_bits(mode, version):
     if mode not in (MODE_NUMBER, MODE_ALPHA_NUM, MODE_8BIT_BYTE, MODE_KANJI):
-        msg = f"Invalid mode ({mode})"
-        raise TypeError(msg)  # pragma: no cover
+        raise TypeError(f"Invalid mode ({mode})")  # pragma: no cover
 
     check_version(version)
 
@@ -181,8 +180,7 @@ def length_in_bits(mode, version):
 
 def check_version(version):
     if version < 1 or version > 40:
-        msg = f"Invalid version (was {version}, expected 1 to 40)"
-        raise ValueError(msg)
+        raise ValueError(f"Invalid version (was {version}, expected 1 to 40)")
 
 
 def lost_point(modules):
@@ -439,11 +437,9 @@ class QRData:
         else:
             self.mode = mode
             if mode not in (MODE_NUMBER, MODE_ALPHA_NUM, MODE_8BIT_BYTE):
-                msg = f"Invalid mode ({mode})"
-                raise TypeError(msg)  # pragma: no cover
+                raise TypeError(f"Invalid mode ({mode})")  # pragma: no cover
             if check_data and mode < optimal_mode(data):  # pragma: no cover
-                msg = f"Provided data can not be represented in mode {mode}"
-                raise ValueError(msg)
+                raise ValueError(f"Provided data can not be represented in mode {mode}")
 
         self.data = data
 
@@ -567,8 +563,9 @@ def create_data(version, error_correction, data_list):
     rs_blocks = base.rs_blocks(version, error_correction)
     bit_limit = sum(block.data_count * 8 for block in rs_blocks)
     if len(buffer) > bit_limit:
-        msg = f"Code length overflow. Data size ({len(buffer)}) > size available ({bit_limit})"
-        raise exceptions.DataOverflowError(msg)
+        raise exceptions.DataOverflowError(
+            f"Code length overflow. Data size ({len(buffer)}) > size available ({bit_limit})"
+        )
 
     # Terminate the bits (add up to four 0s).
     for _ in range(min(bit_limit - len(buffer), 4)):

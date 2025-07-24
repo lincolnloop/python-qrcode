@@ -56,8 +56,7 @@ class QRColorMask:
                     pixels[x, y] = self.get_bg_pixel(image, x, y)
 
     def get_fg_pixel(self, image, x, y):
-        msg = "QRModuleDrawer.paint_fg_pixel"
-        raise NotImplementedError(msg)
+        raise NotImplementedError("QRModuleDrawer.paint_fg_pixel")
 
     def get_bg_pixel(self, image, x, y):
         return self.back_color

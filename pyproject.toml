@@ -111,6 +111,8 @@ lint.ignore = [
   "ARG005", # Unused lambda argument
   "D", # Missing or badly formatted docstrings
   "E501", # Line too long (>88)
+  "EM101", # Exception must not use a string literal, assign to variable first
+  "EM102", # Exception must not use an f-string literal, assign to variable first   "ERA001", # Found commented-out code
   "ERA001", # Found commented-out code
   "FBT", # Flake Boolean Trap (don't use arg=True in functions)
   "N999", # Invalid module name
@@ -119,6 +121,7 @@ lint.ignore = [
   "RUF012", # Mutable class attributes https://github.com/astral-sh/ruff/issues/5243
   "SIM105", # Use contextlib.suppress(ImportError) instead of try-except-pass
   "SLF001", # private-member-access
+  "TRY003", # Avoid specifying long messages outside the exception class
 
   # Should be fixed later
   "C901", # Too complex

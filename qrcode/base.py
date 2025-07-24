@@ -234,8 +234,7 @@ RS_BLOCK_TABLE = (
 
 def glog(n):
     if n < 1:  # pragma: no cover
-        msg = f"glog({n})"
-        raise ValueError(msg)
+        raise ValueError(f"glog({n})")
     return LOG_TABLE[n]
 
 
@@ -246,8 +245,7 @@ def gexp(n):
 class Polynomial:
     def __init__(self, num, shift):
         if not num:  # pragma: no cover
-            msg = f"{len(num)}/{shift}"
-            raise ValueError(msg)
+            raise ValueError(f"{len(num)}/{shift}")
 
         offset = 0
         for offset in range(len(num)):
@@ -299,10 +297,9 @@ class RSBlock(NamedTuple):
 
 def rs_blocks(version, error_correction):
     if error_correction not in RS_BLOCK_OFFSET:  # pragma: no cover
-        msg = (
+        raise ValueError(
             f"bad rs block @ version: {version} / error_correction: {error_correction}"
         )
-        raise ValueError(msg)
     offset = RS_BLOCK_OFFSET[error_correction]
     rs_block = RS_BLOCK_TABLE[(version - 1) * 4 + offset]
 

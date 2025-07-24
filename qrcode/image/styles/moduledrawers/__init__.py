@@ -43,5 +43,4 @@ def __getattr__(name):
         return getattr(pil, name)
 
     # For any other attribute, raise AttributeError
-    msg = f"module {__name__!r} has no attribute {name!r}"
-    raise AttributeError(msg)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
