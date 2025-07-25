@@ -164,10 +164,9 @@ def mask_func(pattern):
 def mode_sizes_for_version(version):
     if version < 10:
         return MODE_SIZE_SMALL
-    elif version < 27:
+    if version < 27:
         return MODE_SIZE_MEDIUM
-    else:
-        return MODE_SIZE_LARGE
+    return MODE_SIZE_LARGE
 
 
 def length_in_bits(mode, version):
@@ -257,9 +256,7 @@ def _lost_point_level2(modules, modules_count):
                 # reduce 33.3% of runtime via next().
                 # None: raise nothing if there is no next item.
                 next(modules_range_iter, None)
-            elif top_right != this_row[col]:
-                continue
-            elif top_right != next_row[col]:
+            elif top_right != this_row[col] or top_right != next_row[col]:
                 continue
             else:
                 lost_point += 3
@@ -288,18 +285,22 @@ def _lost_point_level3(modules, modules_count):
                 and this_row[col + 6]
                 and not this_row[col + 9]
                 and (
-                    this_row[col + 0]
-                    and this_row[col + 2]
-                    and this_row[col + 3]
-                    and not this_row[col + 7]
-                    and not this_row[col + 8]
-                    and not this_row[col + 10]
-                    or not this_row[col + 0]
-                    and not this_row[col + 2]
-                    and not this_row[col + 3]
-                    and this_row[col + 7]
-                    and this_row[col + 8]
-                    and this_row[col + 10]
+                    (
+                        this_row[col + 0]
+                        and this_row[col + 2]
+                        and this_row[col + 3]
+                        and not this_row[col + 7]
+                        and not this_row[col + 8]
+                        and not this_row[col + 10]
+                    )
+                    or (
+                        not this_row[col + 0]
+                        and not this_row[col + 2]
+                        and not this_row[col + 3]
+                        and this_row[col + 7]
+                        and this_row[col + 8]
+                        and this_row[col + 10]
+                    )
                 )
             ):
                 lost_point += 40
@@ -322,18 +323,22 @@ def _lost_point_level3(modules, modules_count):
                 and modules[row + 6][col]
                 and not modules[row + 9][col]
                 and (
-                    modules[row + 0][col]
-                    and modules[row + 2][col]
-                    and modules[row + 3][col]
-                    and not modules[row + 7][col]
-                    and not modules[row + 8][col]
-                    and not modules[row + 10][col]
-                    or not modules[row + 0][col]
-                    and not modules[row + 2][col]
-                    and not modules[row + 3][col]
-                    and modules[row + 7][col]
-                    and modules[row + 8][col]
-                    and modules[row + 10][col]
+                    (
+                        modules[row + 0][col]
+                        and modules[row + 2][col]
+                        and modules[row + 3][col]
+                        and not modules[row + 7][col]
+                        and not modules[row + 8][col]
+                        and not modules[row + 10][col]
+                    )
+                    or (
+                        not modules[row + 0][col]
+                        and not modules[row + 2][col]
+                        and not modules[row + 3][col]
+                        and modules[row + 7][col]
+                        and modules[row + 8][col]
+                        and modules[row + 10][col]
+                    )
                 )
             ):
                 lost_point += 40
@@ -559,8 +564,7 @@ def create_data(version, error_correction, data_list):
     bit_limit = sum(block.data_count * 8 for block in rs_blocks)
     if len(buffer) > bit_limit:
         raise exceptions.DataOverflowError(
-            "Code length overflow. Data size (%s) > size available (%s)"
-            % (len(buffer), bit_limit)
+            f"Code length overflow. Data size ({len(buffer)}) > size available ({bit_limit})"
         )
 
     # Terminate the bits (add up to four 0s).

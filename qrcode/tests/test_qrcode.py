@@ -121,10 +121,10 @@ def test_mask_pattern_setter():
 
 def test_qrcode_bad_factory():
     with pytest.raises(TypeError):
-        qrcode.QRCode(image_factory="not_BaseImage")  # type: ignore
+        qrcode.QRCode(image_factory="not_BaseImage")
 
     with pytest.raises(AssertionError):
-        qrcode.QRCode(image_factory=dict)  # type: ignore
+        qrcode.QRCode(image_factory=dict)
 
 
 def test_qrcode_factory():

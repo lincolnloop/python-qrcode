@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING
 
 from PIL import Image, ImageDraw
+
 from qrcode.image.styles.moduledrawers.base import QRModuleDrawer
 
 if TYPE_CHECKING:

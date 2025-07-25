@@ -2,6 +2,6 @@
 PngWriter = None
 
 try:
-    from png import Writer as PngWriter  # type: ignore  # noqa: F401
-except ImportError:  # pragma: no cover
+    from png import Writer as PngWriter  # noqa: F401
+except ImportError:
     pass

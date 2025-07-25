@@ -1,15 +1,9 @@
+from __future__ import annotations
+
 import sys
 import warnings
 from bisect import bisect_left
-from typing import (
-    Generic,
-    NamedTuple,
-    Optional,
-    TypeVar,
-    cast,
-    overload,
-    Literal,
-)
+from typing import Generic, Literal, NamedTuple, Optional, TypeVar, cast, overload
 
 from qrcode import constants, exceptions, util
 from qrcode.image.base import BaseImage
@@ -34,7 +28,7 @@ def _check_box_size(size):
 def _check_border(size):
     if int(size) < 0:
         raise ValueError(
-            "Invalid border value (was %s, expected 0 or larger than that)" % size
+            f"Invalid border value (was {size}, expected 0 or larger than that)"
         )
 
 
@@ -74,7 +68,7 @@ GenericImageLocal = TypeVar("GenericImageLocal", bound=BaseImage)
 
 class QRCode(Generic[GenericImage]):
     modules: ModulesType
-    _version: Optional[int] = None
+    _version: int | None = None
 
     def __init__(
         self,
@@ -82,7 +76,7 @@ class QRCode(Generic[GenericImage]):
         error_correction=constants.ERROR_CORRECT_M,
         box_size=10,
         border=4,
-        image_factory: Optional[type[GenericImage]] = None,
+        image_factory: type[GenericImage] | None = None,
         mask_pattern=None,
     ):
         _check_box_size(box_size)
@@ -103,7 +97,7 @@ class QRCode(Generic[GenericImage]):
     def version(self) -> int:
         if self._version is None:
             self.best_fit()
-        return cast(int, self._version)
+        return cast("int", self._version)
 
     @version.setter
     def version(self, value) -> None:
@@ -228,7 +222,7 @@ class QRCode(Generic[GenericImage]):
             util.BIT_LIMIT_TABLE[self.error_correction], needed_bits, start
         )
         if self.version == 41:
-            raise exceptions.DataOverflowError()
+            raise exceptions.DataOverflowError
 
         # Now check whether we need more bits for the mode sizes, recursing if
         # our guess was too low
@@ -261,8 +255,6 @@ class QRCode(Generic[GenericImage]):
         If the data has not been compiled yet, make it first.
         """
         if out is None:
-            import sys
-
             out = sys.stdout
 
         if not out.isatty():
@@ -312,7 +304,7 @@ class QRCode(Generic[GenericImage]):
                 return 1
             if min(x, y) < 0 or max(x, y) >= modcount:
                 return 0
-            return cast(int, self.modules[x][y])
+            return cast("int", self.modules[x][y])
 
         for r in range(-self.border, modcount + self.border, 2):
             if tty:
@@ -334,7 +326,7 @@ class QRCode(Generic[GenericImage]):
 
     @overload
     def make_image(
-        self, image_factory: type[GenericImageLocal] = None, **kwargs
+        self, image_factory: type[GenericImageLocal] | None = None, **kwargs
     ) -> GenericImageLocal: ...
 
     def make_image(self, image_factory=None, **kwargs):
@@ -373,7 +365,7 @@ class QRCode(Generic[GenericImage]):
         else:
             image_factory = self.image_factory
             if image_factory is None:
-                from qrcode.image.pil import Image, PilImage
+                from qrcode.image.pil import Image, PilImage  # noqa: PLC0415
 
                 # Use PIL by default if available, otherwise use PyPNG.
                 image_factory = PilImage if Image else PyPNGImage
@@ -432,13 +424,7 @@ class QRCode(Generic[GenericImage]):
 
                 for r in range(-2, 3):
                     for c in range(-2, 3):
-                        if (
-                            r == -2
-                            or r == 2
-                            or c == -2
-                            or c == 2
-                            or (r == 0 and c == 0)
-                        ):
+                        if r in (-2, 2) or c in (-2, 2) or (r == 0 and c == 0):
                             self.modules[row + r][col + c] = True
                         else:
                             self.modules[row + r][col + c] = False
@@ -495,7 +481,7 @@ class QRCode(Generic[GenericImage]):
 
         for col in range(self.modules_count - 1, 0, -2):
             if col <= 6:
-                col -= 1
+                col -= 1  # noqa: PLW2901
 
             col_range = (col, col - 1)
 
@@ -540,7 +526,7 @@ class QRCode(Generic[GenericImage]):
         code = [[False] * width] * self.border
         x_border = [False] * self.border
         for module in self.modules:
-            code.append(x_border + cast(list[bool], module) + x_border)
+            code.append(x_border + cast("list[bool]", module) + x_border)
         code += [[False] * width] * self.border
 
         return code

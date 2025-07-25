@@ -2,19 +2,43 @@
 Change log
 ==========
 
+Deprecation Warnings
+====================
+
+Removed in v9.0:
+----------------
+
+- Importing a PIL drawer from ``qrcode.image.styles.moduledrawers`` has been deprecated.
+  Update your code to import directly from the ``pil`` module instead:
+
+  .. code-block:: python
+
+     from qrcode.image.styles.moduledrawers import SquareModuleDrawer  # Old
+     from qrcode.image.styles.moduledrawers.pil import SquareModuleDrawer  # New
+
+- Calling ``QRCode.make_image`` or ``StyledPilImage`` with the arguments ``embeded_image``
+  or ``embeded_image_path`` have been deprecated due to typographical errors. Update
+  your code to use the correct arguments ``embedded_image`` and ``embededd_image_path``:
+
+  .. code-block:: python
+
+     qr = QRCode()
+     qr.make_image(embeded_image=..., embeded_image_path=...)  # Old
+     qr.make_image(embedded_image=..., embedded_image_path=...)  # New
+
+     StyledPilImage(embeded_image=..., embeded_image_path=...)  # Old
+     StyledPilImage(embedded_image=..., embedded_image_path=...)  # New
+
 WIP
 ===
 
-- Added ``GappedCircleModuleDrawer`` (PIL) to render QR code modules as non-contiguous circles. (BenwestGate in `#373`_)
-- Removed the hardcoded 'id' argument from SVG elements. The fixed element ID caused conflicts when embedding multiple QR codes in a single document. (m000 in `#385`_)
+- **Added** ``GappedCircleModuleDrawer`` (PIL) to render QR code modules as non-contiguous circles. (BenwestGate in `#373`_)
+- **Added** ability to execute as a Python module: ``python -m qrcode --output qrcode.png "hello world"`` (stefansjs in `#400`_)
+- **Removed** the hardcoded 'id' argument from SVG elements. The fixed element ID caused conflicts when embedding multiple QR codes in a single document. (m000 in `#385`_)
 - Improved test coveraged (akx in `#315`_)
 - Fixed typos in code that used ``embeded`` instead of ``embedded``. For backwards compatibility, the misspelled parameter names are still accepted but now emit deprecation warnings. These deprecated parameter names will be removed in v9.0. (benjnicholls in `#349`_)
 - Migrate pyproject.toml to PEP 621-compliant [project] metadata format. (hroncok in `#399`_)
-- Allow execution as a Python module. (stefansjs in `#400`_)
-
-  ::
-
-    python -m qrcode --output qrcode.png "hello world"
+- Implement Ruff rules and perform comprehensive code cleanup.
 
 .. _#315: https://github.com/lincolnloop/python-qrcode/pull/315
 .. _#349: https://github.com/lincolnloop/python-qrcode/pull/349

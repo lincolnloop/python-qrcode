@@ -8,7 +8,7 @@ from PIL import Image
 
 import qrcode.image.base
 from qrcode.image.styles.colormasks import QRColorMask, SolidFillColorMask
-from qrcode.image.styles.moduledrawers import SquareModuleDrawer
+from qrcode.image.styles.moduledrawers.pil import SquareModuleDrawer
 
 
 class StyledPilImage(qrcode.image.base.BaseImageWithDrawer):
@@ -60,11 +60,9 @@ class StyledPilImage(qrcode.image.base.BaseImageWithDrawer):
 
         # allow embeded_ parameters with typos for backwards compatibility
         embedded_image_path = kwargs.get(
-            "embedded_image_path", kwargs.get("embeded_image_path", None)
+            "embedded_image_path", kwargs.get("embeded_image_path")
         )
-        self.embedded_image = kwargs.get(
-            "embedded_image", kwargs.get("embeded_image", None)
-        )
+        self.embedded_image = kwargs.get("embedded_image", kwargs.get("embeded_image"))
         self.embedded_image_ratio = kwargs.get(
             "embedded_image_ratio", kwargs.get("embeded_image_ratio", 0.25)
         )
@@ -80,7 +78,7 @@ class StyledPilImage(qrcode.image.base.BaseImageWithDrawer):
         # are replaced by a newly-calculated color
         self.paint_color = tuple(0 for i in self.color_mask.back_color)
         if self.color_mask.has_transparency:
-            self.paint_color = tuple([*self.color_mask.back_color[:3], 255])
+            self.paint_color = (*self.color_mask.back_color[:3], 255)
 
         super().__init__(*args, **kwargs)
 

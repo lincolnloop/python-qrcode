@@ -24,7 +24,7 @@
 
 # Result. Usage: input: ecCount, output: Polynomial.num
 # e.g. rsPoly = base.Polynomial(LUT.rsPoly_LUT[ecCount], 0)
-rsPoly_LUT = {
+rsPoly_LUT = {  # noqa: N816
     7: [1, 127, 122, 154, 164, 11, 68, 117],
     10: [1, 216, 194, 159, 111, 199, 94, 95, 113, 157, 193],
     13: [1, 137, 73, 227, 17, 177, 17, 52, 13, 46, 43, 83, 132, 120],

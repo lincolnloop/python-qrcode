@@ -1,5 +1,6 @@
-import qrcode.image.base
 from PIL import Image, ImageDraw
+
+import qrcode.image.base
 
 
 class PilImage(qrcode.image.base.BaseImage):
@@ -18,10 +19,6 @@ class PilImage(qrcode.image.base.BaseImage):
 
         try:
             fill_color = fill_color.lower()
-        except AttributeError:
-            pass
-
-        try:
             back_color = back_color.lower()
         except AttributeError:
             pass

@@ -1,4 +1,4 @@
 try:
-    import lxml.etree as ET  # type: ignore  # noqa: F401
+    import lxml.etree as ET  # noqa: N812
 except ImportError:
-    import xml.etree.ElementTree as ET  # type: ignore  # noqa: F401
+    import xml.etree.ElementTree as ET  # noqa: F401
