@@ -123,6 +123,7 @@ class QRCode(Generic[GenericImage]):
         self.modules_count = 0
         self.data_cache = None
         self.data_list = []
+        self._version = None
 
     def add_data(self, data, optimize=20):
         """
