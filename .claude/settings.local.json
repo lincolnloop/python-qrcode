@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(python -m pytest qrcode/tests/test_qrcode.py::test_qrcode_factory -xvs)"
-    ],
-    "deny": []
-  }
-}
