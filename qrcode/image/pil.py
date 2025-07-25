@@ -1,5 +1,3 @@
-import contextlib
-
 from PIL import Image, ImageDraw
 
 import qrcode.image.base
@@ -19,11 +17,11 @@ class PilImage(qrcode.image.base.BaseImage):
         back_color = kwargs.get("back_color", "white")
         fill_color = kwargs.get("fill_color", "black")
 
-        with contextlib.suppress(AttributeError):
+        try:
             fill_color = fill_color.lower()
-
-        with contextlib.suppress(AttributeError):
             back_color = back_color.lower()
+        except AttributeError:
+            pass
 
         # L mode (1 mode) color = (r*299 + g*587 + b*114)//1000
         if fill_color == "black" and back_color == "white":
