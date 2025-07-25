@@ -5,12 +5,13 @@ from typing import TYPE_CHECKING
 import pytest
 
 import qrcode
+from qrcode.constants import PIL_AVAILABLE
 
 if TYPE_CHECKING:
     from pathlib import Path
 
 
-@pytest.mark.parametrize("back_color", ["TransParent", "red", (255, 195, 235)])
+@pytest.mark.skipif(not PIL_AVAILABLE, reason="PIL is not installed")
 def test_qrcode_clear_resets_size(tmp_path: Path):
     """
     Test that QRCode.clear() properly resets the QRCode object.
