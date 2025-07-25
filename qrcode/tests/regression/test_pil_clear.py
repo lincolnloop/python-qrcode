@@ -2,12 +2,15 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+import pytest
+
 import qrcode
 
 if TYPE_CHECKING:
     from pathlib import Path
 
 
+@pytest.mark.parametrize("back_color", ["TransParent", "red", (255, 195, 235)])
 def test_qrcode_clear_resets_size(tmp_path: Path):
     """
     Test that QRCode.clear() properly resets the QRCode object.
