@@ -44,12 +44,8 @@ def test_qrcode_clear_resets_size(tmp_path: Path):
     img3 = qr.make_image()
     img3.save(test3_path)
 
-    # Compare the images. Image 1 and 3 must be binary identical.
+    # Check that the first and third QR codes are identical.
     with test1_path.open("rb") as file1, test3_path.open("rb") as file3:
-        file1_data = file1.read()
-        file3_data = file3.read()
-
-        # Check that the first and third QR codes are identical
-        assert file1_data == file3_data, (
+        assert file1.read() == file3.read(), (
             "First and third QR codes should be identical after clearing"
         )
