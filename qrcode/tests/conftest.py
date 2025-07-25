@@ -9,8 +9,6 @@ def dummy_image() -> tempfile.NamedTemporaryFile:
     """
     This function creates a red pixel image with full opacity, saves it as a PNG
     file in a temporary location, and returns the temporary file.
-
-    The file is not automatically deleted. The caller is responsible for deleting it.
     """
     # Must import here as PIL might be not installed
     from PIL import Image
