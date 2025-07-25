@@ -1,6 +1,6 @@
-==========
-Change log
-==========
+=======
+Changes
+=======
 
 Deprecation Warnings
 ====================
@@ -29,8 +29,11 @@ Removed in v9.0:
      StyledPilImage(embeded_image=..., embeded_image_path=...)  # Old
      StyledPilImage(embedded_image=..., embedded_image_path=...)  # New
 
+Change Log
+==========
+
 WIP
-===
+---
 
 - **Added** ``GappedCircleModuleDrawer`` (PIL) to render QR code modules as non-contiguous circles. (BenwestGate in `#373`_)
 - **Added** ability to execute as a Python module: ``python -m qrcode --output qrcode.png "hello world"`` (stefansjs in `#400`_)
@@ -48,7 +51,7 @@ WIP
 .. _#400: https://github.com/lincolnloop/python-qrcode/pull/400
 
 8.2 (01 May 2025)
-=================
+-----------------
 
 - Optimize QRColorMask apply_mask method for enhanced performance
 - Fix typos on StyledPilImage embeded_* parameters.
@@ -57,12 +60,12 @@ WIP
 
 
 8.1 (02 April 2025)
-====================
+--------------------
 
 - Added support for Python 3.13.
 
 8.0 (27 September 2024)
-========================
+------------------------
 
 - Added support for Python 3.11 and 3.12.
 
@@ -87,21 +90,21 @@ WIP
 
 
 7.4.2 (6 February 2023)
-=======================
+-----------------------
 
 - Allow ``pypng`` factory to allow for saving to a string (like
   ``qr.save("some_file.png")``) in addition to file-like objects.
 
 
 7.4.1 (3 February 2023)
-=======================
+-----------------------
 
 - Fix bad over-optimization in v7.4 that broke large QR codes. Thanks to
   mattiasj-axis!
 
 
 7.4 (1 February 2023)
-=====================
+---------------------
 
 - Restructure the factory drawers, allowing different shapes in SVG image
   factories as well.
@@ -120,19 +123,19 @@ WIP
 
 
 7.3.1 (1 October 2021)
-======================
+----------------------
 
 - Improvements for embedded image.
 
 
 7.3 (19 August 2021)
-====================
+--------------------
 
 - Skip color mask if QR is black and white
 
 
 7.2 (19 July 2021)
-==================
+------------------
 
 - Add Styled PIL image factory, allowing different color masks and shapes in QR codes
 
@@ -142,7 +145,7 @@ WIP
 
 
 7.1 (1 July 2021)
-=================
+-----------------
 
 - Add --ascii parameter to command line interface allowing to output ascii when stdout is piped
 
@@ -158,13 +161,13 @@ WIP
 
 
 7.0 (29 June 2021)
-==================
+------------------
 
 - Drop Python < 3.6 support.
 
 
 6.1 (14 January 2019)
-=====================
+---------------------
 
 - Fix short chunks of data not being optimized to the correct mode.
 
@@ -172,7 +175,7 @@ WIP
 
 
 6.0 (23 March 2018)
-===================
+-------------------
 
 - Fix optimize length being ignored in ``QRCode.add_data``.
 
@@ -181,7 +184,7 @@ WIP
 
 
 5.3 (18 May 2016)
-=================
+-----------------
 
 * Fix incomplete block table for QR version 15. Thanks Rodrigo Queiro for the
   report and Jacob Welsh for the investigation and fix.
@@ -192,7 +195,7 @@ WIP
 
 
 5.2 (25 Jan 2016)
-=================
+-----------------
 
 * Add ``--error-correction`` option to qr script.
 
@@ -220,7 +223,7 @@ WIP
 
 
 5.1 (22 Oct 2014)
-=================
+-----------------
 
 * Make ``qr`` script work in Windows. Thanks Ionel Cristian Mărieș
 
@@ -233,7 +236,7 @@ WIP
 
 
 5.0 (17 Jun 2014)
-=================
+-----------------
 
 * Speed optimizations.
 
@@ -254,7 +257,7 @@ WIP
 
 
 4.0 (4 Sep 2013)
-================
+----------------
 
 * Made qrcode work on Python 2.4 - Thanks tcely.
   Note: officially, qrcode only supports 2.5+.
@@ -263,7 +266,7 @@ WIP
   Adam Wisniewski!
 
 * SVG image generation now supports alternate sizing (the default box size of
-  10 == 1mm per rectangle).
+  10 -- 1mm per rectangle).
 
 * SVG path image generation allows cleaner SVG output by combining all QR rects
   into a single path. Thank you, Viktor Stískala.
@@ -295,7 +298,7 @@ WIP
 
 
 3.1 (12 Aug 2013)
-=================
+-----------------
 
 * Important fixes for incorrect matches of the alphanumeric encoding mode.
   Previously, the pattern would match if a single line was alphanumeric only
@@ -315,7 +318,7 @@ WIP
 
 
 3.0 (25 Jun 2013)
-=================
+-----------------
 
 * Python 3 support.
 
@@ -330,13 +333,13 @@ WIP
 
 
 2.7 (5 Mar 2013)
-================
+----------------
 
 * Fix incorrect termination padding.
 
 
 2.6 (2 Apr 2013)
-================
+----------------
 
 * Fix the first four columns incorrectly shifted by one. Thanks to Josep
   Gómez-Suay for the report and fix.
@@ -346,7 +349,7 @@ WIP
 
 
 2.5 (12 Mar 2013)
-=================
+-----------------
 
 * The PilImage wrapper is more transparent - you can use any methods or
   attributes available to the underlying PIL Image instance.
@@ -360,7 +363,7 @@ WIP
 
 
 2.4 (23 Apr 2012)
-=================
+-----------------
 
 * Use a pluggable backend system for generating images, thanks to Branko Čibej!
   Comes with PIL and SVG backends built in.
@@ -378,7 +381,7 @@ WIP
 
 
 2.3 (29 Jan 2012)
-=================
+-----------------
 
 * When adding data, auto-select the more efficient encoding methods for numbers
   and alphanumeric data (KANJI still not supported).
@@ -390,7 +393,7 @@ WIP
 
 
 2.2 (18 Jan 2012)
-=================
+-----------------
 
 * Fixed tty output to work on both white and black backgrounds.
 
@@ -399,7 +402,7 @@ WIP
 
 
 2.1 (17 Jan 2012)
-=================
+-----------------
 
 * Added a ``qr`` script which can be used to output a qr code to the tty using
   background colors, or to a file via a pipe.
