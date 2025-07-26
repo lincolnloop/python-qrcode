@@ -2,14 +2,21 @@
 Changes
 =======
 
-Deprecation Warnings
-====================
+Change Log
+==========
 
-Removed in v9.0:
-----------------
+WIP (9.0)
+---------
 
-- Importing a PIL drawer from ``qrcode.image.styles.moduledrawers`` has been deprecated.
-  Update your code to import directly from the ``pil`` module instead:
+**Backwards incompatible changes:**
+
+- The ``width`` and ``height`` attributes was removed from the ``<svg>`` tag.
+  Instead, the ``viewBox`` attribute is now used for defining the dimensions.
+  Additionally, all SVG elements now utilize pixel units rather than millimeters,
+  which may cause rendering differences in browsers.
+
+- Importing a PIL drawer from ``qrcode.image.styles.moduledrawers`` is no longer
+  supported. Update your code to import directly from the ``pil`` module instead:
 
   .. code-block:: python
 
@@ -17,7 +24,7 @@ Removed in v9.0:
      from qrcode.image.styles.moduledrawers.pil import SquareModuleDrawer  # New
 
 - Calling ``QRCode.make_image`` or ``StyledPilImage`` with the arguments ``embeded_image``
-  or ``embeded_image_path`` have been deprecated due to typographical errors. Update
+  or ``embeded_image_path`` has been removed to typographical errors. Update
   your code to use the correct arguments ``embedded_image`` and ``embededd_image_path``:
 
   .. code-block:: python
@@ -28,20 +35,6 @@ Removed in v9.0:
 
      StyledPilImage(embeded_image=..., embeded_image_path=...)  # Old
      StyledPilImage(embedded_image=..., embedded_image_path=...)  # New
-
-- The ``width`` and ``height`` attributes will be removed from the ``<svg>`` tag.
-  Instead, the ``viewBox`` attribute is now used for defining the dimensions.
-  Additionally, all SVG elements now utilize pixel units rather than millimeters,
-  which may cause rendering differences in browsers.
-
-Change Log
-==========
-
-WIP (9.0)
----------
-
-- **Removed** ``width=.. height=...`` attributes from SVG tag, using viewBox instead. SVG elements now use pixel units instead of millimeters.
-
 
 WIP 8.x
 -------
