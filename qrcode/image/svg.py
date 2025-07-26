@@ -44,9 +44,9 @@ class SvgFragmentImage(qrcode.image.base.BaseImageWithDrawer):
 
     def units(self, pixels, text=True):
         """
-        A box_size of 10 (default) equals 1mm.
+        Returns pixel values directly.
         """
-        units = Decimal(pixels) / 10
+        units = Decimal(pixels)
         if not text:
             return units
         units = units.quantize(Decimal("0.001"))
@@ -56,7 +56,7 @@ class SvgFragmentImage(qrcode.image.base.BaseImageWithDrawer):
                 units = units.quantize(d, context=context)
         except decimal.Inexact:
             pass
-        return f"{units}mm"
+        return f"{units}"
 
     def save(self, stream, kind=None):
         self.check_kind(kind=kind)
@@ -71,11 +71,11 @@ class SvgFragmentImage(qrcode.image.base.BaseImageWithDrawer):
     def _svg(self, tag=None, version="1.1", **kwargs):
         if tag is None:
             tag = ET.QName(self._SVG_namespace, "svg")
-        dimension = self.units(self.pixel_size)
+        dimension = self.units(self.pixel_size, text=False)
+        viewBox = kwargs.get("viewBox", f"0 0 {dimension} {dimension}")
+        kwargs["viewBox"] = viewBox
         return ET.Element(
             tag,
-            width=dimension,
-            height=dimension,
             version=version,
             **kwargs,
         )

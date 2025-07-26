@@ -29,8 +29,20 @@ Removed in v9.0:
      StyledPilImage(embeded_image=..., embeded_image_path=...)  # Old
      StyledPilImage(embedded_image=..., embedded_image_path=...)  # New
 
+- The ``width`` and ``height`` attributes will be removed from the ``<svg>``tag.
+  Instead, the``viewBox`` attribute is now used for defining the dimensions.
+  Additionally, all SVG elements now utilize pixel units rather than millimeters,
+  which may cause rendering differences in browsers. (`#351`_)
+
+.. _#351: https://github.com/lincolnloop/python-qrcode/issues/351
+
 Change Log
 ==========
+
+WIP (9.0)
+---------
+
+- **Removed** ``width=.. height=...`` attributes from SVG tag, using viewBox instead. SVG elements now use pixel units instead of millimeters.
 
 WIP
 ---
