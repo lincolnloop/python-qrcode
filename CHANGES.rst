@@ -37,6 +37,12 @@ Removed in v9.0:
 Change Log
 ==========
 
+WIP (9.0)
+---------
+
+- **Removed** ``width=.. height=...`` attributes from SVG tag, using viewBox instead. SVG elements now use pixel units instead of millimeters.
+
+
 WIP 8.x
 -------
 
