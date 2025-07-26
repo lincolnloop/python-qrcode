@@ -53,8 +53,6 @@ class SvgQRModuleDrawer(BaseSvgQRModuleDrawer):
 
     def initialize(self, *args, **kwargs) -> None:
         super().initialize(*args, **kwargs)
-        # Use tag directly instead of QName with namespace to avoid svg: prefix in output
-        self.tag_qname = self.tag
 
     def drawrect(self, box, is_active: bool):
         if not is_active:
@@ -73,7 +71,7 @@ class SvgSquareDrawer(SvgQRModuleDrawer):
     def el(self, box):
         coords = self.coords(box)
         return ET.Element(
-            self.tag_qname,
+            self.tag,
             x=self.img.units(coords.x0),
             y=self.img.units(coords.y0),
             width=self.unit_size,
@@ -91,7 +89,7 @@ class SvgCircleDrawer(SvgQRModuleDrawer):
     def el(self, box):
         coords = self.coords(box)
         return ET.Element(
-            self.tag_qname,
+            self.tag,
             cx=self.img.units(coords.xh),
             cy=self.img.units(coords.yh),
             r=self.radius,
