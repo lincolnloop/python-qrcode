@@ -42,13 +42,20 @@ class SvgFragmentImage(qrcode.image.base.BaseImageWithDrawer):
     @overload
     def units(self, pixels: int | Decimal, text: Literal[True] = True) -> str: ...
 
-    def units(self, pixels, text=True):
+    def units(self, pixels: int, text=True) -> Decimal | str:
         """
-        Returns pixel values directly.
+        Converts pixel values into a decimal representation with up to three decimal
+        places of precision or a string representation, optionally rounding to
+        lower precision without data loss.
         """
         units = Decimal(pixels)
         if not text:
             return units
+
+        # Round the decimal to 3 decimal places first, then try to reduce precision
+        # further by attempting to round to 2 decimals, 1 decimal, and whole numbers.
+        # If any rounding causes data loss (raises Inexact), keep the previous
+        # precision.
         units = units.quantize(Decimal("0.001"))
         context = decimal.Context(traps=[decimal.Inexact])
         try:
@@ -56,7 +63,8 @@ class SvgFragmentImage(qrcode.image.base.BaseImageWithDrawer):
                 units = units.quantize(d, context=context)
         except decimal.Inexact:
             pass
-        return f"{units}"
+
+        return str(units)
 
     def save(self, stream, kind=None):
         self.check_kind(kind=kind)
