@@ -29,11 +29,16 @@ Removed in v9.0:
      StyledPilImage(embeded_image=..., embeded_image_path=...)  # Old
      StyledPilImage(embedded_image=..., embedded_image_path=...)  # New
 
+- The ``width`` and ``height`` attributes will be removed from the ``<svg>`` tag.
+  Instead, the ``viewBox`` attribute is now used for defining the dimensions.
+  Additionally, all SVG elements now utilize pixel units rather than millimeters,
+  which may cause rendering differences in browsers.
+
 Change Log
 ==========
 
-WIP
----
+WIP 8.x
+-------
 
 - **Added** ``GappedCircleModuleDrawer`` (PIL) to render QR code modules as non-contiguous circles. (BenwestGate in `#373`_)
 - **Added** ability to execute as a Python module: ``python -m qrcode --output qrcode.png "hello world"`` (stefansjs in `#400`_)
