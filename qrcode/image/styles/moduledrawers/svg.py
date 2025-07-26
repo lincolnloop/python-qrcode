@@ -53,7 +53,8 @@ class SvgQRModuleDrawer(BaseSvgQRModuleDrawer):
 
     def initialize(self, *args, **kwargs) -> None:
         super().initialize(*args, **kwargs)
-        self.tag_qname = ET.QName(self.img._SVG_namespace, self.tag)
+        # Use tag directly instead of QName with namespace to avoid svg: prefix in output
+        self.tag_qname = self.tag
 
     def drawrect(self, box, is_active: bool):
         if not is_active:
