@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import sys
-import warnings
 from bisect import bisect_left
 from typing import Generic, Literal, NamedTuple, Optional, TypeVar, cast, overload
 
@@ -335,22 +334,8 @@ class QRCode(Generic[GenericImage]):
 
         If the data has not been compiled yet, make it first.
         """
-        # Raise a warning that 'embeded' is still used
-        if kwargs.get("embeded_image_path") or kwargs.get("embeded_image"):
-            warnings.warn(
-                "The 'embeded_*' parameters are deprecated. Use 'embedded_image_path' "
-                "or 'embedded_image' instead. The 'embeded_*' parameters will be "
-                "removed in v9.0.",
-                category=DeprecationWarning,
-                stacklevel=2,
-            )
-
-        # allow embeded_ parameters with typos for backwards compatibility
         if (
-            kwargs.get("embedded_image_path")
-            or kwargs.get("embedded_image")
-            or kwargs.get("embeded_image_path")
-            or kwargs.get("embeded_image")
+            kwargs.get("embedded_image_path") or kwargs.get("embedded_image")
         ) and self.error_correction != constants.ERROR_CORRECT_H:
             raise ValueError(
                 "Error correction level must be ERROR_CORRECT_H if an embedded image is provided"
