@@ -47,7 +47,7 @@ WIP 8.x
 - **Fixed** an issue where an ``<svg:`` prefix in the SVG output caused invalid markup when inlined within HTML documents. (bartTC in `#412`_)
 - Migrate pyproject.toml to PEP 621-compliant [project] metadata format. (hroncok in `#399`_)
 - Improved test coveraged (akx in `#315`_)
-- Implement Ruff rules and perform comprehensive code cleanup.
+- Implement Ruff rules and perform comprehensive code cleanup. (bartTC in `#408`_)
 
 .. _#315: https://github.com/lincolnloop/python-qrcode/pull/315
 .. _#349: https://github.com/lincolnloop/python-qrcode/pull/349
@@ -55,6 +55,7 @@ WIP 8.x
 .. _#385: https://github.com/lincolnloop/python-qrcode/pull/385
 .. _#399: https://github.com/lincolnloop/python-qrcode/pull/399
 .. _#400: https://github.com/lincolnloop/python-qrcode/pull/400
+.. _#408: https://github.com/lincolnloop/python-qrcode/pull/408
 .. _#412: https://github.com/lincolnloop/python-qrcode/pull/412
 
 8.2 (01 May 2025)
