@@ -122,9 +122,12 @@ Or in Python:
 
 .. code:: python
 
+
     import qrcode
     import qrcode.image.svg
-
+    
+    method = input("What method?: ")
+    
     if method == 'basic':
         # Simple factory, just a set of rects.
         factory = qrcode.image.svg.SvgImage
@@ -134,8 +137,10 @@ Or in Python:
     else:
         # Combined path factory, fixes white space that may occur when zooming
         factory = qrcode.image.svg.SvgPathImage
-
+    
     img = qrcode.make('Some data here', image_factory=factory)
+    
+    img.save('some_file.svg')
 
 Two other related factories are available that work the same, but also fill the
 background of the SVG with white::
