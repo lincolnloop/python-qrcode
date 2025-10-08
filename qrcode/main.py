@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sys
+import warnings
 from bisect import bisect_left
 from typing import Generic, Literal, NamedTuple, Optional, TypeVar, cast, overload
 
@@ -337,8 +338,9 @@ class QRCode(Generic[GenericImage]):
         if (
             kwargs.get("embedded_image_path") or kwargs.get("embedded_image")
         ) and self.error_correction != constants.ERROR_CORRECT_H:
-            raise ValueError(
-                "Error correction level must be ERROR_CORRECT_H if an embedded image is provided"
+            warnings.warn(
+                "Low error correction level with an embedded image might lead to unreadable QR codes. "
+                "Use ERROR_CORRECT_H for better results.",
             )
 
         _check_box_size(self.box_size)

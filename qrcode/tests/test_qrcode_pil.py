@@ -121,30 +121,36 @@ def test_render_styled_with_mask(mask):
 
 
 def test_embedded_image_and_error_correction(tmp_path):
-    "If an embedded image is specified, error correction must be the highest so the QR code is readable"
+    "If an embedded image is specified, error correction should be the highest so the QR code is readable"
     tmpfile = str(tmp_path / "test.png")
     embedded_img = Image.new("RGB", (10, 10), color="red")
     embedded_img.save(tmpfile)
 
     qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_L)
     qr.add_data(UNICODE_TEXT)
-    with pytest.raises(ValueError):
+
+    message = (
+        "Low error correction level with an embedded image might lead to unreadable QR codes. "
+        "Use ERROR_CORRECT_H for better results."
+    )
+
+    with pytest.warns(match=message):
         qr.make_image(embedded_image_path=tmpfile)
-    with pytest.raises(ValueError):
+    with pytest.warns(match=message):
         qr.make_image(embedded_image=embedded_img)
 
     qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_M)
     qr.add_data(UNICODE_TEXT)
-    with pytest.raises(ValueError):
+    with pytest.warns(match=message):
         qr.make_image(embedded_image_path=tmpfile)
-    with pytest.raises(ValueError):
+    with pytest.warns(match=message):
         qr.make_image(embedded_image=embedded_img)
 
     qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_Q)
     qr.add_data(UNICODE_TEXT)
-    with pytest.raises(ValueError):
+    with pytest.warns(match=message):
         qr.make_image(embedded_image_path=tmpfile)
-    with pytest.raises(ValueError):
+    with pytest.warns(match=message):
         qr.make_image(embedded_image=embedded_img)
 
     # The only accepted correction level when an embedded image is provided
