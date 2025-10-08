@@ -36,6 +36,11 @@ WIP (9.0)
      StyledPilImage(embeded_image=..., embeded_image_path=...)  # Old
      StyledPilImage(embedded_image=..., embedded_image_path=...)  # New
 
+- Use warning instead of raising ValueError when an embedded image is provided
+  with a low error correction level. With a low error correction and an
+  embedded image, the QR code might become unreadable, but not necessarily.
+
+
 WIP 8.x
 -------
 
