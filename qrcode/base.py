@@ -281,7 +281,7 @@ class Polynomial:
 
         num = [
             item ^ gexp(glog(other_item) + ratio)
-            for item, other_item in zip(self, other)
+            for item, other_item in zip(self, other, strict=False)
         ]
         if difference:
             num.extend(self[-difference:])
