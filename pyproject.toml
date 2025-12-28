@@ -28,7 +28,7 @@ classifiers = [
   "Topic :: Multimedia :: Graphics",
   "Topic :: Software Development :: Libraries :: Python Modules",
 ]
-requires-python = "~=3.10"
+requires-python = ">=3.10"
 dependencies = [
   "colorama; sys_platform == 'win32'",
   "deprecation",
