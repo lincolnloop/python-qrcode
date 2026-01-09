@@ -1,37 +1,37 @@
 Testing
 =======
 
-First, install dev dependencies::
+This project uses `uv <https://github.com/astral-sh/uv>`_ for dependency management and running tests.
+It also uses `just <https://github.com/casey/just>`_ as a command runner for convenience.
 
-    poetry install --with dev
+Setup
+-----
 
-To run all tests, you'll need to install multiple Python interpreters. On a
-modern Ubuntu distribution you can use ``add-apt-repository
-ppa:deadsnakes/ppa``.
+1.  Install ``uv`` (see `installation instructions <https://github.com/astral-sh/uv?tab=readme-ov-file#installation>`_).
+2.  Install ``just`` (see `installation instructions <https://github.com/casey/just?tab=readme-ov-file#installation>`_).
 
-Depending on if you can install the wheels directly for your OS, you may need
-the libraries to build PIL, too. Here's the Ubuntu commands::
+Running Tests
+-------------
 
-    sudo apt-get install build-essential python-dev python3-dev
-    sudo apt-get install libjpeg8-dev zlib1g-dev
+To run the full test suite (all Python versions and variants)::
 
-Here's the OSX Homebrew command:
+    just test
 
-    brew install libjpeg libtiff little-cms2 openjpeg webp
+To run a quick test on your current environment (fastest)::
 
-Finally, just run ``tox``::
+    just test quick
 
-    poetry run tox
-    # or
-    poetry shell
-    tox
+To run tests for a specific Python version::
 
-If you want, you can test against a specific version like this: ``tox -e py312-pil``
+    just test 3.12
 
+To run tests for a specific Python version and variant (pil, png, none)::
+
+    just test 3.12 pil
 
 Linting
 -------
 
-Run `ruff` to check formatting::
+To run all checks (formatting, linting, and tests)::
 
-    ruff format qrcode
+    just check

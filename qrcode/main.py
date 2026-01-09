@@ -3,13 +3,13 @@ from __future__ import annotations
 import sys
 import warnings
 from bisect import bisect_left
-from typing import Generic, Literal, NamedTuple, Optional, TypeVar, cast, overload
+from typing import Generic, NamedTuple, TypeVar, cast, overload
 
 from qrcode import constants, exceptions, util
 from qrcode.image.base import BaseImage
 from qrcode.image.pure import PyPNGImage
 
-ModulesType = list[list[Optional[bool]]]
+ModulesType = list[list[bool | None]]
 # Cache modules generated just based on the QR Code version
 precomputed_qr_blanks: dict[int, ModulesType] = {}
 
@@ -321,9 +321,7 @@ class QRCode(Generic[GenericImage]):
         out.flush()
 
     @overload
-    def make_image(
-        self, image_factory: Literal[None] = None, **kwargs
-    ) -> GenericImage: ...
+    def make_image(self, image_factory: None = None, **kwargs) -> GenericImage: ...
 
     @overload
     def make_image(
@@ -366,7 +364,7 @@ class QRCode(Generic[GenericImage]):
         else:
             image_factory = self.image_factory
             if image_factory is None:
-                from qrcode.image.pil import Image, PilImage  # noqa: PLC0415
+                from qrcode.image.pil import Image, PilImage
 
                 # Use PIL by default if available, otherwise use PyPNG.
                 image_factory = PilImage if Image else PyPNGImage

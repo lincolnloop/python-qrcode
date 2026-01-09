@@ -19,16 +19,16 @@ classifiers = [
   "Intended Audience :: Developers",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Programming Language :: Python :: 3 :: Only",
   "Topic :: Multimedia :: Graphics",
   "Topic :: Software Development :: Libraries :: Python Modules",
 ]
-requires-python = "~=3.9"
+requires-python = ">=3.10"
 dependencies = [
   "colorama; sys_platform == 'win32'",
   "deprecation",
@@ -50,6 +50,17 @@ changelog = "https://github.com/lincolnloop/python-qrcode/blob/main/CHANGES.rst"
 [project.scripts]
 qr = "qrcode.console_scripts:main"
 
+[dependency-groups]
+dev = [
+  "pytest",
+  "pytest-cov",
+  "ruff",
+  "pypng",
+  "pillow>=9.1.0",
+  "docutils>=0.21.2",
+  "zest-releaser[recommended]>=9.2.0",
+]
+
 [tool.poetry]
 packages = [{ include = "qrcode" }]
 readme = ["README.rst", "CHANGES.rst"]
@@ -60,16 +71,6 @@ readme = ["README.rst", "CHANGES.rst"]
 # data_files = [
 #     { destination = "share/man/man1", from = [ "doc/qr.1" ] },
 # ]
-
-[tool.poetry.group.dev.dependencies]
-pytest = { version = "*" }
-pytest-cov = { version = "*" }
-tox = { version = "*" }
-ruff = { version = "*" }
-pypng = { version = "*" }
-pillow = { version = ">=9.1.0" }
-docutils = "^0.21.2"
-zest-releaser = { extras = ["recommended"], version = "^9.2.0" }
 
 [tool.zest-releaser]
 less-zeros = "yes"
@@ -97,7 +98,7 @@ exclude_lines = [
 skip_covered = true
 
 [tool.ruff]
-target-version = "py39"
+target-version = "py310"
 exclude = ["migrations"]
 lint.select = ["ALL"]
 lint.ignore = [

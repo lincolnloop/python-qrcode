@@ -29,19 +29,26 @@ Removed in v9.0:
      StyledPilImage(embeded_image=..., embeded_image_path=...)  # Old
      StyledPilImage(embedded_image=..., embedded_image_path=...)  # New
 
+- The ``width`` and ``height`` attributes will be removed from the ``<svg>`` tag.
+  Instead, the ``viewBox`` attribute is now used for defining the dimensions.
+  Additionally, all SVG elements now utilize pixel units rather than millimeters,
+  which may cause rendering differences in browsers.
+
 Change Log
 ==========
 
-WIP
----
+WIP 8.x
+-------
 
 - **Added** ``GappedCircleModuleDrawer`` (PIL) to render QR code modules as non-contiguous circles. (BenwestGate in `#373`_)
 - **Added** ability to execute as a Python module: ``python -m qrcode --output qrcode.png "hello world"`` (stefansjs in `#400`_)
 - **Removed** the hardcoded 'id' argument from SVG elements. The fixed element ID caused conflicts when embedding multiple QR codes in a single document. (m000 in `#385`_)
-- Improved test coveraged (akx in `#315`_)
-- Fixed typos in code that used ``embeded`` instead of ``embedded``. For backwards compatibility, the misspelled parameter names are still accepted but now emit deprecation warnings. These deprecated parameter names will be removed in v9.0. (benjnicholls in `#349`_)
+- **Fixed** typos in code that used ``embeded`` instead of ``embedded``. For backwards compatibility, the misspelled parameter names are still accepted but now emit deprecation warnings. These deprecated parameter names will be removed in v9.0. (benjnicholls in `#349`_)
+- **Fixed** an issue where an ``<svg:`` prefix in the SVG output caused invalid markup when inlined within HTML documents. (bartTC in `#412`_)
 - Migrate pyproject.toml to PEP 621-compliant [project] metadata format. (hroncok in `#399`_)
-- Implement Ruff rules and perform comprehensive code cleanup.
+- Improved test coveraged (akx in `#315`_)
+- Implement Ruff rules and perform comprehensive code cleanup. (bartTC in `#408`_)
+- Modernize development setup: use ``uv`` and ``just``, add support for Python 3.14, and drop support for Python 3.9. (hugovk in `#420`_)
 
 .. _#315: https://github.com/lincolnloop/python-qrcode/pull/315
 .. _#349: https://github.com/lincolnloop/python-qrcode/pull/349
@@ -49,6 +56,9 @@ WIP
 .. _#385: https://github.com/lincolnloop/python-qrcode/pull/385
 .. _#399: https://github.com/lincolnloop/python-qrcode/pull/399
 .. _#400: https://github.com/lincolnloop/python-qrcode/pull/400
+.. _#408: https://github.com/lincolnloop/python-qrcode/pull/408
+.. _#412: https://github.com/lincolnloop/python-qrcode/pull/412
+.. _#420: https://github.com/lincolnloop/python-qrcode/pull/420
 
 8.2 (01 May 2025)
 -----------------
