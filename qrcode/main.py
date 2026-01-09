@@ -363,7 +363,7 @@ class QRCode(Generic[GenericImage]):
         else:
             image_factory = self.image_factory
             if image_factory is None:
-                from qrcode.image.pil import Image, PilImage  # noqa: PLC0415
+                from qrcode.image.pil import Image, PilImage
 
                 # Use PIL by default if available, otherwise use PyPNG.
                 image_factory = PilImage if Image else PyPNGImage
