@@ -81,6 +81,7 @@ class QRCode(Generic[GenericImage]):
     ):
         _check_box_size(box_size)
         _check_border(border)
+        self.clear()
         self.version = version
         self.error_correction = int(error_correction)
         self.box_size = int(box_size)
@@ -91,7 +92,6 @@ class QRCode(Generic[GenericImage]):
         self.image_factory = image_factory
         if image_factory is not None:
             assert issubclass(image_factory, BaseImage)
-        self.clear()
 
     @property
     def version(self) -> int:
@@ -123,6 +123,7 @@ class QRCode(Generic[GenericImage]):
         self.modules_count = 0
         self.data_cache = None
         self.data_list = []
+        self._version = None
 
     def add_data(self, data, optimize=20):
         """
