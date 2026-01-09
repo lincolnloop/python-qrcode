@@ -38,7 +38,7 @@ def __getattr__(name):
             )
 
         # Import and return the drawer from the pil module
-        from . import pil
+        from . import pil  # noqa: PLC0415
 
         return getattr(pil, name)
 
