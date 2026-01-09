@@ -50,6 +50,17 @@ changelog = "https://github.com/lincolnloop/python-qrcode/blob/main/CHANGES.rst"
 [project.scripts]
 qr = "qrcode.console_scripts:main"
 
+[dependency-groups]
+dev = [
+  "pytest",
+  "pytest-cov",
+  "ruff",
+  "pypng",
+  "pillow>=9.1.0",
+  "docutils>=0.21.2",
+  "zest-releaser[recommended]>=9.2.0",
+]
+
 [tool.poetry]
 packages = [{ include = "qrcode" }]
 readme = ["README.rst", "CHANGES.rst"]
@@ -60,16 +71,6 @@ readme = ["README.rst", "CHANGES.rst"]
 # data_files = [
 #     { destination = "share/man/man1", from = [ "doc/qr.1" ] },
 # ]
-
-[tool.poetry.group.dev.dependencies]
-pytest = { version = "*" }
-pytest-cov = { version = "*" }
-tox = { version = "*" }
-ruff = { version = "*" }
-pypng = { version = "*" }
-pillow = { version = ">=9.1.0" }
-docutils = "^0.21.2"
-zest-releaser = { extras = ["recommended"], version = "^9.2.0" }
 
 [tool.zest-releaser]
 less-zeros = "yes"

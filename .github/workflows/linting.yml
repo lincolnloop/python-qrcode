@@ -11,13 +11,16 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Install Dependencies
-        run: pip install ruff
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
 
       - name: Code Linting
         if: always()
-        run: ruff check qrcode
+        run: uv run ruff check qrcode
 
       - name: Code Formatting
         if: always()
-        run: ruff format --check qrcode
+        run: uv run ruff format --check qrcode
