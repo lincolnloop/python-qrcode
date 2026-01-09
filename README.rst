@@ -126,13 +126,13 @@ Or in Python:
     import qrcode
     import qrcode.image.svg
     
-    method = input("What method?: ")
+    method = input("What method? (basic, fragment, path): ")
     
     if method == 'basic':
         # Simple factory, just a set of rects.
         factory = qrcode.image.svg.SvgImage
     elif method == 'fragment':
-        # Fragment factory (also just a set of rects)
+        # Fragment factory (no standalone header)
         factory = qrcode.image.svg.SvgFragmentImage
     else:
         # Combined path factory, fixes white space that may occur when zooming
