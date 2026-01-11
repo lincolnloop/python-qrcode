@@ -50,11 +50,13 @@ WIP 8.x
 - Implement Ruff rules and perform comprehensive code cleanup. (bartTC in `#408`_)
 - Modernize development setup: use ``uv`` and ``just``, add support for Python 3.14, and drop support for Python 3.9. (hugovk in `#420`_)
 - Fix ``QRCode.clear()`` to properly reset the internal state, allowing instance reuse. (m000 in `#411`_)
+- Significant performance improvement for ``SolidFillColorMask``. (heitor in `#397`_)
 
 .. _#315: https://github.com/lincolnloop/python-qrcode/pull/315
 .. _#349: https://github.com/lincolnloop/python-qrcode/pull/349
 .. _#373: https://github.com/lincolnloop/python-qrcode/pull/373
 .. _#385: https://github.com/lincolnloop/python-qrcode/pull/385
+.. _#397: https://github.com/lincolnloop/python-qrcode/pull/397
 .. _#399: https://github.com/lincolnloop/python-qrcode/pull/399
 .. _#400: https://github.com/lincolnloop/python-qrcode/pull/400
 .. _#408: https://github.com/lincolnloop/python-qrcode/pull/408
