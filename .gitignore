@@ -9,4 +9,5 @@ cov.xml
 dist/
 htmlcov/
 poetry.lock
+uv.lock
 qrcode.egg-info/

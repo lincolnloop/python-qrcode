@@ -27,24 +27,33 @@ class QRColorMask:
     def initialize(self, styledPilImage, image):
         self.paint_color = styledPilImage.paint_color
 
-    def apply_mask(self, image):
+    def apply_mask(self, image, use_cache=False):
         width, height = image.size
+        pixels = image.load()
+        fg_color_cache = {} if use_cache else None
         for x in range(width):
             for y in range(height):
+                current_color = pixels[x, y]
+                if current_color == self.back_color:
+                    continue
+                if use_cache and current_color in fg_color_cache:
+                    pixels[x, y] = fg_color_cache[current_color]
+                    continue
                 norm = self.extrap_color(
-                    self.back_color, self.paint_color, image.getpixel((x, y))
+                    self.back_color, self.paint_color, current_color
                 )
                 if norm is not None:
-                    image.putpixel(
-                        (x, y),
-                        self.interp_color(
-                            self.get_bg_pixel(image, x, y),
-                            self.get_fg_pixel(image, x, y),
-                            norm,
-                        ),
+                    new_color = self.interp_color(
+                        self.get_bg_pixel(image, x, y),
+                        self.get_fg_pixel(image, x, y),
+                        norm,
                     )
+                    pixels[x, y] = new_color
+
+                    if use_cache:
+                        fg_color_cache[current_color] = new_color
                 else:
-                    image.putpixel((x, y), self.get_bg_pixel(image, x, y))
+                    pixels[x, y] = self.get_bg_pixel(image, x, y)
 
     def get_fg_pixel(self, image, x, y):
         raise NotImplementedError("QRModuleDrawer.paint_fg_pixel")
@@ -66,13 +75,12 @@ class QRColorMask:
     def extrap_num(self, n1, n2, interped_num):
         if n2 == n1:
             return None
-        else:
-            return (interped_num - n1) / (n2 - n1)
+        return (interped_num - n1) / (n2 - n1)
 
     # find the interpolation coefficient between two numbers
     def extrap_color(self, col1, col2, interped_color):
         normed = []
-        for c1, c2, ci in zip(col1, col2, interped_color):
+        for c1, c2, ci in zip(col1, col2, interped_color, strict=False):
             extrap = self.extrap_num(c1, c2, ci)
             if extrap is not None:
                 normed.append(extrap)
@@ -215,5 +223,4 @@ class ImageColorMask(QRColorMask):
         self.color_img = self.color_img.resize(image.size)
 
     def get_fg_pixel(self, image, x, y):
-        width, _ = image.size
         return self.color_img.getpixel((x, y))

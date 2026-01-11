@@ -6,19 +6,25 @@ When stdout is a tty the QR Code is printed to the terminal and when stdout is
 a pipe to a file an image is written. The default image format is PNG.
 """
 
+from __future__ import annotations
+
 import optparse
 import os
 import sys
-from typing import NoReturn, Optional
-from collections.abc import Iterable
 from importlib import metadata
+from pathlib import Path
+from typing import TYPE_CHECKING, NoReturn
 
 import qrcode
-from qrcode.image.base import BaseImage, DrawerAliases
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+
+    from qrcode.image.base import BaseImage, DrawerAliases
 
 # The next block is added to get the terminal to display properly on MS platforms
 if sys.platform.startswith(("win", "cygwin")):  # pragma: no cover
-    import colorama  # type: ignore
+    import colorama
 
     colorama.init()
 
@@ -50,7 +56,7 @@ def main(args=None):
     # Wrap parser.error in a typed NoReturn method for better typing.
     def raise_error(msg: str) -> NoReturn:
         parser.error(msg)
-        raise  # pragma: no cover
+        raise  # pragma: no cover # noqa: PLE0704
 
     parser.add_option(
         "--factory",
@@ -114,7 +120,7 @@ def main(args=None):
 
     if opts.output:
         img = qr.make_image()
-        with open(opts.output, "wb") as out:
+        with Path(opts.output).open("wb") as out:
             img.save(out)
     else:
         if image_factory is None and (os.isatty(sys.stdout.fileno()) or opts.ascii):
@@ -122,7 +128,7 @@ def main(args=None):
             return
 
         kwargs = {}
-        aliases: Optional[DrawerAliases] = getattr(
+        aliases: DrawerAliases | None = getattr(
             qr.image_factory, "drawer_aliases", None
         )
         if opts.factory_drawer:
@@ -151,12 +157,13 @@ def get_factory(module: str) -> type[BaseImage]:
 
 def get_drawer_help() -> str:
     help: dict[str, set] = {}
+
     for alias, module in default_factories.items():
         try:
             image = get_factory(module)
         except ImportError:  # pragma: no cover
             continue
-        aliases: Optional[DrawerAliases] = getattr(image, "drawer_aliases", None)
+        aliases: DrawerAliases | None = getattr(image, "drawer_aliases", None)
         if not aliases:
             continue
         factories = help.setdefault(commas(aliases), set())

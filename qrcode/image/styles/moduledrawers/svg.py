@@ -2,8 +2,8 @@ import abc
 from decimal import Decimal
 from typing import TYPE_CHECKING, NamedTuple
 
-from qrcode.image.styles.moduledrawers.base import QRModuleDrawer
 from qrcode.compat.etree import ET
+from qrcode.image.styles.moduledrawers.base import QRModuleDrawer
 
 if TYPE_CHECKING:
     from qrcode.image.svg import SvgFragmentImage, SvgPathImage
@@ -24,6 +24,7 @@ class BaseSvgQRModuleDrawer(QRModuleDrawer):
     img: "SvgFragmentImage"
 
     def __init__(self, *, size_ratio: Decimal = Decimal(1), **kwargs):
+        super().__init__(**kwargs)
         self.size_ratio = size_ratio
 
     def initialize(self, *args, **kwargs) -> None:
@@ -52,7 +53,6 @@ class SvgQRModuleDrawer(BaseSvgQRModuleDrawer):
 
     def initialize(self, *args, **kwargs) -> None:
         super().initialize(*args, **kwargs)
-        self.tag_qname = ET.QName(self.img._SVG_namespace, self.tag)
 
     def drawrect(self, box, is_active: bool):
         if not is_active:
@@ -71,7 +71,7 @@ class SvgSquareDrawer(SvgQRModuleDrawer):
     def el(self, box):
         coords = self.coords(box)
         return ET.Element(
-            self.tag_qname,  # type: ignore
+            self.tag,
             x=self.img.units(coords.x0),
             y=self.img.units(coords.y0),
             width=self.unit_size,
@@ -89,7 +89,7 @@ class SvgCircleDrawer(SvgQRModuleDrawer):
     def el(self, box):
         coords = self.coords(box)
         return ET.Element(
-            self.tag_qname,  # type: ignore
+            self.tag,
             cx=self.img.units(coords.xh),
             cy=self.img.units(coords.yh),
             r=self.radius,

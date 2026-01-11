@@ -1,14 +1,83 @@
-==========
-Change log
+=======
+Changes
+=======
+
+Deprecation Warnings
+====================
+
+Removed in v9.0:
+----------------
+
+- Importing a PIL drawer from ``qrcode.image.styles.moduledrawers`` has been deprecated.
+  Update your code to import directly from the ``pil`` module instead:
+
+  .. code-block:: python
+
+     from qrcode.image.styles.moduledrawers import SquareModuleDrawer  # Old
+     from qrcode.image.styles.moduledrawers.pil import SquareModuleDrawer  # New
+
+- Calling ``QRCode.make_image`` or ``StyledPilImage`` with the arguments ``embeded_image``
+  or ``embeded_image_path`` have been deprecated due to typographical errors. Update
+  your code to use the correct arguments ``embedded_image`` and ``embededd_image_path``:
+
+  .. code-block:: python
+
+     qr = QRCode()
+     qr.make_image(embeded_image=..., embeded_image_path=...)  # Old
+     qr.make_image(embedded_image=..., embedded_image_path=...)  # New
+
+     StyledPilImage(embeded_image=..., embeded_image_path=...)  # Old
+     StyledPilImage(embedded_image=..., embedded_image_path=...)  # New
+
+- The ``width`` and ``height`` attributes will be removed from the ``<svg>`` tag.
+  Instead, the ``viewBox`` attribute is now used for defining the dimensions.
+  Additionally, all SVG elements now utilize pixel units rather than millimeters,
+  which may cause rendering differences in browsers.
+
+Change Log
 ==========
 
-8.1 ( 02 April 2025)
-====================
+WIP 8.x
+-------
+
+- **Added** ``GappedCircleModuleDrawer`` (PIL) to render QR code modules as non-contiguous circles. (BenwestGate in `#373`_)
+- **Added** ability to execute as a Python module: ``python -m qrcode --output qrcode.png "hello world"`` (stefansjs in `#400`_)
+- **Removed** the hardcoded 'id' argument from SVG elements. The fixed element ID caused conflicts when embedding multiple QR codes in a single document. (m000 in `#385`_)
+- **Fixed** typos in code that used ``embeded`` instead of ``embedded``. For backwards compatibility, the misspelled parameter names are still accepted but now emit deprecation warnings. These deprecated parameter names will be removed in v9.0. (benjnicholls in `#349`_)
+- **Fixed** an issue where an ``<svg:`` prefix in the SVG output caused invalid markup when inlined within HTML documents. (bartTC in `#412`_)
+- Migrate pyproject.toml to PEP 621-compliant [project] metadata format. (hroncok in `#399`_)
+- Improved test coveraged (akx in `#315`_)
+- Implement Ruff rules and perform comprehensive code cleanup. (bartTC in `#408`_)
+- Modernize development setup: use ``uv`` and ``just``, add support for Python 3.14, and drop support for Python 3.9. (hugovk in `#420`_)
+- Fix ``QRCode.clear()`` to properly reset the internal state, allowing instance reuse. (m000 in `#411`_)
+
+.. _#315: https://github.com/lincolnloop/python-qrcode/pull/315
+.. _#349: https://github.com/lincolnloop/python-qrcode/pull/349
+.. _#373: https://github.com/lincolnloop/python-qrcode/pull/373
+.. _#385: https://github.com/lincolnloop/python-qrcode/pull/385
+.. _#399: https://github.com/lincolnloop/python-qrcode/pull/399
+.. _#400: https://github.com/lincolnloop/python-qrcode/pull/400
+.. _#408: https://github.com/lincolnloop/python-qrcode/pull/408
+.. _#411: https://github.com/lincolnloop/python-qrcode/pull/411
+.. _#412: https://github.com/lincolnloop/python-qrcode/pull/412
+.. _#420: https://github.com/lincolnloop/python-qrcode/pull/420
+
+8.2 (01 May 2025)
+-----------------
+
+- Optimize QRColorMask apply_mask method for enhanced performance
+- Fix typos on StyledPilImage embeded_* parameters.
+  The old parameters with the typos are still accepted
+  for backward compatibility.
+
+
+8.1 (02 April 2025)
+--------------------
 
 - Added support for Python 3.13.
 
-8.0 ( 27 September 2024)
-========================
+8.0 (27 September 2024)
+------------------------
 
 - Added support for Python 3.11 and 3.12.
 
@@ -20,10 +89,12 @@ Change log
 
 - Code quality and formatting utilises ruff_.
 
-- Removed ``typing_extensions`` as a dependency, as it's no longer required with
+- Removed ``typing_extensions`` as a dependency, as it's no longer required
+  with having Python 3.9+ as a requirement.
   having Python 3.9+ as a requirement.
 
-- Only allow high error correction rate (`qrcode.ERROR_CORRECT_H`) when generating
+- Only allow high error correction rate (`qrcode.ERROR_CORRECT_H`)
+  when generating
   QR codes with embedded images to ensure content is readable
 
 .. _Poetry: https://python-poetry.org
@@ -31,21 +102,21 @@ Change log
 
 
 7.4.2 (6 February 2023)
-=======================
+-----------------------
 
 - Allow ``pypng`` factory to allow for saving to a string (like
   ``qr.save("some_file.png")``) in addition to file-like objects.
 
 
 7.4.1 (3 February 2023)
-=======================
+-----------------------
 
 - Fix bad over-optimization in v7.4 that broke large QR codes. Thanks to
   mattiasj-axis!
 
 
 7.4 (1 February 2023)
-=====================
+---------------------
 
 - Restructure the factory drawers, allowing different shapes in SVG image
   factories as well.
@@ -64,19 +135,19 @@ Change log
 
 
 7.3.1 (1 October 2021)
-======================
+----------------------
 
 - Improvements for embedded image.
 
 
 7.3 (19 August 2021)
-====================
+--------------------
 
 - Skip color mask if QR is black and white
 
 
 7.2 (19 July 2021)
-==================
+------------------
 
 - Add Styled PIL image factory, allowing different color masks and shapes in QR codes
 
@@ -86,7 +157,7 @@ Change log
 
 
 7.1 (1 July 2021)
-=================
+-----------------
 
 - Add --ascii parameter to command line interface allowing to output ascii when stdout is piped
 
@@ -102,13 +173,13 @@ Change log
 
 
 7.0 (29 June 2021)
-==================
+------------------
 
 - Drop Python < 3.6 support.
 
 
 6.1 (14 January 2019)
-=====================
+---------------------
 
 - Fix short chunks of data not being optimized to the correct mode.
 
@@ -116,7 +187,7 @@ Change log
 
 
 6.0 (23 March 2018)
-===================
+-------------------
 
 - Fix optimize length being ignored in ``QRCode.add_data``.
 
@@ -125,7 +196,7 @@ Change log
 
 
 5.3 (18 May 2016)
-=================
+-----------------
 
 * Fix incomplete block table for QR version 15. Thanks Rodrigo Queiro for the
   report and Jacob Welsh for the investigation and fix.
@@ -136,7 +207,7 @@ Change log
 
 
 5.2 (25 Jan 2016)
-=================
+-----------------
 
 * Add ``--error-correction`` option to qr script.
 
@@ -164,7 +235,7 @@ Change log
 
 
 5.1 (22 Oct 2014)
-=================
+-----------------
 
 * Make ``qr`` script work in Windows. Thanks Ionel Cristian Mărieș
 
@@ -177,7 +248,7 @@ Change log
 
 
 5.0 (17 Jun 2014)
-=================
+-----------------
 
 * Speed optimizations.
 
@@ -198,7 +269,7 @@ Change log
 
 
 4.0 (4 Sep 2013)
-================
+----------------
 
 * Made qrcode work on Python 2.4 - Thanks tcely.
   Note: officially, qrcode only supports 2.5+.
@@ -207,7 +278,7 @@ Change log
   Adam Wisniewski!
 
 * SVG image generation now supports alternate sizing (the default box size of
-  10 == 1mm per rectangle).
+  10 -- 1mm per rectangle).
 
 * SVG path image generation allows cleaner SVG output by combining all QR rects
   into a single path. Thank you, Viktor Stískala.
@@ -239,7 +310,7 @@ Change log
 
 
 3.1 (12 Aug 2013)
-=================
+-----------------
 
 * Important fixes for incorrect matches of the alphanumeric encoding mode.
   Previously, the pattern would match if a single line was alphanumeric only
@@ -259,7 +330,7 @@ Change log
 
 
 3.0 (25 Jun 2013)
-=================
+-----------------
 
 * Python 3 support.
 
@@ -274,13 +345,13 @@ Change log
 
 
 2.7 (5 Mar 2013)
-================
+----------------
 
 * Fix incorrect termination padding.
 
 
 2.6 (2 Apr 2013)
-================
+----------------
 
 * Fix the first four columns incorrectly shifted by one. Thanks to Josep
   Gómez-Suay for the report and fix.
@@ -290,7 +361,7 @@ Change log
 
 
 2.5 (12 Mar 2013)
-=================
+-----------------
 
 * The PilImage wrapper is more transparent - you can use any methods or
   attributes available to the underlying PIL Image instance.
@@ -304,7 +375,7 @@ Change log
 
 
 2.4 (23 Apr 2012)
-=================
+-----------------
 
 * Use a pluggable backend system for generating images, thanks to Branko Čibej!
   Comes with PIL and SVG backends built in.
@@ -322,7 +393,7 @@ Change log
 
 
 2.3 (29 Jan 2012)
-=================
+-----------------
 
 * When adding data, auto-select the more efficient encoding methods for numbers
   and alphanumeric data (KANJI still not supported).
@@ -334,7 +405,7 @@ Change log
 
 
 2.2 (18 Jan 2012)
-=================
+-----------------
 
 * Fixed tty output to work on both white and black backgrounds.
 
@@ -343,7 +414,7 @@ Change log
 
 
 2.1 (17 Jan 2012)
-=================
+-----------------
 
 * Added a ``qr`` script which can be used to output a qr code to the tty using
   background colors, or to a file via a pipe.

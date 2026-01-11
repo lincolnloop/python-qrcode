@@ -3,23 +3,29 @@ name: Testsuite Run
 on: [push]
 
 jobs:
-  build:
+  test:
+    name: Test Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: 4
+      fail-fast: false
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
         with:
           python-version: ${{ matrix.python-version }}
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
 
-      - name: Install dependencies
-        run: |
-          pip install --disable-pip-version-check tox tox-gh-actions
-      - name: Test with tox
-        run: tox
+      - name: Test with pil
+        run: uv run --extra pil --group dev pytest
+
+      - name: Test with png
+        run: uv run --extra png --group dev pytest
+
+      - name: Test with none
+        run: uv run --group dev pytest

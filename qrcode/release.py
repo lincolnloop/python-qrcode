@@ -3,9 +3,9 @@ This file provides zest.releaser entrypoints using when releasing new
 qrcode versions.
 """
 
-import os
-import re
 import datetime
+import re
+from pathlib import Path
 
 
 def update_manpage(data):
@@ -15,9 +15,10 @@ def update_manpage(data):
     if data["name"] != "qrcode":
         return
 
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    filename = os.path.join(base_dir, "doc", "qr.1")
-    with open(filename) as f:
+    base_dir = Path(__file__).parent.parent.resolve()
+    filename = base_dir / "doc" / "qr.1"
+
+    with filename.open("r") as f:
         lines = f.readlines()
 
     changed = False
@@ -32,11 +33,13 @@ def update_manpage(data):
             # Update version
             parts[3] = data["new_version"]
             # Update date
-            parts[1] = datetime.datetime.now().strftime("%-d %b %Y")
+            parts[1] = datetime.datetime.now(tz=datetime.timezone.utc).strftime(
+                "%-d %b %Y"
+            )
             lines[i] = '"'.join(parts)
         break
 
     if changed:
-        with open(filename, "w") as f:
+        with filename.open("w") as f:
             for line in lines:
                 f.write(line)

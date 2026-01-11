@@ -1,11 +1,15 @@
+from __future__ import annotations
+
 import decimal
 from decimal import Decimal
-from typing import Optional, Union, overload, Literal
+from typing import TYPE_CHECKING, Literal, overload
 
 import qrcode.image.base
 from qrcode.compat.etree import ET
 from qrcode.image.styles.moduledrawers import svg as svg_drawers
-from qrcode.image.styles.moduledrawers.base import QRModuleDrawer
+
+if TYPE_CHECKING:
+    from qrcode.image.styles.moduledrawers.base import QRModuleDrawer
 
 
 class SvgFragmentImage(qrcode.image.base.BaseImageWithDrawer):
@@ -27,10 +31,16 @@ class SvgFragmentImage(qrcode.image.base.BaseImageWithDrawer):
         self.unit_size = self.units(self.box_size)
 
     @overload
-    def units(self, pixels: Union[int, Decimal], text: Literal[False]) -> Decimal: ...
+    def drawrect(self, row, col):
+        """
+        Not used.
+        """
 
     @overload
-    def units(self, pixels: Union[int, Decimal], text: Literal[True] = True) -> str: ...
+    def units(self, pixels: int | Decimal, text: Literal[False]) -> Decimal: ...
+
+    @overload
+    def units(self, pixels: int | Decimal, text: Literal[True] = True) -> str: ...
 
     def units(self, pixels, text=True):
         """
@@ -42,7 +52,7 @@ class SvgFragmentImage(qrcode.image.base.BaseImageWithDrawer):
         units = units.quantize(Decimal("0.001"))
         context = decimal.Context(traps=[decimal.Inexact])
         try:
-            for d in (Decimal("0.01"), Decimal("0.1"), Decimal("0")):
+            for d in (Decimal("0.01"), Decimal("0.1"), Decimal(0)):
                 units = units.quantize(d, context=context)
         except decimal.Inexact:
             pass
@@ -63,7 +73,7 @@ class SvgFragmentImage(qrcode.image.base.BaseImageWithDrawer):
             tag = ET.QName(self._SVG_namespace, "svg")
         dimension = self.units(self.pixel_size)
         return ET.Element(
-            tag,  # type: ignore
+            tag,
             width=dimension,
             height=dimension,
             version=version,
@@ -81,11 +91,11 @@ class SvgImage(SvgFragmentImage):
     Creates a QR-code image as a standalone SVG document.
     """
 
-    background: Optional[str] = None
+    background: str | None = None
     drawer_aliases: qrcode.image.base.DrawerAliases = {
         "circle": (svg_drawers.SvgCircleDrawer, {}),
-        "gapped-circle": (svg_drawers.SvgCircleDrawer, {"size_ratio": Decimal(0.8)}),
-        "gapped-square": (svg_drawers.SvgSquareDrawer, {"size_ratio": Decimal(0.8)}),
+        "gapped-circle": (svg_drawers.SvgCircleDrawer, {"size_ratio": Decimal("0.8")}),
+        "gapped-square": (svg_drawers.SvgSquareDrawer, {"size_ratio": Decimal("0.8")}),
     }
 
     def _svg(self, tag="svg", **kwargs):
@@ -122,17 +132,17 @@ class SvgPathImage(SvgImage):
     }
 
     needs_processing = True
-    path: Optional[ET.Element] = None
+    path: ET.Element | None = None
     default_drawer_class: type[QRModuleDrawer] = svg_drawers.SvgPathSquareDrawer
     drawer_aliases = {
         "circle": (svg_drawers.SvgPathCircleDrawer, {}),
         "gapped-circle": (
             svg_drawers.SvgPathCircleDrawer,
-            {"size_ratio": Decimal(0.8)},
+            {"size_ratio": Decimal("0.8")},
         ),
         "gapped-square": (
             svg_drawers.SvgPathSquareDrawer,
-            {"size_ratio": Decimal(0.8)},
+            {"size_ratio": Decimal("0.8")},
         ),
     }
 
@@ -143,16 +153,15 @@ class SvgPathImage(SvgImage):
     def _svg(self, viewBox=None, **kwargs):
         if viewBox is None:
             dimension = self.units(self.pixel_size, text=False)
-            viewBox = "0 0 {d} {d}".format(d=dimension)
+            viewBox = f"0 0 {dimension} {dimension}"
         return super()._svg(viewBox=viewBox, **kwargs)
 
     def process(self):
         # Store the path just in case someone wants to use it again or in some
         # unique way.
         self.path = ET.Element(
-            ET.QName("path"),  # type: ignore
+            ET.QName("path"),
             d="".join(self._subpaths),
-            id="qr-path",
             **self.QR_PATH_STYLE,
         )
         self._subpaths = []
