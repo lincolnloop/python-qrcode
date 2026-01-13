@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [project]
 name = "qrcode"
-version = "8.2"
+version = "9.0a0"
 description = "QR Code image generator"
 authors = [
   { name = "Lincoln Loop", email = "info@lincolnloop.com" },
@@ -31,7 +31,6 @@ classifiers = [
 requires-python = ">=3.10"
 dependencies = [
   "colorama; sys_platform == 'win32'",
-  "deprecation",
 ]
 
 
