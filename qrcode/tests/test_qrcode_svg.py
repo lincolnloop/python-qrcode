@@ -23,6 +23,13 @@ def test_render_svg_path():
     img.save(io.BytesIO())
 
 
+def test_render_svg_compressed():
+    qr = qrcode.QRCode()
+    qr.add_data(UNICODE_TEXT)
+    img = qr.make_image(image_factory=svg.SvgCompressedImage)
+    img.save(io.BytesIO())
+
+
 def test_render_svg_fragment():
     qr = qrcode.QRCode()
     qr.add_data(UNICODE_TEXT)
