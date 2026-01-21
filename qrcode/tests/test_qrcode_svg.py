@@ -2,6 +2,8 @@ import io
 
 import qrcode
 from qrcode.image import svg
+from qrcode.image.styles.moduledrawers.svg import SvgRoundedModuleDrawer
+from decimal import Decimal
 from qrcode.tests.consts import UNICODE_TEXT
 
 
@@ -51,4 +53,32 @@ def test_svg_circle_drawer():
     qr = qrcode.QRCode()
     qr.add_data(UNICODE_TEXT)
     img = qr.make_image(image_factory=svg.SvgPathImage, module_drawer="circle")
+    img.save(io.BytesIO())
+
+
+def test_svg_rounded_module_drawer():
+    """Test that the SvgRoundedModuleDrawer works correctly."""
+    qr = qrcode.QRCode()
+    qr.add_data(UNICODE_TEXT)
+
+    # Test with default parameters
+    module_drawer = SvgRoundedModuleDrawer()
+    img = qr.make_image(image_factory=svg.SvgPathImage, module_drawer=module_drawer)
+    img.save(io.BytesIO())
+
+    # Test with custom radius_ratio
+    module_drawer = SvgRoundedModuleDrawer(radius_ratio=Decimal("0.5"))
+    img = qr.make_image(image_factory=svg.SvgPathImage, module_drawer=module_drawer)
+    img.save(io.BytesIO())
+
+    # Test with custom size_ratio
+    module_drawer = SvgRoundedModuleDrawer(size_ratio=Decimal("0.8"))
+    img = qr.make_image(image_factory=svg.SvgPathImage, module_drawer=module_drawer)
+    img.save(io.BytesIO())
+
+    # Test with both custom parameters
+    module_drawer = SvgRoundedModuleDrawer(
+        radius_ratio=Decimal("0.3"), size_ratio=Decimal("0.9")
+    )
+    img = qr.make_image(image_factory=svg.SvgPathImage, module_drawer=module_drawer)
     img.save(io.BytesIO())
