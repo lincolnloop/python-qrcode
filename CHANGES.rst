@@ -53,11 +53,13 @@ WIP 8.x
 - Significant performance improvement for ``SolidFillColorMask``. (heitor in `#397`_)
 - Fix thread safety issue in ``bisect_left`` usage. (Fixes `#421`_)
 - Fix ``ValueError: glog(0)`` when encoding zero-heavy data. (Fixes `#330`_)
+- Fix mask evaluation to include format info, version info, and the dark module per ISO 18004 §7.8.3.1. (Jaimeetxebarria in `#389`_)
 
 .. _#315: https://github.com/lincolnloop/python-qrcode/pull/315
 .. _#349: https://github.com/lincolnloop/python-qrcode/pull/349
 .. _#373: https://github.com/lincolnloop/python-qrcode/pull/373
 .. _#385: https://github.com/lincolnloop/python-qrcode/pull/385
+.. _#389: https://github.com/lincolnloop/python-qrcode/pull/389
 .. _#397: https://github.com/lincolnloop/python-qrcode/pull/397
 .. _#399: https://github.com/lincolnloop/python-qrcode/pull/399
 .. _#400: https://github.com/lincolnloop/python-qrcode/pull/400
