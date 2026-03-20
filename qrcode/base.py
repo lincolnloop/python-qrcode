@@ -268,6 +268,8 @@ class Polynomial:
 
         for i, item in enumerate(self):
             for j, other_item in enumerate(other):
+                if item == 0 or other_item == 0:
+                    continue
                 num[i + j] ^= gexp(glog(item) + glog(other_item))
 
         return Polynomial(num, 0)
@@ -276,6 +278,12 @@ class Polynomial:
         difference = len(self) - len(other)
         if difference < 0:
             return self
+
+        if self[0] == 0:
+            num = list(self[1:])
+            if difference:
+                num.append(0)
+            return Polynomial(num, 0) % other
 
         ratio = glog(self[0]) - glog(other[0])
 

@@ -23,6 +23,19 @@ def test_large():
     qr.make(fit=False)
 
 
+def test_glog_zero_data_with_leading_zeros():
+    """Regression test for issue #330: glog(0) ValueError with zero-heavy data."""
+    qr = qrcode.QRCode(
+        version=6,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=10,
+        border=4,
+        mask_pattern=0,
+    )
+    qr.add_data("http://test.com/abc" + "000" * 90)
+    qr.make()
+
+
 def test_invalid_version():
     with pytest.raises(ValueError):
         qrcode.QRCode(version=42)
