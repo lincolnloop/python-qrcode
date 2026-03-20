@@ -106,6 +106,20 @@ def test_make_image_with_wrong_pattern():
         qrcode.QRCode(mask_pattern=42)
 
 
+def test_best_mask_pattern_includes_format_info():
+    """Mask evaluation should use the complete symbol per ISO 18004 §7.8.3.1."""
+    qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_H)
+    qr.add_data("hello")
+    qr.best_fit()
+    qr.data_cache = qrcode.util.create_data(
+        qr.version, qr.error_correction, qr.data_list
+    )
+    # The old code zeroed out format info, version info, and the dark module
+    # during mask evaluation, which violated the spec and selected mask 5 for
+    # this input. With the complete symbol evaluated, the correct mask is 6.
+    assert qr.best_mask_pattern() == 6
+
+
 def test_mask_pattern_setter():
     qr = qrcode.QRCode()
 
