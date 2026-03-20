@@ -468,7 +468,7 @@ class QRCode(Generic[GenericImage]):
                 self.modules[8][15 - i - 1] = mod
 
         # fixed module
-        self.modules[self.modules_count - 8][8] = 1
+        self.modules[self.modules_count - 8][8] = True
 
     def map_data(self, data, mask_pattern):
         inc = -1
