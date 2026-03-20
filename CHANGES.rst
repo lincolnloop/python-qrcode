@@ -51,6 +51,8 @@ WIP 8.x
 - Modernize development setup: use ``uv`` and ``just``, add support for Python 3.14, and drop support for Python 3.9. (hugovk in `#420`_)
 - Fix ``QRCode.clear()`` to properly reset the internal state, allowing instance reuse. (m000 in `#411`_)
 - Significant performance improvement for ``SolidFillColorMask``. (heitor in `#397`_)
+- Fix thread safety issue in ``bisect_left`` usage. (Fixes `#421`_)
+- Fix ``ValueError: glog(0)`` when encoding zero-heavy data. (Fixes `#330`_)
 
 .. _#315: https://github.com/lincolnloop/python-qrcode/pull/315
 .. _#349: https://github.com/lincolnloop/python-qrcode/pull/349
@@ -62,7 +64,9 @@ WIP 8.x
 .. _#408: https://github.com/lincolnloop/python-qrcode/pull/408
 .. _#411: https://github.com/lincolnloop/python-qrcode/pull/411
 .. _#412: https://github.com/lincolnloop/python-qrcode/pull/412
+.. _#330: https://github.com/lincolnloop/python-qrcode/issues/330
 .. _#420: https://github.com/lincolnloop/python-qrcode/pull/420
+.. _#421: https://github.com/lincolnloop/python-qrcode/issues/421
 
 8.2 (01 May 2025)
 -----------------
