@@ -36,6 +36,22 @@ def test_glog_zero_data_with_leading_zeros():
     qr.make()
 
 
+def test_glog_zero_binary_data_at_capacity():
+    """Regression test for issue #423: glog(0) with binary null bytes at capacity limit."""
+    from qrcode.util import QRData, MODE_8BIT_BYTE
+
+    # Version 5 + Q = 60 bytes capacity, data padded with trailing null bytes
+    data = (
+        b"\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x16"
+        b"Hello from kakaworld!!"
+        + b"\x00" * 26
+    )
+    assert len(data) == 60
+    qr = qrcode.QRCode(version=5, error_correction=qrcode.constants.ERROR_CORRECT_Q)
+    qr.add_data(QRData(data, mode=MODE_8BIT_BYTE))
+    qr.make(fit=False)
+
+
 def test_invalid_version():
     with pytest.raises(ValueError):
         qrcode.QRCode(version=42)
