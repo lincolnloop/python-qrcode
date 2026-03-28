@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import abc
 from decimal import Decimal
 from typing import TYPE_CHECKING, NamedTuple
@@ -21,7 +23,7 @@ class Coords(NamedTuple):
 
 
 class BaseSvgQRModuleDrawer(QRModuleDrawer):
-    img: "SvgFragmentImage"
+    img: SvgFragmentImage
 
     def __init__(self, *, size_ratio: Decimal = Decimal(1), **kwargs):
         super().__init__(**kwargs)
@@ -97,7 +99,7 @@ class SvgCircleDrawer(SvgQRModuleDrawer):
 
 
 class SvgPathQRModuleDrawer(BaseSvgQRModuleDrawer):
-    img: "SvgPathImage"
+    img: SvgPathImage
 
     def drawrect(self, box, is_active: bool):
         if not is_active:
@@ -106,6 +108,20 @@ class SvgPathQRModuleDrawer(BaseSvgQRModuleDrawer):
 
     @abc.abstractmethod
     def subpath(self, box) -> str: ...
+
+
+class SvgCompressedDrawer(BaseSvgQRModuleDrawer):
+    img: SvgPathImage
+
+    def drawrect(self, box, is_active: bool):
+        if not is_active:
+            return
+        coords = self.coords(box)
+        x0 = self.img.units(coords.x0, text=False)
+        y0 = self.img.units(coords.y0, text=False)
+        assert self.img.units(coords.x1, text=False) - 1 == x0
+        assert self.img.units(coords.y1, text=False) - 1 == y0
+        self.img._points.append([int(x0), int(y0)])
 
 
 class SvgPathSquareDrawer(SvgPathQRModuleDrawer):
