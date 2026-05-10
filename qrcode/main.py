@@ -219,12 +219,16 @@ class QRCode(Generic[GenericImage]):
             data.write(buffer)
 
         needed_bits = len(buffer)
-        # Create a thread-local copy of the table to avoid concurrent access issues (Python 3.13+)
-        self.version = bisect_left(
+        # Compute the version from a thread-local view of the limit table.
+        # Bisect first, then check overflow, *before* assigning to the setter
+        # so we raise the semantically correct DataOverflowError instead of
+        # the ValueError the version setter would raise for value 41.
+        new_version = bisect_left(
             util.BIT_LIMIT_TABLE[self.error_correction][:], needed_bits, start
         )
-        if self.version == 41:
+        if new_version == 41:
             raise exceptions.DataOverflowError
+        self.version = new_version
 
         # Now check whether we need more bits for the mode sizes, recursing if
         # our guess was too low
