@@ -158,7 +158,7 @@ def mask_func(pattern):
         return lambda i, j: ((i * j) % 2 + (i * j) % 3) % 2 == 0
     if pattern == 7:  # 111
         return lambda i, j: ((i * j) % 3 + (i + j) % 2) % 2 == 0
-    raise TypeError("Bad mask pattern: " + pattern)  # pragma: no cover
+    raise ValueError(f"Bad mask pattern: {pattern!r}")
 
 
 def mode_sizes_for_version(version):
@@ -456,11 +456,22 @@ class QRData:
             for i in range(0, len(self.data), 2):
                 chars = self.data[i : i + 2]
                 if len(chars) > 1:
-                    buffer.put(
-                        ALPHA_NUM.find(chars[0]) * 45 + ALPHA_NUM.find(chars[1]), 11
-                    )
+                    a = ALPHA_NUM.find(chars[0])
+                    b = ALPHA_NUM.find(chars[1])
+                    if a < 0 or b < 0:
+                        raise ValueError(
+                            f"Character {chars!r} is not in the alphanumeric "
+                            f"table; cannot encode in MODE_ALPHA_NUM"
+                        )
+                    buffer.put(a * 45 + b, 11)
                 else:
-                    buffer.put(ALPHA_NUM.find(chars), 6)
+                    a = ALPHA_NUM.find(chars)
+                    if a < 0:
+                        raise ValueError(
+                            f"Character {chars!r} is not in the alphanumeric "
+                            f"table; cannot encode in MODE_ALPHA_NUM"
+                        )
+                    buffer.put(a, 6)
         else:
             # Iterating a bytestring in Python 3 returns an integer,
             # no need to ord().
