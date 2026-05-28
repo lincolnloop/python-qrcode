@@ -1,0 +1,21 @@
+# Pre-commit hooks for python-qrcode
+# Install: pip install pre-commit && pre-commit install
+# Run manually: pre-commit run --all-files
+
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.14
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+        exclude: ^qrcode/tests/
+      - id: ruff-format
+
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy
+        entry: .venv/bin/mypy qrcode/
+        language: system
+        types: [python]
+        exclude: ^qrcode/tests/

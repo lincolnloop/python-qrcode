@@ -2,6 +2,27 @@
 Pure python QR Code generator
 =============================
 
+.. image:: https://img.shields.io/pypi/v/qrcode.svg
+    :target: https://pypi.org/project/qrcode/
+    :alt: PyPI version
+
+.. image:: https://img.shields.io/pypi/pyversions/qrcode.svg
+    :target: https://pypi.org/project/qrcode/
+    :alt: Python versions
+
+.. image:: https://github.com/lincolnloop/python-qrcode/actions/workflows/push.yml/badge.svg
+    :target: https://github.com/lincolnloop/python-qrcode/actions
+    :alt: Build status
+
+.. image:: https://img.shields.io/pypi/l/qrcode.svg
+    :target: https://opensource.org/licenses/BSD-3-Clause
+    :alt: License
+
+.. image:: https://codecov.io/gh/lincolnloop/python-qrcode/graph/badge.svg?token=PLACEHOLDER
+    :target: https://codecov.io/gh/lincolnloop/python-qrcode
+    :alt: Code coverage
+
+
 Generate QR codes.
 
 A standard install uses pypng_ to generate PNG files and can also render QR
@@ -233,11 +254,106 @@ and an embedded image:
     from qrcode.image.styles.colormasks import RadialGradiantColorMask
 
     qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_H)
-    qr.add_data('Some data')
+    qr.add_data('https://example.com')
+    qr.make(fit=True)
 
-    img_1 = qr.make_image(image_factory=StyledPilImage, module_drawer=RoundedModuleDrawer())
-    img_2 = qr.make_image(image_factory=StyledPilImage, color_mask=RadialGradiantColorMask())
-    img_3 = qr.make_image(image_factory=StyledPilImage, embedded_image_path="/path/to/image.png")
+    # Combined: rounded modules + radial gradient + embedded logo
+    img = qr.make_image(
+        image_factory=StyledPilImage,
+        module_drawer=RoundedModuleDrawer(),
+        color_mask=RadialGradiantColorMask(
+            center_color=(255, 0, 0),
+            edge_color=(0, 0, 255),
+        ),
+        embedded_image_path="/path/to/logo.png",
+    )
+    img.save("styled_qr.png")
+
+**Available Module Drawers (PIL)**
+
+The following drawers control the shape of individual QR modules:
+
+- ``SquareModuleDrawer`` — default square blocks
+- ``RoundedModuleDrawer`` — rounded corners for a softer look
+- ``GappedCircleDrawer`` — circular modules with gaps between them
+- ``VerticalBarsDrawer`` — vertical bar style (like a barcode)
+
+All drawers accept a ``size_ratio`` parameter (default ``1.0``) to control the
+module size relative to the available space. Values less than 1.0 create gaps
+between modules.
+
+**Available Color Masks**
+
+Color masks control the foreground color of dark modules:
+
+- ``SolidFillColorMask`` — single uniform color (default: black)
+- ``RadialGradiantColorMask`` — radial gradient from center to edge
+- ``HorizontalGradiantColorMask`` — left-to-right gradient
+- ``VerticalGradiantColorMask`` — top-to-bottom gradient
+- ``ImageColorMask`` — colors derived from a reference image
+
+All color masks support an optional ``back_color`` parameter for the background.
+Use ``(255, 255, 255, 0)`` (RGBA with alpha=0) for transparency.
+
+**CLI Advanced Usage**
+
+The command-line tool supports multiple output formats:
+
+.. code:: bash
+
+    # Basic PNG output
+    qr "https://example.com" > qr.png
+
+    # SVG path output (recommended for web)
+    qr --factory=svg-path "https://example.com" > qr.svg
+
+    # ASCII art to terminal
+    qr --terminal "https://example.com"
+
+    # ASCII art to file
+    qr --ascii "https://example.com" > qr.txt
+
+    # Custom output file (avoids PowerShell piping issues)
+    qr --output=qr.png "https://example.com"
+
+    # Using a specific module drawer with StyledPilImage
+    qr --factory=styledpil --drawer=circle "https://example.com" > styled.svg
+
+
+Custom Image Factory
+====================
+
+You can create your own image output format by subclassing
+:class:`qrcode.image.base.BaseImage`. Three abstract methods must be
+implemented:
+
+1. ``new_image(**kwargs)`` — instantiate and return the underlying image object.
+2. ``drawrect(row, col)`` — draw a single dark module at grid position *(row, col)*.
+3. ``save(stream, kind=None)`` — write the finished image to *stream*.
+
+Use :meth:`~qrcode.image.base.BaseImage.pixel_box` to convert module coordinates
+to pixel coordinates. Override :meth:`~qrcode.image.base.BaseImage.process` for
+post-processing (called before saving when ``needs_processing = True``).
+
+Minimal example::
+
+    from qrcode.image.base import BaseImage
+
+    class MyFormat(BaseImage):
+        kind = "MYFMT"
+
+        def new_image(self, **kwargs):
+            return []  # placeholder image object
+
+        def drawrect(self, row, col):
+            self._img.append((row, col))
+
+        def save(self, stream, kind=None):
+            for coord in self._img:
+                stream.write(f"module {coord}\\n".encode())
+
+    import qrcode
+    img = qrcode.make("Hello!", image_factory=MyFormat)
 
 Examples
 ========

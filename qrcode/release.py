@@ -3,12 +3,18 @@ This file provides zest.releaser entrypoints using when releasing new
 qrcode versions.
 """
 
+from __future__ import annotations
+
 import datetime
 import re
 from pathlib import Path
 
+__all__: list[str] = [
+    "update_manpage",
+]
 
-def update_manpage(data):
+
+def update_manpage(data: dict) -> None:
     """
     Update the version in the manpage document.
     """

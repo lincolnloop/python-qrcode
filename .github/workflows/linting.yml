@@ -5,7 +5,7 @@ on:
 
 jobs:
   linting:
-    name: Code Quality Checks
+    name: Code Linting & Formatting
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -24,3 +24,20 @@ jobs:
       - name: Code Formatting
         if: always()
         run: uv run ruff format --check qrcode
+
+  type-checking:
+    name: Type Checking (mypy)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+          python-version: "3.12"
+
+      - name: Type Checking
+        run: uv run mypy qrcode

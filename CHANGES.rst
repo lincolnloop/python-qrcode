@@ -2,6 +2,141 @@
 Changes
 =======
 
+.. towncrier-release-announcement-start
+
+## [9.0] — Breaking Changes
+============================
+
+Format follows `Keep a Changelog <https://keepachangelog.com/>`_.
+
+**This is a major release with breaking changes.** See the migration guide below.
+
+Removed
+-------
+
+- **Deprecated ``embeded_*`` parameters removed** (TASK-36). The misspelled
+  parameters ``embeded_image_path``, ``embeded_image``, ``embeded_image_ratio``,
+  and ``embeded_image_resample`` are no longer accepted by
+  :class:`~qrcode.image.styledpil.StyledPilImage`. Use the correctly spelled
+  ``embedded_*`` variants instead.
+
+- **Deprecated PIL drawer imports removed** (TASK-37). Importing drawers directly
+  from ``qrcode.image.styles.moduledrawers`` is no longer supported. Import from
+  the submodule instead::
+
+    # Old (removed in v9.0)
+    from qrcode.image.styles.moduledrawers import SquareModuleDrawer
+
+    # New (required since v9.0)
+    from qrcode.image.styles.moduledrawers.pil import SquareModuleDrawer
+
+- **Deprecated ``draw_embeded_image()`` method removed** (TASK-38). The misspelled
+  alias on :class:`~qrcode.image.styledpil.StyledPilImage` has been removed.
+  Use :meth:`~qrcode.image.styledpil.StyledPilImage.draw_embedded_image` instead.
+
+Changed
+-------
+
+- ``QRCode.print_ascii()`` now accepts an ``out`` parameter for writing to a
+  custom text stream and restored the original CP437 block-character rendering.
+- ``QRCode.print_tty()`` method restored with ANSI terminal escape code output.
+
+Migration Guide
+---------------
+
+1. **Replace misspelled parameters:**
+
+   .. code-block:: python
+
+      # Before (v8.x)
+      StyledPilImage(embeded_image_path="logo.png")
+
+      # After (v9.0+)
+      StyledPilImage(embedded_image_path="logo.png")
+
+2. **Update drawer imports:**
+
+   .. code-block:: python
+
+      # Before (v8.x)
+      from qrcode.image.styles.moduledrawers import SquareModuleDrawer
+
+      # After (v9.0+)
+      from qrcode.image.styles.moduledrawers.pil import SquareModuleDrawer
+
+3. **Update method calls:**
+
+   .. code-block:: python
+
+      # Before (v8.x)
+      img.draw_embeded_image()
+
+      # After (v9.0+)
+      img.draw_embedded_image()
+
+.. towncrier-release-announcement-start
+
+[Unreleased]
+============
+
+Format follows `Keep a Changelog <https://keepachangelog.com/>`_.
+
+Added
+-----
+
+- **py.typed** file for PEP 561 native type stub support (P0)
+- Type hints on core modules: ``main.py``, ``util.py``, ``base.py``,
+  ``exceptions.py``, ``image/base.py``, factory subclasses,
+  ``console_scripts.py``, ``colormasks.py``, ``moduledrawers/pil.py`` (P0–P2)
+- Google-style docstrings on all public classes and methods in styled image
+  modules (``QRColorMask`` subclasses, ``QRModuleDrawer`` subclasses) (P1–P2)
+- CLI options ``--box-size``, ``--border``, ``--qr-version`` for fine-grained
+  QR code control from the command line (TASK-23)
+- Regression tests with visual determinism checks (``test_visual_determinism.py``) (TASK-12)
+- Parametrised combination tests for all mode × error-correction levels
+  (``test_combinations.py``) (TASK-13)
+- Shared pytest fixtures in ``conftest.py`` reused across test modules (TASK-14)
+- Custom eyes support via ``eye_patterns`` parameter on ``QRCode`` / image
+  factories (Issue #237, TASK-15)
+- Codecov badge and upload workflow in CI (TASK-18)
+- Wheel build job in CI for packaging verification (TASK-26)
+
+Changed
+-------
+
+- Refactored ``console_scripts.main()`` into ``_parse_args``, ``_create_qr``,
+  helper functions — main entry point < 40 lines (TASK-16)
+- Improved ``BaseImage`` API documentation with custom factory example (TASK-17)
+- CHANGES.rst restructured to semantic changelog format (this change, TASK-24)
+
+Deprecated
+----------
+
+- Importing PIL drawers from ``qrcode.image.styles.moduledrawers`` is deprecated;
+  import directly from ``qrcode.image.styles.moduledrawers.pil`` instead.
+  Will be removed in v9.0.
+- Parameters ``embeded_image`` / ``embeded_image_path`` (typo) are deprecated;
+  use ``embedded_image`` / ``embedded_image_path``. Will be removed in v9.0.
+
+Fixed
+-----
+
+- Thread safety issue in ``bisect_left`` usage (Fixes #421)
+- ``ValueError: glog(0)`` when encoding zero-heavy data (Fixes #330)
+- Mask evaluation now includes format info, version info, and dark module per
+  ISO 18004 §7.8.3.1 (#389)
+- **``optimal_data_chunks()`` no longer drops short non-matching segments** — data
+  integrity is preserved when the optimiser splits mixed-type input (TASK-40).
+  Previously, segments shorter than *minimum* were silently discarded.
+- Added ``__all__`` exports to all public modules for explicit API surface (TASK-44)
+
+Security
+--------
+
+- No security changes in this release.
+
+.. towncrier-release-announcement-end
+
 Deprecation Warnings
 ====================
 

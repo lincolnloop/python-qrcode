@@ -8,3 +8,11 @@ ERROR_CORRECT_H = 2
 
 # Constant whether the PIL library is installed.
 PIL_AVAILABLE = find_spec("PIL") is not None
+
+__all__: list[str] = [
+    "ERROR_CORRECT_H",
+    "ERROR_CORRECT_L",
+    "ERROR_CORRECT_M",
+    "ERROR_CORRECT_Q",
+    "PIL_AVAILABLE",
+]
