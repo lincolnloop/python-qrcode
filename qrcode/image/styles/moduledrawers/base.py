@@ -1,33 +1,48 @@
+from __future__ import annotations
+
 import abc
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from qrcode.image.base import BaseImage
+    from qrcode.main import ActiveWithNeighbors
+
+
+__all__: list[str] = [
+    "QRModuleDrawer",
+]
 
 
 class QRModuleDrawer(abc.ABC):
-    """
-    QRModuleDrawer exists to draw the modules of the QR Code onto images.
+    """QR module drawer — renders individual modules onto an image.
 
-    For this, technically all that is necessary is a ``drawrect(self, box,
-    is_active)`` function which takes in the box in which it is to draw,
-    whether or not the box is "active" (a module exists there). If
-    ``needs_neighbors`` is set to True, then the method should also accept a
-    ``neighbors`` kwarg (the neighboring pixels).
+    Subclasses implement :meth:`drawrect` to draw a single module within the
+    given *box* coordinates. If ``needs_neighbors`` is set to ``True``, the
+    method also receives a ``neighbors`` argument describing the 3×3
+    neighbourhood around the module.
 
-    It is frequently necessary to also implement an "initialize" function to
-    set up values that only the containing Image class knows about.
+    An optional :meth:`initialize` hook lets subclasses access image-level
+    attributes (size, colours, drawing context).
 
-    For examples of what these look like, see doc/module_drawers.png
+    For visual examples see ``doc/module_drawers.png``.
     """
 
-    needs_neighbors = False
+    needs_neighbors: bool = False
 
-    def __init__(self, **kwargs):  # noqa: B027
-        pass
+    def __init__(self, **kwargs: Any) -> None:  # noqa: B027
+        """Initialize the drawer.
 
-    def initialize(self, img: "BaseImage") -> None:
-        self.img = img
+        Args:
+            **kwargs: Subclass-specific keyword arguments.
+        """
+
+    def initialize(self, img: BaseImage) -> None:
+        """Set up internal state from the parent image object.
+
+        Args:
+            img: The containing image instance (PIL, SVG, etc.).
+        """
+        self.img = img  # type: ignore[misc]
 
     @abc.abstractmethod
-    def drawrect(self, box, is_active) -> None: ...
+    def drawrect(self, box: Any, is_active: bool | ActiveWithNeighbors) -> None: ...

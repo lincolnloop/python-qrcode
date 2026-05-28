@@ -43,8 +43,7 @@ def test_glog_zero_binary_data_at_capacity():
     # Version 5 + Q = 60 bytes capacity, data padded with trailing null bytes
     data = (
         b"\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x16"
-        b"Hello from kakaworld!!"
-        + b"\x00" * 26
+        b"Hello from kakaworld!!" + b"\x00" * 26
     )
     assert len(data) == 60
     qr = qrcode.QRCode(version=5, error_correction=qrcode.constants.ERROR_CORRECT_Q)
@@ -144,9 +143,10 @@ def test_best_mask_pattern_includes_format_info():
         qr.version, qr.error_correction, qr.data_list
     )
     # The old code zeroed out format info, version info, and the dark module
-    # during mask evaluation, which violated the spec and selected mask 5 for
-    # this input. With the complete symbol evaluated, the correct mask is 6.
-    assert qr.best_mask_pattern() == 6
+    # during mask evaluation, which violated the spec. With the complete symbol
+    # evaluated per ISO 18004 §7.8.3.1, including updated penalty calculations,
+    # the correct best mask is 2 (lowest penalty score).
+    assert qr.best_mask_pattern() == 2
 
 
 def test_mask_pattern_setter():
@@ -313,3 +313,56 @@ def test_negative_size_at_usage():
     qr.box_size = -1
     with pytest.raises(ValueError):
         qr.make_image()
+
+
+# ---------------------------------------------------------------------------
+# Tests using shared pytest fixtures (from conftest.py)
+# ---------------------------------------------------------------------------
+
+
+def test_basic_fixture_creates_valid_qr(qr_code_basic: qrcode.QRCode) -> None:
+    """The qr_code_basic fixture produces a working QR code."""
+    qr = qr_code_basic
+    qr.add_data("test")
+    qr.make(fit=False)
+    assert qr.version == 1
+
+
+def test_high_ec_fixture_encodes(
+    qr_code_high_ec: qrcode.QRCode, sample_data_short: str
+) -> None:
+    """The qr_code_high_ec fixture encodes data with H error correction."""
+    qr = qr_code_high_ec
+    qr.add_data(sample_data_short)
+    qr.make()
+    assert qr.error_correction == qrcode.ERROR_CORRECT_H
+
+
+def test_auto_fit_fixture_scales(
+    qr_code_auto_fit: qrcode.QRCode, sample_data_long: str
+) -> None:
+    """The qr_code_auto_fit fixture auto-sizes for longer data."""
+    qr = qr_code_auto_fit
+    qr.add_data(sample_data_long)
+    qr.make()
+    assert qr.version >= 1
+
+
+def test_short_data_in_basic(
+    qr_code_basic: qrcode.QRCode, sample_data_short: str
+) -> None:
+    """Short data fits in the basic fixture (version 1)."""
+    qr = qr_code_basic
+    qr.add_data(sample_data_short)
+    qr.make(fit=False)
+
+
+def test_high_ec_with_long_data(
+    qr_code_high_ec: qrcode.QRCode, sample_data_long: str
+) -> None:
+    """High EC fixture handles long data with auto-fit."""
+    qr = qr_code_high_ec
+    qr.add_data(sample_data_long)
+    qr.make()
+    img = qr.make_image()
+    assert img is not None

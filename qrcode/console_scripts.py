@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-"""
-qr - Convert stdin (or the first argument) to a QR Code.
+"""qr - Convert stdin (or the first argument) to a QR Code.
 
 When stdout is a tty the QR Code is printed to the terminal and when stdout is
 a pipe to a file an image is written. The default image format is PNG.
@@ -13,14 +12,18 @@ import os
 import sys
 from importlib import metadata
 from pathlib import Path
-from typing import TYPE_CHECKING, NoReturn
-
-import qrcode
+from typing import TYPE_CHECKING, Any, NamedTuple, NoReturn
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
     from qrcode.image.base import BaseImage, DrawerAliases
+
+import qrcode
+
+# ---------------------------------------------------------------------------
+# Environment setup (Windows colour support)
+# ---------------------------------------------------------------------------
 
 # The next block is added to get the terminal to display properly on MS platforms
 if sys.platform.startswith(("win", "cygwin")):  # pragma: no cover
@@ -28,7 +31,12 @@ if sys.platform.startswith(("win", "cygwin")):  # pragma: no cover
 
     colorama.init()
 
-default_factories = {
+
+# ---------------------------------------------------------------------------
+# Constants
+# ---------------------------------------------------------------------------
+
+DEFAULT_FACTORIES: dict[str, str] = {
     "pil": "qrcode.image.pil.PilImage",
     "png": "qrcode.image.pure.PyPNGImage",
     "svg": "qrcode.image.svg.SvgImage",
@@ -38,31 +46,66 @@ default_factories = {
     "pymaging": "qrcode.image.pure.PymagingImage",
 }
 
-error_correction = {
+ERROR_CORRECTION_MAP: dict[str, int] = {
     "L": qrcode.ERROR_CORRECT_L,
     "M": qrcode.ERROR_CORRECT_M,
     "Q": qrcode.ERROR_CORRECT_Q,
     "H": qrcode.ERROR_CORRECT_H,
 }
 
+__all__: list[str] = [
+    "ParsedArgs",
+    "get_drawer_help",
+    "main",
+]
 
-def main(args=None):
-    if args is None:
-        args = sys.argv[1:]
 
+# ---------------------------------------------------------------------------
+# Parsed arguments container
+# ---------------------------------------------------------------------------
+
+
+class ParsedArgs(NamedTuple):
+    """Container for CLI options parsed by ``_parse_args``."""
+
+    factory: str | None
+    factory_drawer: str | None
+    optimize: int | None
+    error_correction: str
+    ascii_output: bool
+    output_path: str | None
+    data_arg: str | None
+    box_size: int | None
+    border: int | None
+    version: int | None
+
+
+# ---------------------------------------------------------------------------
+# Argument parsing
+# ---------------------------------------------------------------------------
+
+
+def _parse_args(argv: list[str]) -> ParsedArgs:
+    """Parse command-line arguments into a :class:`ParsedArgs` named tuple.
+
+    Args:
+        argv: List of argument strings (typically ``sys.argv[1:]``).
+
+    Returns:
+        A :class:`ParsedArgs` instance with all recognised options populated.
+    """
     version = metadata.version("qrcode")
     parser = optparse.OptionParser(usage=(__doc__ or "").strip(), version=version)
 
-    # Wrap parser.error in a typed NoReturn method for better typing.
     def raise_error(msg: str) -> NoReturn:
         parser.error(msg)
-        raise  # pragma: no cover # noqa: PLE0704
+        raise  # pragma: no cover  # noqa: PLE0704
 
     parser.add_option(
         "--factory",
         help="Full python path to the image factory class to "
         "create the image with. You can use the following shortcuts to the "
-        f"built-in image factory classes: {commas(default_factories)}.",
+        f"built-in image factory classes: {commas(DEFAULT_FACTORIES)}.",
     )
     parser.add_option(
         "--factory-drawer",
@@ -78,7 +121,7 @@ def main(args=None):
     parser.add_option(
         "--error-correction",
         type="choice",
-        choices=sorted(error_correction.keys()),
+        choices=sorted(ERROR_CORRECTION_MAP.keys()),
         default="M",
         help="The error correction level to use. Choices are L (7%), "
         "M (15%, default), Q (25%), and H (30%).",
@@ -91,97 +134,233 @@ def main(args=None):
         help="The output file. If not specified, the image is sent to "
         "the standard output.",
     )
+    parser.add_option(
+        "--box-size",
+        type=int,
+        help="Pixel size of each QR module (default: factory default).",
+    )
+    parser.add_option(
+        "--border",
+        type=int,
+        help="Width of the quiet zone in modules (default: 4).",
+    )
+    parser.add_option(
+        "--qr-version",
+        type=int,
+        help="QR code version (1–40). Auto-fit when omitted.",
+    )
 
-    opts, args = parser.parse_args(args)
+    opts, remaining = parser.parse_args(argv)
 
-    if opts.factory:
-        module = default_factories.get(opts.factory, opts.factory)
+    return ParsedArgs(
+        factory=opts.factory,
+        factory_drawer=opts.factory_drawer,
+        optimize=opts.optimize,
+        error_correction=opts.error_correction,
+        ascii_output=bool(opts.ascii),
+        output_path=opts.output,
+        data_arg=remaining[0] if remaining else None,
+        box_size=opts.box_size,
+        border=opts.border,
+        version=opts.qr_version,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Factory resolution
+# ---------------------------------------------------------------------------
+
+
+def get_factory(module: str) -> type[BaseImage]:
+    """Dynamically import an image factory class from a dotted path.
+
+    Args:
+        module: Full Python import path (e.g. ``"qrcode.image.pil.PilImage"``).
+
+    Returns:
+        The factory class (subclass of :class:`BaseImage`).
+
+    Raises:
+        ValueError: If *module* does not contain a dot.
+    """
+    if "." not in module:
+        raise ValueError("The image factory is not a full python path")
+    mod_name, cls_name = module.rsplit(".", 1)
+    imp = __import__(mod_name, {}, {}, [cls_name])
+    return getattr(imp, cls_name)  # type: ignore[no-any-return]
+
+
+# ---------------------------------------------------------------------------
+# QR code creation helper
+# ---------------------------------------------------------------------------
+
+
+def _create_qr(args: ParsedArgs) -> tuple[qrcode.QRCode, bytes]:
+    """Create a :class:`~qrcode.main.QRCode` instance and read input data.
+
+    Args:
+        args: Parsed CLI arguments.
+
+    Returns:
+        Tuple of ``(qr_code, raw_data_bytes)``. The QR code is configured with
+        the requested factory and error correction level but has not yet had
+        ``make()`` called on it.
+    """
+    # Resolve image factory
+    if args.factory:
+        module = DEFAULT_FACTORIES.get(args.factory, args.factory)
         try:
             image_factory = get_factory(module)
         except ValueError as e:
-            raise_error(str(e))
+            raise SystemExit(str(e)) from e
     else:
         image_factory = None
 
     qr = qrcode.QRCode(
-        error_correction=error_correction[opts.error_correction],
+        version=args.version if args.version is not None else None,
+        error_correction=ERROR_CORRECTION_MAP[args.error_correction],
+        box_size=args.box_size if args.box_size is not None else 10,
+        border=args.border if args.border is not None else 4,
         image_factory=image_factory,
     )
 
-    if args:
-        data = args[0]
-        data = data.encode(errors="surrogateescape")
+    # Read data from argument or stdin
+    if args.data_arg:
+        data = args.data_arg.encode(errors="surrogateescape")
     else:
         data = sys.stdin.buffer.read()
-    if opts.optimize is None:
+
+    return qr, data
+
+
+# ---------------------------------------------------------------------------
+# Output helpers
+# ---------------------------------------------------------------------------
+
+
+def _resolve_drawer_kwargs(
+    qr: qrcode.QRCode, drawer_alias: str | None
+) -> dict[str, Any]:
+    """Build keyword arguments for ``make_image`` based on the drawer alias.
+
+    Args:
+        qr: The QR code instance (already initialised with its factory).
+        drawer_alias: String alias for the desired drawer, or ``None`` to use
+            defaults.
+
+    Returns:
+        Dictionary suitable for unpacking into ``qr.make_image(**kwargs)``.
+
+    Raises:
+        SystemExit: If the selected factory has no drawer aliases or the alias
+            is not recognised.
+    """
+    kwargs: dict[str, Any] = {}
+    if not drawer_alias:
+        return kwargs
+
+    aliases: DrawerAliases | None = getattr(qr.image_factory, "drawer_aliases", None)
+    if not aliases:
+        print("The selected factory has no drawer aliases.", file=sys.stderr)
+        raise SystemExit(1)
+    if drawer_alias not in aliases:
+        msg = f"{drawer_alias} factory drawer not found. Expected {commas(aliases)}"
+        print(msg, file=sys.stderr)
+        raise SystemExit(1)
+
+    drawer_cls, drawer_kwargs = aliases[drawer_alias]
+    kwargs["module_drawer"] = drawer_cls(**drawer_kwargs)
+    return kwargs
+
+
+# ---------------------------------------------------------------------------
+# Main entry point
+# ---------------------------------------------------------------------------
+
+
+def main(argv: list[str] | None = None) -> None:
+    """CLI entry-point for the ``qr`` command."""
+    if argv is None:
+        argv = sys.argv[1:]
+
+    args = _parse_args(argv)
+    qr, data = _create_qr(args)
+
+    # Add data with optional optimisation
+    if args.optimize is not None:
+        qr.add_data(data, optimize=args.optimize)
+    else:
         qr.add_data(data)
-    else:
-        qr.add_data(data, optimize=opts.optimize)
 
-    if opts.output:
+    # --- Output path: file ---
+    if args.output_path:
         img = qr.make_image()
-        with Path(opts.output).open("wb") as out:
+        with Path(args.output_path).open("wb") as out:
             img.save(out)
-    else:
-        if image_factory is None and (os.isatty(sys.stdout.fileno()) or opts.ascii):
-            qr.print_ascii(tty=not opts.ascii)
-            return
+        return
 
-        kwargs = {}
-        aliases: DrawerAliases | None = getattr(
-            qr.image_factory, "drawer_aliases", None
-        )
-        if opts.factory_drawer:
-            if not aliases:
-                raise_error("The selected factory has no drawer aliases.")
-            if opts.factory_drawer not in aliases:
-                raise_error(
-                    f"{opts.factory_drawer} factory drawer not found."
-                    f" Expected {commas(aliases)}"
-                )
-            drawer_cls, drawer_kwargs = aliases[opts.factory_drawer]
-            kwargs["module_drawer"] = drawer_cls(**drawer_kwargs)
-        img = qr.make_image(**kwargs)
+    # --- Output path: ASCII to terminal (only when no custom factory set) ---
+    if qr.image_factory is None and (
+        os.isatty(sys.stdout.fileno()) or args.ascii_output
+    ):
+        qr.print_ascii(tty=not args.ascii_output)
+        return
 
-        sys.stdout.flush()
-        img.save(sys.stdout.buffer)
+    # --- Output path: image stream to stdout ---
+    kwargs = _resolve_drawer_kwargs(qr, args.factory_drawer)
+    img = qr.make_image(**kwargs)  # type: ignore[arg-type]
+
+    sys.stdout.flush()
+    img.save(sys.stdout.buffer)
 
 
-def get_factory(module: str) -> type[BaseImage]:
-    if "." not in module:
-        raise ValueError("The image factory is not a full python path")
-    module, name = module.rsplit(".", 1)
-    imp = __import__(module, {}, {}, [name])
-    return getattr(imp, name)
+# ---------------------------------------------------------------------------
+# Utility functions (used in help text generation)
+# ---------------------------------------------------------------------------
 
 
 def get_drawer_help() -> str:
-    help: dict[str, set] = {}
+    """Build the ``--factory-drawer`` help string listing available drawers.
 
-    for alias, module in default_factories.items():
+    Returns:
+        Human-readable sentence describing which drawer aliases are available
+        for each factory shortcut.
+    """
+    help_map: dict[str, set[str]] = {}
+
+    for alias, module in DEFAULT_FACTORIES.items():
         try:
-            image = get_factory(module)
+            image_cls = get_factory(module)
         except ImportError:  # pragma: no cover
             continue
-        aliases: DrawerAliases | None = getattr(image, "drawer_aliases", None)
+        aliases: DrawerAliases | None = getattr(image_cls, "drawer_aliases", None)
         if not aliases:
             continue
-        factories = help.setdefault(commas(aliases), set())
+        factories = help_map.setdefault(commas(aliases), set())
         factories.add(alias)
 
     return ". ".join(
-        f"For {commas(factories, 'and')}, use: {aliases}"
-        for aliases, factories in help.items()
+        f"For {commas(factories, 'and')}, use: {alias_key}"
+        for alias_key, factories in help_map.items()
     )
 
 
-def commas(items: Iterable[str], joiner="or") -> str:
-    items = tuple(items)
-    if not items:
+def commas(items: Iterable[str], joiner: str = "or") -> str:
+    """Join an iterable of strings with commas and a final conjunction.
+
+    Args:
+        items: Strings to join.
+        joiner: Final conjunction (``"or"``, ``"and"``, etc.).
+
+    Returns:
+        Formatted string, e.g. ``"a, b or c"``.
+    """
+    items_tuple = tuple(items)
+    if not items_tuple:
         return ""
-    if len(items) == 1:
-        return items[0]
-    return f"{', '.join(items[:-1])} {joiner} {items[-1]}"
+    if len(items_tuple) == 1:
+        return items_tuple[0]
+    return f"{', '.join(items_tuple[:-1])} {joiner} {items_tuple[-1]}"
 
 
 if __name__ == "__main__":  # pragma: no cover

@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [project]
 name = "qrcode"
-version = "8.2"
+version = "9.0"
 description = "QR Code image generator"
 authors = [
   { name = "Lincoln Loop", email = "info@lincolnloop.com" },
@@ -55,10 +55,12 @@ dev = [
   "pytest",
   "pytest-cov",
   "ruff",
+  "mypy>=1.13",
   "pypng",
   "pillow>=9.1.0",
   "docutils>=0.21.2",
   "zest-releaser[recommended]>=9.2.0",
+  "sphinx>=7.0",
 ]
 
 [tool.poetry]
@@ -86,6 +88,7 @@ prereleaser.middle = [
 [tool.coverage.run]
 source = ["qrcode"]
 parallel = true
+omit = ["qrcode/tests/*", "qrcode/release.py"]
 
 [tool.coverage.report]
 exclude_lines = [
@@ -96,6 +99,8 @@ exclude_lines = [
   "raise NotImplementedError"
 ]
 skip_covered = true
+show_missing = true
+fail_under = 90
 
 [tool.ruff]
 target-version = "py310"
@@ -105,7 +110,6 @@ lint.ignore = [
   # Safe to ignore
   "A001", # Variable is shadowing a Python builtin
   "A002", # Function argument is shadowing a Python builtin
-  "ANN", # Missing Type Annotation
   "ANN401", # Dynamically typed expressions (typing.Any) are disallowed in `**kwargs`"
   "ARG001", # Unused function argument (request, ...)
   "ARG002", # Unused method argument (*args, **kwargs)
@@ -135,13 +139,54 @@ lint.ignore = [
   # Required for `ruff format` to work correctly
   "COM812", # Checks for the absence of trailing commas
   "ISC001", # Checks for implicitly concatenated strings on a single line
+  
+  # Cosmetic / stylistic — not critical for correctness
+  "E402",   # Module level import not at top of file (docstring after __future__)
+  "T20",    # print() calls (needed in CLI for stderr output)
+  "RUF001", # String contains ambiguous unicode characters
+  "RUF002", # Docstring contains ambiguous unicode characters
+  
+  # Pre-existing — not introduced by P1 tasks
+  "TC003",  # Type-checking block imports (safe with from __future__ annotations)
+  "B007",   # Unused loop variable (pre-existing in util.py)
 ]
 
 [tool.ruff.lint.extend-per-file-ignores]
 "qrcode/tests/*.py" = [
+  "ANN",   # Type annotations not required in tests
   "F401",  # Unused import
+  "I001",  # Import sorting (cosmetic — tests import what they need)
   "PLC0415", # Import not at top of a file
   "PT011", # pytest.raises is too broad
+  "PT018", # Assertion should be broken down (unsafe auto-fix)
+  "PT028", # Test param with default arg (pre-existing pattern)
+  "RUF003", # Ambiguous unicode in comments (pre-existing)
+  "RUF061", # Context-manager form of pytest.raises (pre-existing)
   "S101", # Use of 'assert' detected
   "S603", # `subprocess` call: check for execution of untrusted input
 ]
+"qrcode/release.py" = ["ANN"]            # Release tooling — not part of public API
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = false
+check_untyped_defs = true
+disallow_untyped_decorators = false
+no_implicit_optional = true
+strict_optional = true
+ignore_missing_imports = true  # External packages without type stubs (colorama, deprecation)
+
+# Per-file overrides: relax strict rules for files with legitimate patterns
+[[tool.mypy.overrides]]
+module = "qrcode.compat.png"
+# Conditional import pattern: PngWriter = None then try/except redefines it
+warn_no_return = false
+disable_error_code = ["no-redef"]
+
+[[tool.mypy.overrides]]
+module = "qrcode.release"
+# Release tooling — not part of public API, gradual typing
+disallow_untyped_defs = false

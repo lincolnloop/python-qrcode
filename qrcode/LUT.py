@@ -1,5 +1,9 @@
 # Store all kinds of lookup table.
 
+__all__: list[str] = [
+    "rsPoly_LUT",
+]
+
 
 # # generate rsPoly lookup table.
 

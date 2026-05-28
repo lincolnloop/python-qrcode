@@ -1,12 +1,28 @@
+from __future__ import annotations
+
 import abc
 from decimal import Decimal
-from typing import TYPE_CHECKING, NamedTuple
+from typing import TYPE_CHECKING, Any, NamedTuple
 
 from qrcode.compat.etree import ET
 from qrcode.image.styles.moduledrawers.base import QRModuleDrawer
 
 if TYPE_CHECKING:
     from qrcode.image.svg import SvgFragmentImage, SvgPathImage
+    from qrcode.main import ActiveWithNeighbors
+
+
+__all__: list[str] = [
+    "ANTIALIASING_FACTOR",
+    "BaseSvgQRModuleDrawer",
+    "Coords",
+    "SvgCircleDrawer",
+    "SvgPathCircleDrawer",
+    "SvgPathQRModuleDrawer",
+    "SvgPathSquareDrawer",
+    "SvgQRModuleDrawer",
+    "SvgSquareDrawer",
+]
 
 ANTIALIASING_FACTOR = 4
 
@@ -21,19 +37,37 @@ class Coords(NamedTuple):
 
 
 class BaseSvgQRModuleDrawer(QRModuleDrawer):
-    img: "SvgFragmentImage"
+    """Base SVG module drawer with size ratio and coordinate helpers."""
 
-    def __init__(self, *, size_ratio: Decimal = Decimal(1), **kwargs):
+    img: SvgFragmentImage
+
+    def __init__(self, *, size_ratio: Decimal = Decimal(1), **kwargs: Any) -> None:
+        """Initialize the base SVG drawer.
+
+        Args:
+            size_ratio: Ratio (0–1) of module size relative to cell size.
+                ``1`` fills the entire cell; smaller values create gaps.
+            **kwargs: Additional keyword arguments forwarded to parent.
+        """
         super().__init__(**kwargs)
         self.size_ratio = size_ratio
 
-    def initialize(self, *args, **kwargs) -> None:
+    def initialize(self, *args: Any, **kwargs: Any) -> None:
+        """Compute box dimensions from the parent image."""
         super().initialize(*args, **kwargs)
         self.box_delta = (1 - self.size_ratio) * self.img.box_size / 2
         self.box_size = Decimal(self.img.box_size) * self.size_ratio
         self.box_half = self.box_size / 2
 
-    def coords(self, box) -> Coords:
+    def coords(self, box: Any) -> Coords:
+        """Convert a module box to SVG coordinates.
+
+        Args:
+            box: Module position — ``((row, col), ...)`` or equivalent.
+
+        Returns:
+            :class:`Coords` named tuple with computed positions.
+        """
         row, col = box[0]
         x = row + self.box_delta
         y = col + self.box_delta
@@ -49,26 +83,48 @@ class BaseSvgQRModuleDrawer(QRModuleDrawer):
 
 
 class SvgQRModuleDrawer(BaseSvgQRModuleDrawer):
-    tag = "rect"
+    """SVG drawer that appends individual ``<rect>``/``<circle>`` elements."""
 
-    def initialize(self, *args, **kwargs) -> None:
+    tag: str = "rect"
+
+    def initialize(self, *args: Any, **kwargs: Any) -> None:
+        """Initialize the SVG element drawer."""
         super().initialize(*args, **kwargs)
 
-    def drawrect(self, box, is_active: bool):
+    def drawrect(self, box: Any, is_active: bool | ActiveWithNeighbors) -> None:
+        """Draw a single module as an SVG element.
+
+        Args:
+            box: Module position coordinates.
+            is_active: Whether the module should be drawn (``True`` = dark).
+                For drawers with ``needs_neighbors=True``, this may also be
+                an :class:`~qrcode.main.ActiveWithNeighbors` instance.
+        """
         if not is_active:
             return
-        self.img._img.append(self.el(box))
+        self.img._img.append(self.el(box))  # type: ignore[attr-defined]
 
     @abc.abstractmethod
-    def el(self, box): ...
+    def el(self, box: Any) -> Any: ...
 
 
 class SvgSquareDrawer(SvgQRModuleDrawer):
-    def initialize(self, *args, **kwargs) -> None:
+    """Draw modules as SVG ``<rect>`` elements."""
+
+    def initialize(self, *args: Any, **kwargs: Any) -> None:
+        """Pre-compute the unit size string for rectangles."""
         super().initialize(*args, **kwargs)
         self.unit_size = self.img.units(self.box_size)
 
-    def el(self, box):
+    def el(self, box: Any) -> Any:
+        """Create a ``<rect>`` element for one module.
+
+        Args:
+            box: Module position coordinates.
+
+        Returns:
+            An :class:`xml.etree.ElementTree.Element` representing the rect.
+        """
         coords = self.coords(box)
         return ET.Element(
             self.tag,
@@ -80,13 +136,24 @@ class SvgSquareDrawer(SvgQRModuleDrawer):
 
 
 class SvgCircleDrawer(SvgQRModuleDrawer):
-    tag = "circle"
+    """Draw modules as SVG ``<circle>`` elements."""
 
-    def initialize(self, *args, **kwargs) -> None:
+    tag: str = "circle"
+
+    def initialize(self, *args: Any, **kwargs: Any) -> None:
+        """Pre-compute the radius string for circles."""
         super().initialize(*args, **kwargs)
         self.radius = self.img.units(self.box_half)
 
-    def el(self, box):
+    def el(self, box: Any) -> Any:
+        """Create a ``<circle>`` element for one module.
+
+        Args:
+            box: Module position coordinates.
+
+        Returns:
+            An :class:`xml.etree.ElementTree.Element` representing the circle.
+        """
         coords = self.coords(box)
         return ET.Element(
             self.tag,
@@ -97,19 +164,39 @@ class SvgCircleDrawer(SvgQRModuleDrawer):
 
 
 class SvgPathQRModuleDrawer(BaseSvgQRModuleDrawer):
-    img: "SvgPathImage"
+    """SVG drawer that accumulates path data for a combined ``<path>`` element."""
 
-    def drawrect(self, box, is_active: bool):
+    img: SvgPathImage
+
+    def drawrect(self, box: Any, is_active: bool | ActiveWithNeighbors) -> None:
+        """Append path sub-data for one module.
+
+        Args:
+            box: Module position coordinates.
+            is_active: Whether the module should be drawn (``True`` = dark).
+                For drawers with ``needs_neighbors=True``, this may also be
+                an :class:`~qrcode.main.ActiveWithNeighbors` instance.
+        """
         if not is_active:
             return
-        self.img._subpaths.append(self.subpath(box))
+        self.img._subpaths.append(self.subpath(box))  # type: ignore[attr-defined]
 
     @abc.abstractmethod
-    def subpath(self, box) -> str: ...
+    def subpath(self, box: Any) -> str: ...
 
 
 class SvgPathSquareDrawer(SvgPathQRModuleDrawer):
-    def subpath(self, box) -> str:
+    """Generate path data for square modules."""
+
+    def subpath(self, box: Any) -> str:
+        """Return SVG path commands for one square module.
+
+        Args:
+            box: Module position coordinates.
+
+        Returns:
+            A path string like ``M0,0H1V1H0z``.
+        """
         coords = self.coords(box)
         x0 = self.img.units(coords.x0, text=False)
         y0 = self.img.units(coords.y0, text=False)
@@ -120,10 +207,23 @@ class SvgPathSquareDrawer(SvgPathQRModuleDrawer):
 
 
 class SvgPathCircleDrawer(SvgPathQRModuleDrawer):
-    def initialize(self, *args, **kwargs) -> None:
+    """Generate path data for circular modules."""
+
+    def initialize(self, *args: Any, **kwargs: Any) -> None:
+        """Initialize the circle path drawer."""
         super().initialize(*args, **kwargs)
 
-    def subpath(self, box) -> str:
+    def subpath(self, box: Any) -> str:
+        """Return SVG path commands for one circular module.
+
+        Uses two arc segments to approximate a circle.
+
+        Args:
+            box: Module position coordinates.
+
+        Returns:
+            A path string with ``A`` (arc) commands forming a circle.
+        """
         coords = self.coords(box)
         x0 = self.img.units(coords.x0, text=False)
         yh = self.img.units(coords.yh, text=False)

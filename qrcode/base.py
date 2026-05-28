@@ -1,10 +1,44 @@
-from typing import NamedTuple
+"""Reed-Solomon error correction and Galois field arithmetic for QR codes.
+
+This module implements the GF(256) arithmetic required by the Reed-Solomon
+error-correction algorithm defined in ISO/IEC 18004. It provides:
+
+- Lookup tables ``EXP_TABLE`` and ``LOG_TABLE`` for fast exponentiation /
+  logarithm in the Galois field (``gexp()`` / ``glog()``).
+- The :class:`Polynomial` class for polynomial arithmetic over GF(256).
+- The :class:`~qrcode.base.RSBlock` named-tuple describing an error-correction block.
+- The ``rs_blocks()`` function to look up the RS block layout for a given
+  version and error correction level.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Iterator
+from typing import NamedTuple, overload
 
 from qrcode import constants
 
-EXP_TABLE = list(range(256))
+# ---------------------------------------------------------------------------
+# Public API
+# ---------------------------------------------------------------------------
 
-LOG_TABLE = list(range(256))
+__all__: list[str] = [
+    "EXP_TABLE",
+    "LOG_TABLE",
+    "Polynomial",
+    "RSBlock",
+    "gexp",
+    "glog",
+    "rs_blocks",
+]
+
+# ---------------------------------------------------------------------------
+# Galois field GF(256) lookup tables (generated at module load time)
+# ---------------------------------------------------------------------------
+
+EXP_TABLE: list[int] = list(range(256))
+
+LOG_TABLE: list[int] = list(range(256))
 
 for i in range(8):
     EXP_TABLE[i] = 1 << i
@@ -17,18 +51,22 @@ for i in range(8, 256):
 for i in range(255):
     LOG_TABLE[EXP_TABLE[i]] = i
 
-RS_BLOCK_OFFSET = {
+
+# ---------------------------------------------------------------------------
+# RS block table: indexed by (version-1)*4 + error_correction_offset
+# Each row is a flat tuple of (count, total_count, data_count) triplets.
+# Some entries have two groups with different sizes.
+# ---------------------------------------------------------------------------
+
+RS_BLOCK_OFFSET: dict[int, int] = {
     constants.ERROR_CORRECT_L: 0,
     constants.ERROR_CORRECT_M: 1,
     constants.ERROR_CORRECT_Q: 2,
     constants.ERROR_CORRECT_H: 3,
 }
 
-RS_BLOCK_TABLE = (
-    # L
-    # M
-    # Q
-    # H
+RS_BLOCK_TABLE: tuple[tuple[int, ...], ...] = (
+    # L   M   Q   H   # version
     # 1
     (1, 26, 19),
     (1, 26, 16),
@@ -232,78 +270,204 @@ RS_BLOCK_TABLE = (
 )
 
 
-def glog(n):
+# ---------------------------------------------------------------------------
+# Galois field helper functions
+# ---------------------------------------------------------------------------
+
+
+def glog(n: int) -> int:
+    """Return the discrete logarithm of *n* in GF(256).
+
+    Uses a precomputed lookup table for O(1) performance.
+
+    Args:
+        n: Field element (1–255). ``glog(0)`` is undefined and raises.
+
+    Returns:
+        Integer exponent *e* such that ``gexp(e) == n``.
+
+    Raises:
+        ValueError: If *n* < 1.
+    """
     if n < 1:  # pragma: no cover
         raise ValueError(f"glog({n})")
     return LOG_TABLE[n]
 
 
-def gexp(n):
+def gexp(n: int) -> int:
+    """Return ``0x01`` raised to the power *n* in GF(256).
+
+    Uses a precomputed lookup table. The result wraps modulo 255 so that
+    exponents outside [0, 254] are still valid.
+
+    Args:
+        n: Exponent (any integer; wrapped mod 255 internally).
+
+    Returns:
+        Field element value in range [1, 255].
+    """
     return EXP_TABLE[n % 255]
 
 
+# ---------------------------------------------------------------------------
+# Polynomial arithmetic over GF(256)
+# ---------------------------------------------------------------------------
+
+
 class Polynomial:
-    def __init__(self, num, shift):
-        if not num:  # pragma: no cover
-            raise ValueError(f"{len(num)}/{shift}")
+    """Polynomial with coefficients in the Galois field GF(256).
+
+    Coefficients are stored least-significant first (index 0 = constant term).
+    Arithmetic operators work in GF(256): addition is XOR, multiplication uses
+    ``gexp`` / ``glog`` lookup tables.
+
+    Attributes:
+        num: List of coefficient values (with leading zeros stripped).
+    """
+
+    def __init__(self, data: list[int], shift: int) -> None:
+        """Create a polynomial from raw coefficients.
+
+        Leading zero coefficients are stripped and *shift* trailing zeros are
+        appended to account for multiplication by ``x**shift``.
+
+        Args:
+            data: Coefficient values (least-significant first). Must be non-empty
+                after stripping leading zeros.
+            shift: Number of trailing zeros to append (equivalent to multiplying
+                the polynomial by ``x**shift``).
+
+        Raises:
+            ValueError: If *data* is empty or contains only zeros.
+        """
+        if not data:  # pragma: no cover
+            raise ValueError(f"{len(data)}/{shift}")
 
         offset = 0
-        for offset in range(len(num)):
-            if num[offset] != 0:
+        for offset in range(len(data)):
+            if data[offset] != 0:
                 break
 
-        self.num = num[offset:] + [0] * shift
+        self.num: list[int] = data[offset:] + [0] * shift
 
-    def __getitem__(self, index):
-        return self.num[index]
+    @overload
+    def __getitem__(self, index: int) -> int: ...
 
-    def __iter__(self):
+    @overload
+    def __getitem__(self, index: slice) -> list[int]: ...
+
+    def __getitem__(self, index: int | slice) -> int | list[int]:
+        """Return coefficient at *index* (or a slice of coefficients)."""
+        return self.num[index]  # type: ignore[return-value]
+
+    def __iter__(self) -> Iterator[int]:
+        """Iterate over all coefficients."""
         return iter(self.num)
 
-    def __len__(self):
+    def __len__(self) -> int:
+        """Return the number of coefficients (degree + 1)."""
         return len(self.num)
 
-    def __mul__(self, other):
+    def __mul__(self, other: Polynomial) -> Polynomial:
+        """Multiply two GF(256) polynomials.
+
+        Args:
+            other: The second polynomial.
+
+        Returns:
+            A new :class:`Polynomial` representing the product.
+        """
         num = [0] * (len(self) + len(other) - 1)
 
         for i, item in enumerate(self):
             for j, other_item in enumerate(other):
                 if item == 0 or other_item == 0:
                     continue
-                num[i + j] ^= gexp(glog(item) + glog(other_item))
+                num[i + j] ^= gexp(glog(int(item)) + glog(int(other_item)))
 
         return Polynomial(num, 0)
 
-    def __mod__(self, other):
+    def __mod__(self, other: Polynomial) -> Polynomial:
+        """Polynomial remainder (division) in GF(256).
+
+        Args:
+            other: The divisor polynomial.
+
+        Returns:
+            A new :class:`Polynomial` representing ``self mod other``.
+        """
         difference = len(self) - len(other)
         if difference < 0:
             return self
 
         if self[0] == 0:
-            num = list(self[1:])
+            num = list(self[1:])  # type: ignore[arg-type]
             if difference:
                 num.append(0)
             return Polynomial(num, 0) % other
 
-        ratio = glog(self[0]) - glog(other[0])
+        ratio = glog(int(self[0])) - glog(int(other[0]))
 
         num = [
-            item ^ gexp(glog(other_item) + ratio)
+            int(item) ^ gexp(glog(int(other_item)) + ratio)
             for item, other_item in zip(self, other, strict=False)
         ]
         if difference:
-            num.extend(self[-difference:])
+            num.extend(list(self[-difference:]))  # type: ignore[arg-type]
 
-        # recursive call
         return Polynomial(num, 0) % other
+
+    def __repr__(self) -> str:
+        """Return a human-readable representation of the polynomial."""
+        return f"Polynomial({self.num!r})"
+
+
+# ---------------------------------------------------------------------------
+# RS block description
+# ---------------------------------------------------------------------------
 
 
 class RSBlock(NamedTuple):
+    """Description of a single Reed-Solomon error-correction block.
+
+    Attributes:
+        total_count: Total number of bytes in the block (data + EC).
+        data_count: Number of data bytes (the remainder are EC bytes).
+    """
+
     total_count: int
     data_count: int
 
+    def __repr__(self) -> str:
+        """Return ``RSBlock(total=..., data=...)``."""
+        return (
+            f"RSBlock(total_count={self.total_count!r}, data_count={self.data_count!r})"
+        )
 
-def rs_blocks(version, error_correction):
+
+# ---------------------------------------------------------------------------
+# RS block lookup
+# ---------------------------------------------------------------------------
+
+
+def rs_blocks(version: int, error_correction: int) -> list[RSBlock]:
+    """Return the Reed-Solomon block layout for a given version and EC level.
+
+    Looks up the precomputed ``RS_BLOCK_TABLE`` and expands it into a flat
+    list of :class:`RSBlock` instances (some versions use multiple blocks of
+    different sizes).
+
+    Args:
+        version: QR code version (1–40).
+        error_correction: One of
+            :data:`~qrcode.constants.ERROR_CORRECT_L`, ``M``, ``Q``, or ``H``.
+
+    Returns:
+        List of :class:`RSBlock` describing each EC block.
+
+    Raises:
+        ValueError: If *error_correction* is not a recognized constant.
+    """
     if error_correction not in RS_BLOCK_OFFSET:  # pragma: no cover
         raise ValueError(
             f"bad rs block @ version: {version} / error_correction: {error_correction}"
@@ -311,7 +475,7 @@ def rs_blocks(version, error_correction):
     offset = RS_BLOCK_OFFSET[error_correction]
     rs_block = RS_BLOCK_TABLE[(version - 1) * 4 + offset]
 
-    blocks = []
+    blocks: list[RSBlock] = []
 
     for i in range(0, len(rs_block), 3):
         count, total_count, data_count = rs_block[i : i + 3]
