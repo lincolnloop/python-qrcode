@@ -43,8 +43,7 @@ def test_glog_zero_binary_data_at_capacity():
     # Version 5 + Q = 60 bytes capacity, data padded with trailing null bytes
     data = (
         b"\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x16"
-        b"Hello from kakaworld!!"
-        + b"\x00" * 26
+        b"Hello from kakaworld!!" + b"\x00" * 26
     )
     assert len(data) == 60
     qr = qrcode.QRCode(version=5, error_correction=qrcode.constants.ERROR_CORRECT_Q)
@@ -301,6 +300,32 @@ def test_get_matrix_border():
     qr.add_data("1")
     matrix = [row[1:-1] for row in qr.get_matrix()[1:-1]]
     assert matrix == qr.modules
+
+
+def test_get_matrix_border_rows_not_aliased():
+    # With border > 1, each border row must be a distinct list object so that
+    # mutating one row does not corrupt the others.
+    qr = qrcode.QRCode(border=4)
+    qr.add_data("1")
+    matrix = qr.get_matrix()
+    border = qr.border
+    top_rows = matrix[:border]
+    bottom_rows = matrix[-border:]
+    # Every pair of top border rows must be distinct objects.
+    for i in range(border):
+        for j in range(i + 1, border):
+            assert top_rows[i] is not top_rows[j], (
+                f"Top border rows {i} and {j} are the same object (aliased)"
+            )
+    # Every pair of bottom border rows must be distinct objects.
+    for i in range(border):
+        for j in range(i + 1, border):
+            assert bottom_rows[i] is not bottom_rows[j], (
+                f"Bottom border rows {i} and {j} are the same object (aliased)"
+            )
+    # All border rows must contain only False values.
+    for row in top_rows + bottom_rows:
+        assert row == [False] * len(row)
 
 
 def test_negative_size_at_construction():
