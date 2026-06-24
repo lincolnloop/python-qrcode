@@ -523,11 +523,11 @@ class QRCode(Generic[GenericImage]):
             return self.modules
 
         width = len(self.modules) + self.border * 2
-        code = [[False] * width] * self.border
+        code = [[False] * width for _ in range(self.border)]
         x_border = [False] * self.border
         for module in self.modules:
             code.append(x_border + cast("list[bool]", module) + x_border)
-        code += [[False] * width] * self.border
+        code += [[False] * width for _ in range(self.border)]
 
         return code
 
