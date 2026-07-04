@@ -54,6 +54,7 @@ WIP 8.x
 - Fix thread safety issue in ``bisect_left`` usage. (Fixes `#421`_)
 - Fix ``ValueError: glog(0)`` when encoding zero-heavy data. (Fixes `#330`_)
 - Fix mask evaluation to include format info, version info, and the dark module per ISO 18004 §7.8.3.1. (Jaimeetxebarria in `#389`_)
+- Fix the ``qr`` CLI ignoring ``--ascii`` when ``--output`` is given; it now writes ascii art to the file instead of a PNG image. (Fixes `#428`_)
 
 .. _#315: https://github.com/lincolnloop/python-qrcode/pull/315
 .. _#349: https://github.com/lincolnloop/python-qrcode/pull/349
@@ -69,6 +70,7 @@ WIP 8.x
 .. _#330: https://github.com/lincolnloop/python-qrcode/issues/330
 .. _#420: https://github.com/lincolnloop/python-qrcode/pull/420
 .. _#421: https://github.com/lincolnloop/python-qrcode/issues/421
+.. _#428: https://github.com/lincolnloop/python-qrcode/issues/428
 
 8.2 (01 May 2025)
 -----------------

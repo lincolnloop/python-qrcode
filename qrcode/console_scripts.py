@@ -119,9 +119,13 @@ def main(args=None):
         qr.add_data(data, optimize=opts.optimize)
 
     if opts.output:
-        img = qr.make_image()
-        with Path(opts.output).open("wb") as out:
-            img.save(out)
+        if opts.ascii and image_factory is None:
+            with Path(opts.output).open("w") as out:
+                qr.print_ascii(out=out, tty=False)
+        else:
+            img = qr.make_image()
+            with Path(opts.output).open("wb") as out:
+                img.save(out)
     else:
         if image_factory is None and (os.isatty(sys.stdout.fileno()) or opts.ascii):
             qr.print_ascii(tty=not opts.ascii)
