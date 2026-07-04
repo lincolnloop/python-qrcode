@@ -77,6 +77,15 @@ def test_output(tmp_path):
     main(["testtext", "--output", str(tmp_path / "test.png")])
 
 
+def test_ascii_output(tmp_path):
+    # `--ascii` must be honored when writing to a file: the output should be
+    # ascii art, not a PNG image (and it does not require PIL). See #428.
+    out = tmp_path / "test.txt"
+    main(["testtext", "--ascii", "--output", str(out)])
+    assert not out.read_bytes().startswith(b"\x89PNG")
+    assert "█" in out.read_text()
+
+
 def test_factory_drawer_none(capsys):
     pytest.importorskip("PIL", reason="Requires PIL")
     with pytest.raises(SystemExit):
