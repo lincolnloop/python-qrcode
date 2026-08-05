@@ -61,6 +61,16 @@ def test_factory():
     main(["testtext", "--factory", "svg"])
 
 
+def test_html_factory():
+    main(["testtext", "--factory", "html"])
+
+
+def test_html_factory_output(tmp_path):
+    output = tmp_path / "test.html"
+    main(["testtext", "--factory", "html", "--output", str(output)])
+    assert output.read_text(encoding="utf-8").startswith("<table")
+
+
 def test_bad_factory():
     with pytest.raises(SystemExit):
         main(["testtext", "--factory", "nope"])

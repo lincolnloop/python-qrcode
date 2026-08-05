@@ -98,8 +98,8 @@ The ``border`` parameter controls how many boxes thick the border should be
 Other image factories
 =====================
 
-You can encode as SVG, or use a new pure Python image processor to encode to
-PNG images.
+You can encode as SVG or HTML, or use a new pure Python image processor to
+encode to PNG images.
 
 The Python examples below use the ``make`` shortcut. The same ``image_factory``
 keyword argument is a valid option for the ``QRCode`` class for more advanced
@@ -186,6 +186,53 @@ Or in Python:
     import qrcode
     from qrcode.image.pure import PyPNGImage
     img = qrcode.make('Some data here', image_factory=PyPNGImage)
+
+
+HTML
+----
+
+You can render the QR code as an HTML fragment, to embed in a document instead
+of referencing an image. The code is drawn as a table of cells, which is the
+only markup that email clients render reliably: inline SVG and ``data:`` URIs
+are not supported by Outlook or Gmail.
+
+From your command line::
+
+    qr --factory=html "Some text" > test.html
+
+Or in Python:
+
+.. code:: python
+
+    import qrcode
+    from qrcode.image.html import HtmlImage
+
+    img = qrcode.make('Some data here', image_factory=HtmlImage)
+    img.save('some_file.html')
+
+Use ``to_string()`` to get the markup, for example to pass it to a template:
+
+.. code:: python
+
+    import qrcode
+    from qrcode.image.html import HtmlImage
+
+    qr = qrcode.QRCode(box_size=4, image_factory=HtmlImage)
+    qr.add_data('Some data')
+
+    img = qr.make_image(fill_color="#375f23", back_color="#ffc3eb")
+    html = img.to_string()
+
+The ``box_size`` parameter sets the size of each module in pixels and
+``border`` sets the width of the quiet zone, as with the other image factories.
+
+``make_image()`` also accepts an ``alt`` argument, used as the ``aria-label``
+of the table (it defaults to ``"QR Code"``), and an ``attrib`` dictionary of
+extra attributes for the ``<table>`` element:
+
+.. code:: python
+
+    img = qr.make_image(alt="Scan to pay", attrib={"class": "qr-code"})
 
 
 Styled Image

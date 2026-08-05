@@ -31,6 +31,7 @@ if sys.platform.startswith(("win", "cygwin")):  # pragma: no cover
 default_factories = {
     "pil": "qrcode.image.pil.PilImage",
     "png": "qrcode.image.pure.PyPNGImage",
+    "html": "qrcode.image.html.HtmlImage",
     "svg": "qrcode.image.svg.SvgImage",
     "svg-fragment": "qrcode.image.svg.SvgFragmentImage",
     "svg-path": "qrcode.image.svg.SvgPathImage",
