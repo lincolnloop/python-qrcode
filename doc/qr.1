@@ -3,7 +3,7 @@
 .SH NAME
 qr \- script to create QR codes at the command line
 .SH SYNOPSIS
-qr [\-\-help] [\-\-factory=FACTORY] [\-\-optimize=OPTIMIZE] [\-\-error\-correction=LEVEL] [data]
+qr [\-\-help] [\-\-factory=FACTORY] [\-\-optimize=OPTIMIZE] [\-\-error\-correction=LEVEL] [\-\-mask\-pattern=PATTERN] [data]
 .SH DESCRIPTION
 This script uses the python qrcode module. It can take data from stdin or from the commandline and generate a QR code.
 Normally it will output the QR code as ascii art to the terminal. If the output is piped to a file, it will output the image (default type of PNG).
@@ -37,6 +37,14 @@ method. Use 0 to turn off chunk optimization.
 .RS 4
 The error correction level to use. Choices are L (7%),
 M (15%, default), Q (25%), and H (30%).
+.RE
+
+.PP
+\fB\ \-\-mask\-pattern=PATTERN\fR
+.RS 4
+The mask pattern (0-7) to use. By default the pattern that
+scores best under the standard penalty rules is chosen
+automatically.
 .RE
 
 .PP

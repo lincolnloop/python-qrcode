@@ -42,6 +42,7 @@ WIP 8.x
 
 - **Added** ``GappedCircleModuleDrawer`` (PIL) to render QR code modules as non-contiguous circles. (BenwestGate in `#373`_)
 - **Added** ability to execute as a Python module: ``python -m qrcode --output qrcode.png "hello world"`` (stefansjs in `#400`_)
+- **Added** ``--mask-pattern`` option to the ``qr`` command line script to select a specific mask pattern instead of the automatically chosen one. (ChrisJr404 in `#433`_)
 - **Removed** the hardcoded 'id' argument from SVG elements. The fixed element ID caused conflicts when embedding multiple QR codes in a single document. (m000 in `#385`_)
 - **Fixed** typos in code that used ``embeded`` instead of ``embedded``. For backwards compatibility, the misspelled parameter names are still accepted but now emit deprecation warnings. These deprecated parameter names will be removed in v9.0. (benjnicholls in `#349`_)
 - **Fixed** an issue where an ``<svg:`` prefix in the SVG output caused invalid markup when inlined within HTML documents. (bartTC in `#412`_)
@@ -63,6 +64,7 @@ WIP 8.x
 .. _#397: https://github.com/lincolnloop/python-qrcode/pull/397
 .. _#399: https://github.com/lincolnloop/python-qrcode/pull/399
 .. _#400: https://github.com/lincolnloop/python-qrcode/pull/400
+.. _#433: https://github.com/lincolnloop/python-qrcode/pull/433
 .. _#408: https://github.com/lincolnloop/python-qrcode/pull/408
 .. _#411: https://github.com/lincolnloop/python-qrcode/pull/411
 .. _#412: https://github.com/lincolnloop/python-qrcode/pull/412

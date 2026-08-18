@@ -84,6 +84,12 @@ def main(args=None):
         "M (15%, default), Q (25%), and H (30%).",
     )
     parser.add_option(
+        "--mask-pattern",
+        type=int,
+        help="The mask pattern (0-7) to use. By default the pattern that "
+        "scores best under the standard penalty rules is chosen automatically.",
+    )
+    parser.add_option(
         "--ascii", help="Print as ascii even if stdout is piped.", action="store_true"
     )
     parser.add_option(
@@ -103,10 +109,14 @@ def main(args=None):
     else:
         image_factory = None
 
-    qr = qrcode.QRCode(
-        error_correction=error_correction[opts.error_correction],
-        image_factory=image_factory,
-    )
+    try:
+        qr = qrcode.QRCode(
+            error_correction=error_correction[opts.error_correction],
+            mask_pattern=opts.mask_pattern,
+            image_factory=image_factory,
+        )
+    except (TypeError, ValueError) as e:
+        raise_error(str(e))
 
     if args:
         data = args[0]

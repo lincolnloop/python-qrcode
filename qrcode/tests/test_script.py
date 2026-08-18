@@ -57,6 +57,26 @@ def test_optimize():
     main(["testtext", "--optimize", "0"])
 
 
+@mock.patch("os.isatty", return_value=True)
+@mock.patch("qrcode.QRCode")
+def test_mask_pattern(mock_qrcode, mock_isatty):
+    main(["testtext", "--mask-pattern", "1"])
+    assert mock_qrcode.call_args.kwargs["mask_pattern"] == 1
+
+
+@mock.patch("os.isatty", return_value=True)
+@mock.patch("qrcode.QRCode")
+def test_mask_pattern_default(mock_qrcode, mock_isatty):
+    main(["testtext"])
+    assert mock_qrcode.call_args.kwargs["mask_pattern"] is None
+
+
+def test_mask_pattern_out_of_range(capsys):
+    with pytest.raises(SystemExit):
+        main(["testtext", "--mask-pattern", "8"])
+    assert "Mask pattern should be in range(8)" in capsys.readouterr()[1]
+
+
 def test_factory():
     main(["testtext", "--factory", "svg"])
 
