@@ -1,4 +1,5 @@
 import io
+from unittest.mock import patch
 
 import pytest
 
@@ -156,3 +157,97 @@ def test_embedded_image_and_error_correction(tmp_path):
 
 def test_shortcut():
     qrcode.make("image")
+
+
+@pytest.mark.parametrize(
+    "mask_class",
+    [
+        colormasks.HorizontalGradiantColorMask,
+        colormasks.VerticalGradiantColorMask,
+    ],
+)
+@pytest.mark.parametrize("mode", ["RGB", "RGBA"])
+@pytest.mark.parametrize("use_cache", [False, True])
+def test_linear_gradient_mask_repeated_colors(mask_class, mode, use_cache):
+    back = (240, 230, 220) if mode == "RGB" else (240, 230, 220, 0)
+    paint = (0, 0, 0) if mode == "RGB" else (240, 230, 220, 255)
+    front = (20, 40, 60) if mode == "RGB" else (20, 40, 60, 160)
+    end = (60, 20, 40) if mode == "RGB" else (60, 20, 40, 240)
+    mask = mask_class(back, front, end)
+    mask.paint_color = paint
+    image = Image.new(mode, (60, 80), back)
+    pixels = image.load()
+    colors = [mask.interp_color(back, paint, norm) for norm in (0.25, 0.5, 1)]
+    for x in range(image.width):
+        for y in range(image.height):
+            pixels[x, y] = colors[(x + y) % len(colors)]
+    expected = image.copy()
+    colormasks.QRColorMask.apply_mask(mask, expected)
+
+    with patch.object(mask, "extrap_color", wraps=mask.extrap_color) as extrapolate:
+        mask.apply_mask(image, use_cache=use_cache)
+
+    assert image.tobytes() == expected.tobytes()
+    assert extrapolate.call_count <= max(image.size) * len(colors)
+
+
+@pytest.mark.parametrize(
+    "mask_class",
+    [
+        colormasks.HorizontalGradiantColorMask,
+        colormasks.VerticalGradiantColorMask,
+    ],
+)
+@pytest.mark.parametrize("transparent", [False, True])
+@pytest.mark.parametrize(
+    "drawer_class",
+    [moduledrawers.pil.SquareModuleDrawer, moduledrawers.pil.RoundedModuleDrawer],
+)
+def test_linear_gradient_mask_rendering(mask_class, transparent, drawer_class):
+    back = (245, 235, 225, 0) if transparent else (245, 235, 225)
+    front = (20, 40, 60, 160) if transparent else (20, 40, 60)
+    end = (60, 20, 40, 240) if transparent else (60, 20, 40)
+    mask = mask_class(back, front, end)
+    for data, box_size in (("https://example.org/", 3), (UNICODE_TEXT, 5)):
+        qr = qrcode.QRCode(box_size=box_size)
+        qr.add_data(data)
+        actual = qr.make_image(
+            image_factory=StyledPilImage,
+            color_mask=mask,
+            module_drawer=drawer_class(),
+        )
+        with patch.object(mask_class, "apply_mask", colormasks.QRColorMask.apply_mask):
+            expected = qr.make_image(
+                image_factory=StyledPilImage,
+                color_mask=mask,
+                module_drawer=drawer_class(),
+            )
+        assert actual.get_image().mode == expected.get_image().mode
+        assert actual.get_image().tobytes() == expected.get_image().tobytes()
+        mask.back_color = (
+            tuple(channel - 10 for channel in mask.back_color[:3]) + mask.back_color[3:]
+        )
+
+
+@pytest.mark.parametrize(
+    "mask_class",
+    [
+        colormasks.HorizontalGradiantColorMask,
+        colormasks.VerticalGradiantColorMask,
+    ],
+)
+def test_linear_gradient_mask_custom_subclass(mask_class):
+    class CustomGradient(mask_class):
+        def get_fg_pixel(self, image, x, y):
+            return (x, y, 100)
+
+        def get_bg_pixel(self, image, x, y):
+            return (255 - x, 255 - y, 255)
+
+    mask = CustomGradient()
+    mask.paint_color = (0, 0, 0)
+    image = Image.new("RGB", (12, 18), (127, 127, 127))
+    expected = image.copy()
+    colormasks.QRColorMask.apply_mask(mask, expected)
+    mask.apply_mask(image)
+    assert image.tobytes() == expected.tobytes()
