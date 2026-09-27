@@ -55,6 +55,36 @@ class QRColorMask:
                 else:
                     pixels[x, y] = self.get_bg_pixel(image, x, y)
 
+    def _apply_linear_gradient(self, image, vertical=False):
+        width, height = image.size
+        if vertical:
+            width, height = height, width
+        pixels = image.load()
+        for outer in range(width):
+            # A linear gradient is constant along this row or column.
+            fg_color_cache = {}
+            for inner in range(height):
+                x, y = (inner, outer) if vertical else (outer, inner)
+                current_color = pixels[x, y]
+                if current_color == self.back_color:
+                    continue
+                if current_color in fg_color_cache:
+                    pixels[x, y] = fg_color_cache[current_color]
+                    continue
+                norm = self.extrap_color(
+                    self.back_color, self.paint_color, current_color
+                )
+                if norm is not None:
+                    new_color = self.interp_color(
+                        self.get_bg_pixel(image, x, y),
+                        self.get_fg_pixel(image, x, y),
+                        norm,
+                    )
+                    pixels[x, y] = new_color
+                    fg_color_cache[current_color] = new_color
+                else:
+                    pixels[x, y] = self.get_bg_pixel(image, x, y)
+
     def get_fg_pixel(self, image, x, y):
         raise NotImplementedError("QRModuleDrawer.paint_fg_pixel")
 
@@ -178,6 +208,11 @@ class HorizontalGradiantColorMask(QRColorMask):
         self.right_color = right_color
         self.has_transparency = len(self.back_color) == 4
 
+    def apply_mask(self, image, use_cache=False):
+        if type(self) is not HorizontalGradiantColorMask:
+            return super().apply_mask(image, use_cache=use_cache)
+        return self._apply_linear_gradient(image)
+
     def get_fg_pixel(self, image, x, y):
         width, _ = image.size
         return self.interp_color(self.left_color, self.right_color, x / width)
@@ -195,6 +230,11 @@ class VerticalGradiantColorMask(QRColorMask):
         self.top_color = top_color
         self.bottom_color = bottom_color
         self.has_transparency = len(self.back_color) == 4
+
+    def apply_mask(self, image, use_cache=False):
+        if type(self) is not VerticalGradiantColorMask:
+            return super().apply_mask(image, use_cache=use_cache)
+        return self._apply_linear_gradient(image, vertical=True)
 
     def get_fg_pixel(self, image, x, y):
         width, _ = image.size
