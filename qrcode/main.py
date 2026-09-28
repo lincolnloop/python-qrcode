@@ -278,24 +278,19 @@ class QRCode(Generic[GenericImage]):
         out.write("\x1b[1;47m" + (" " * (modcount * 2 + 4)) + "\x1b[0m\n")
         out.flush()
 
-    def print_ascii(self, out=None, tty=False, invert=False):
+    def get_ascii(self, tty: bool = False, invert: bool = False) -> str:
         """
-        Output the QR Code using ASCII characters.
+        Return the QR Code as a string using ASCII characters.
 
         :param tty: use fixed TTY color codes (forces invert=True)
         :param invert: invert the ASCII characters (solid <-> transparent)
         """
-        if out is None:
-            out = sys.stdout
-
-        if tty and not out.isatty():
-            raise OSError("Not a tty")
-
         if self.data_cache is None:
             self.make()
 
         modcount = self.modules_count
         codes = [bytes((code,)).decode("cp437") for code in (255, 223, 220, 219)]
+        output = []
         if tty:
             invert = True
         if invert:
@@ -311,14 +306,30 @@ class QRCode(Generic[GenericImage]):
         for r in range(-self.border, modcount + self.border, 2):
             if tty:
                 if not invert or r < modcount + self.border - 1:
-                    out.write("\x1b[48;5;232m")  # Background black
-                out.write("\x1b[38;5;255m")  # Foreground white
+                    output.append("\x1b[48;5;232m")  # Background black
+                output.append("\x1b[38;5;255m")  # Foreground white
             for c in range(-self.border, modcount + self.border):
                 pos = get_module(r, c) + (get_module(r + 1, c) << 1)
-                out.write(codes[pos])
+                output.append(codes[pos])
             if tty:
-                out.write("\x1b[0m")
-            out.write("\n")
+                output.append("\x1b[0m")
+            output.append("\n")
+        return "".join(output)
+
+    def print_ascii(self, out=None, tty=False, invert=False):
+        """
+        Output the QR Code using ASCII characters.
+
+        :param tty: use fixed TTY color codes (forces invert=True)
+        :param invert: invert the ASCII characters (solid <-> transparent)
+        """
+        if out is None:
+            out = sys.stdout
+
+        if tty and not out.isatty():
+            raise OSError("Not a tty")
+
+        out.write(self.get_ascii(tty=tty, invert=invert))
         out.flush()
 
     @overload

@@ -40,6 +40,7 @@ Change Log
 WIP 8.x
 -------
 
+- **Added** ``QRCode.get_ascii()`` to return ASCII QR codes as strings.
 - **Added** ``GappedCircleModuleDrawer`` (PIL) to render QR code modules as non-contiguous circles. (BenwestGate in `#373`_)
 - **Added** ability to execute as a Python module: ``python -m qrcode --output qrcode.png "hello world"`` (stefansjs in `#400`_)
 - **Removed** the hardcoded 'id' argument from SVG elements. The fixed element ID caused conflicts when embedding multiple QR codes in a single document. (m000 in `#385`_)

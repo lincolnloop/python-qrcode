@@ -242,18 +242,15 @@ and an embedded image:
 Examples
 ========
 
-Get the text content from `print_ascii`:
+Get a QR code as an ASCII string:
 
 .. code:: python
 
-    import io
     import qrcode
     qr = qrcode.QRCode()
     qr.add_data("Some text")
-    f = io.StringIO()
-    qr.print_ascii(out=f)
-    f.seek(0)
-    print(f.read())
+    ascii_qr = qr.get_ascii()
+    print(ascii_qr)
 
 The `add_data` method will append data to the current QR object. To add new data by replacing previous content in the same object, first use clear method:
 

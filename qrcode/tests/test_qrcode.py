@@ -267,6 +267,61 @@ def test_print_ascii():
     assert printed[: len(expected)] == expected
 
 
+@pytest.mark.parametrize(
+    ("border", "tty", "invert"),
+    [
+        (0, False, False),
+        (4, False, False),
+        (4, False, True),
+        (4, True, False),
+    ],
+)
+def test_get_ascii_matches_print_ascii(border, tty, invert):
+    qr = qrcode.QRCode(border=border)
+    qr.add_data("Some data")
+
+    output = io.StringIO()
+    output.isatty = lambda: True
+    qr.print_ascii(out=output, tty=tty, invert=invert)
+
+    ascii_qr = qr.get_ascii(tty=tty, invert=invert)
+
+    assert isinstance(ascii_qr, str)
+    assert ascii_qr
+    assert ascii_qr == output.getvalue()
+
+
+def test_get_ascii_tty_returns_terminal_escape_codes():
+    qr = qrcode.QRCode(border=0)
+    qr.add_data("Some data")
+
+    ascii_qr = qr.get_ascii(tty=True)
+
+    assert ascii_qr.startswith("\x1b[48;5;232m\x1b[38;5;255m")
+    assert ascii_qr.endswith("\x1b[0m\n")
+
+
+def test_get_ascii_is_stable_across_repeated_calls():
+    qr = qrcode.QRCode()
+    qr.add_data("Some data")
+
+    first_output = qr.get_ascii()
+
+    assert qr.get_ascii() == first_output
+
+
+@pytest.mark.parametrize("border", [0, 4])
+def test_get_ascii_dimensions(border):
+    qr = qrcode.QRCode(border=border)
+    qr.add_data("Some data")
+
+    lines = qr.get_ascii().splitlines()
+    output_width = qr.modules_count + border * 2
+
+    assert len(lines) == (output_width + 1) // 2
+    assert all(len(line) == output_width for line in lines)
+
+
 def test_print_tty_stdout():
     qr = qrcode.QRCode()
     with mock.patch("sys.stdout") as fake_stdout:
