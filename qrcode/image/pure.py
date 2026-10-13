@@ -26,7 +26,7 @@ class PyPNGImage(BaseImage):
         """
 
     def save(self, stream, kind=None):
-        if isinstance(stream, str):
+        if isinstance(stream, (str, Path)):
             stream = Path(stream).open("wb")  # noqa: SIM115
         self._img.write(stream, self.rows_iter())
 
