@@ -1,5 +1,4 @@
 import io
-from unittest import mock
 
 import pytest
 
@@ -20,14 +19,16 @@ def test_render_pypng():
     img.save(io.BytesIO())
 
 
-def test_render_pypng_to_str():
+def test_render_pypng_to_str(tmp_path):
     qr = qrcode.QRCode()
     qr.add_data(UNICODE_TEXT)
     img = qr.make_image(image_factory=PyPNGImage)
     assert isinstance(img.get_image(), png.Writer)
 
-    mock_open = mock.mock_open()
-    with mock.patch("pathlib.Path.open", mock_open, create=True):
-        img.save("test_file.png")
-    mock_open.assert_called_once_with("wb")
-    mock_open("test_file.png", "wb").write.assert_called()
+    expected = io.BytesIO()
+    img.save(expected)
+
+    output = tmp_path / "test_file.png"
+    img.save(str(output))
+
+    assert output.read_bytes() == expected.getvalue()
