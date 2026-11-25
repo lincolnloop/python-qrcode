@@ -1,7 +1,9 @@
 import io
+from decimal import Decimal
 
 import qrcode
 from qrcode.image import svg
+from qrcode.image.styles.moduledrawers.svg import SvgPathCircleDrawer
 from qrcode.tests.consts import UNICODE_TEXT
 
 
@@ -52,3 +54,14 @@ def test_svg_circle_drawer():
     qr.add_data(UNICODE_TEXT)
     img = qr.make_image(image_factory=svg.SvgPathImage, module_drawer="circle")
     img.save(io.BytesIO())
+
+
+def test_svg_path_circle_radius_at_half_size():
+    qr = qrcode.QRCode(box_size=10)
+    qr.add_data("example")
+    img = qr.make_image(
+        image_factory=svg.SvgPathImage,
+        module_drawer=SvgPathCircleDrawer(size_ratio=Decimal("0.5")),
+    )
+    # A half-width module has a 0.5-unit diameter in the SVG viewBox.
+    assert b"A0.25,0.25 " in img.to_string()

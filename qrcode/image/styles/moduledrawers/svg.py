@@ -127,7 +127,7 @@ class SvgPathCircleDrawer(SvgPathQRModuleDrawer):
         coords = self.coords(box)
         x0 = self.img.units(coords.x0, text=False)
         yh = self.img.units(coords.yh, text=False)
-        h = self.img.units(self.box_half - self.box_delta, text=False)
+        radius = self.img.units(self.box_half, text=False)
         x1 = self.img.units(coords.x1, text=False)
 
         # rx,ry is the centerpoint of the arc
@@ -136,4 +136,4 @@ class SvgPathCircleDrawer(SvgPathQRModuleDrawer):
         # 3? is the sweep flag
         # x,y is the point the arc is drawn to
 
-        return f"M{x0},{yh}A{h},{h} 0 0 0 {x1},{yh}A{h},{h} 0 0 0 {x0},{yh}z"
+        return f"M{x0},{yh}A{radius},{radius} 0 0 0 {x1},{yh}A{radius},{radius} 0 0 0 {x0},{yh}z"
